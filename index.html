@@ -74,6 +74,14 @@
         .text-dark { color: #111; }
         .text-light { color: #fff; }
 
+        /* Shape Modes */
+        .shape-circle { border-radius: 50%; aspect-ratio: 1; }
+        .shape-oval { border-radius: 50%; }
+        .shape-rect { border-radius: 6px; }
+
+        /* Italic Style */
+        .text-italic { font-style: italic; }
+
         .trans-box-delete {
             position: absolute; top: 0; right: 4px;
             color: red; cursor: pointer; font-size: 14px; font-weight: bold; z-index: 51;
@@ -97,7 +105,7 @@
             <div class="flex items-center gap-6">
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2">
                     <span class="text-nRed"><i class="fa-solid fa-book-open"></i> UrGal</span>
-                     <p class="hidden sm:block text-gray-400 text-sm">V 0.2.2 beta</p>
+                     <p class="hidden sm:block text-gray-400 text-sm">V 0.2.3 beta</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('tags')" class="hover:text-nRed transition" data-i18n="tags">แท็ก</a>
@@ -153,7 +161,7 @@
             <div class="flex justify-between items-end mb-6 border-b border-gray-700 pb-2">
                 <div class="flex items-center gap-3">
                     <h2 id="gridTitle" class="text-2xl font-bold">อัปเดตล่าสุด</h2>
-                    <button onclick="Grid.toggleEditMode()" id="btnGridEdit" class="text-gray-400 hover:text-white transition text-sm pb-1" title="แก้ไข / ลบ"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="Grid.toggleEditMode()" id="btnGridEdit" class="text-gray-400 hover:text-white transition text-sm pb-1" data-i18n-title="grid_edit_delete_title" title="แก้ไข / ลบ"><i class="fa-solid fa-pen"></i></button>
                 </div>
                 <div class="flex items-center gap-3">
                     <select id="sortGrid" onchange="Grid.handleSortChange(this.value)" class="bg-darkBg text-white border border-gray-600 rounded text-xs px-2 py-1 outline-none focus:border-nRed">
@@ -267,14 +275,34 @@
                     </div>
 
                     <div class="flex flex-wrap gap-3" id="detActionButtons">
-                        <button onclick="Reader.startReading()" class="bg-nRed hover:bg-nRedHover px-8 py-2.5 rounded font-bold text-lg shadow-lg flex items-center gap-2">
-                            <i class="fa-solid fa-book-open-reader"></i> อ่านเลย
+                        <button onclick="Reader.startReading()" class="bg-gradient-to-r from-nRed to-red-600 hover:from-red-600 hover:to-red-700 px-8 py-3 rounded-lg font-bold text-lg shadow-lg flex items-center gap-2 transition text-white" data-i18n="read_now">
+                            <i class="fa-solid fa-book-open-reader"></i> Read Now
                         </button>
-                        <button onclick="UI.navigate('edit', App.currentGalleryId)" class="bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded font-bold text-white transition" title="แก้ไข">
+                        <button onclick="Detail.readRandom(App.currentGalleryId)" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-4 py-3 rounded-lg font-bold text-white transition shadow-lg" data-i18n-title="random_read_title" title="Random Page">
+                            <i class="fa-solid fa-dice"></i>
+                        </button>
+                        <button onclick="UI.navigate('edit', App.currentGalleryId)" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-3 rounded-lg font-bold text-white transition shadow-lg" data-i18n-title="edit_title" title="Edit">
                             <i class="fa-solid fa-wrench"></i>
                         </button>
-                        <button onclick="DB.deleteGallery(App.currentGalleryId)" class="bg-gray-700 hover:bg-red-900 px-4 py-2.5 rounded font-bold text-white transition" title="ลบเรื่องนี้">
+                        <button onclick="DataManager.exportGallery(App.currentGalleryId)" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-4 py-3 rounded-lg font-bold text-white transition shadow-lg flex items-center gap-2" data-i18n-title="export_this_title" title="Export">
+                            <i class="fa-solid fa-file-export"></i> <span data-i18n="export_btn">Export</span>
+                        </button>
+                        <button onclick="DB.deleteGallery(App.currentGalleryId)" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-4 py-3 rounded-lg font-bold text-white transition shadow-lg" data-i18n-title="delete_title" title="Delete">
                             <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Translation Set Export/Import Buttons -->
+                    <div class="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-700">
+                        <span class="text-gray-400 text-xs font-semibold self-center px-1" data-i18n="trans_sets_section">Translation Sets:</span>
+                        <button onclick="TranslationManager.showExportDialog()" class="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 px-4 py-2 rounded-lg font-semibold text-white text-sm transition shadow-md flex items-center gap-2" data-i18n-title="export_trans_sets_title" title="Export Sets">
+                            <i class="fa-solid fa-download"></i> <span data-i18n="export_btn">Export</span>
+                        </button>
+                        <button onclick="TranslationManager.showImportDialog()" class="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 px-4 py-2 rounded-lg font-semibold text-white text-sm transition shadow-md flex items-center gap-2" data-i18n-title="import_trans_sets_title" title="Import Sets">
+                            <i class="fa-solid fa-upload"></i> <span data-i18n="import_btn">Import</span>
+                        </button>
+                        <button onclick="TranslationManager.showDeleteDialog()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-4 py-2 rounded-lg font-semibold text-white text-sm transition shadow-md flex items-center gap-2" data-i18n-title="delete_trans_sets_title" title="Delete Translation Sets">
+                            <i class="fa-solid fa-trash"></i> <span data-i18n="delete_trans_sets">Delete Sets</span>
                         </button>
                     </div>
                 </div>
@@ -306,6 +334,11 @@
                         <input type="checkbox" id="showTransToggle" checked class="form-checkbox text-nRed rounded bg-darkBg border-gray-600 focus:ring-nRed h-4 w-4" onchange="Reader.toggleShowTranslations()">
                         <span class="text-gray-300" data-i18n="show_trans">แสดงคำแปล</span>
                     </label>
+                    <!-- Translation Set Selector -->
+                    <select id="transSetSelector" onchange="TranslationManager.switchSet(this.value)" class="bg-darkBg text-white border border-gray-600 rounded text-xs px-2 py-1.5 outline-none focus:border-nRed" style="max-width: 150px;">
+                        <option value="">ไม่มี</option>
+                    </select>
+                    <button onclick="TranslationManager.showNewSetDialog()" class="bg-nRed hover:bg-nRedHover px-2 py-1 rounded text-xs font-bold transition" title="สร้างชุดแปลใหม่" data-i18n="addnewtranscollect">+ ชุดใหม่</button>
                     <button onclick="Reader.toggleEditMode()" id="btnEditTrans" class="bg-yellow-600 hover:bg-yellow-500 px-3 py-1 rounded text-sm font-bold transition flex items-center gap-1">
                         <i class="fa-solid fa-plus"></i> <span data-i18n="add_trans">เพิ่มคำแปล</span>
                     </button>
@@ -333,10 +366,16 @@
                 </div>
                 
                 <!-- Format Toolbar (Shows when a box is selected) -->
-                <div id="transToolbar" class="flex items-center gap-2 bg-yellow-700 p-1 rounded opacity-50 pointer-events-none transition-opacity">
+                <div id="transToolbar" class="flex items-center gap-2 bg-yellow-700 p-1 rounded opacity-50 pointer-events-none transition-opacity flex-wrap">
                     <button onclick="Reader.changeFormat('size', -2)" class="px-2 hover:bg-yellow-800 rounded" title="ลดขนาดตัวอักษร"><i class="fa-solid fa-a text-xs"></i></button>
                     <span id="tbSize" class="w-6 text-center text-xs">14</span>
                     <button onclick="Reader.changeFormat('size', 2)" class="px-2 hover:bg-yellow-800 rounded" title="เพิ่มขนาดตัวอักษร"><i class="fa-solid fa-a text-lg"></i></button>
+                    <div class="w-px h-4 bg-yellow-800 mx-1"></div>
+                    <button id="tbShapeRect" onclick="Reader.changeFormat('shape', 'rect')" class="px-2 py-0.5 hover:bg-yellow-800 rounded text-xs border border-white" title="สี่เหลี่ยม">▭</button>
+                    <button id="tbShapeCircle" onclick="Reader.changeFormat('shape', 'circle')" class="w-5 h-5 hover:bg-yellow-800 rounded-full border border-white flex items-center justify-center text-[10px]" title="วงกลม">●</button>
+                    <button id="tbShapeOval" onclick="Reader.changeFormat('shape', 'oval')" class="px-2 py-0.5 hover:bg-yellow-800 rounded text-xs border border-white" title="วงรี">⬭</button>
+                    <div class="w-px h-4 bg-yellow-800 mx-1"></div>
+                    <button id="tbItalic" onclick="Reader.changeFormat('italic', null)" class="px-2 hover:bg-yellow-800 rounded font-italic text-sm" title="ตัวเอียง"><i>I</i></button>
                     <div class="w-px h-4 bg-yellow-800 mx-1"></div>
                     <button onclick="Reader.changeFormat('bg', 'white')" class="w-5 h-5 rounded-full bg-white border border-gray-400" title="พื้นขาว"></button>
                     <button onclick="Reader.changeFormat('bg', 'black')" class="w-5 h-5 rounded-full bg-black border border-gray-400" title="พื้นดำ"></button>
@@ -368,21 +407,94 @@
 
         <!-- ================= SETTINGS MODAL ================= -->
         <div id="settingsModal" class="fixed inset-0 bg-black/80 z-50 hide flex items-center justify-center p-4 backdrop-blur-sm">
-            <div class="bg-darkCard p-6 rounded-lg shadow-lg max-w-md w-full border border-gray-700">
-                <h2 class="text-xl font-bold mb-4 text-white" data-i18n="settingmodal"><i class="fa-solid fa-gear"></i> Settings</h2>
-                <div class="mb-6">
-                    <label class="block text-sm text-gray-400 mb-2" data-i18n="local_backup_folder">Local Backup Folder</label>
-                    <button onclick="FileSystemManager.selectFolder()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded w-full flex items-center justify-center gap-2 transition border border-gray-600">
-                        <i class="fa-solid fa-folder-open text-yellow-500" ></i> <span id="folderName" data-i18n="select_folder">Select Folder...</span>
+            <div class="bg-darkCard p-8 rounded-xl shadow-2xl max-w-md w-full border border-gray-700">
+                <div class="flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-gear text-nRed text-xl"></i>
+                    <h2 class="text-2xl font-bold text-white" data-i18n="settingmodal">Settings</h2>
+                </div>
+                <div class="mb-6 p-4 bg-darkBg rounded-lg border border-gray-700/50">
+                    <label class="block text-sm text-gray-300 font-semibold mb-3" data-i18n="local_backup_folder">Local Backup Folder</label>
+                    <button onclick="FileSystemManager.selectFolder()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-lg w-full flex items-center justify-center gap-2 transition shadow-lg font-medium">
+                        <i class="fa-solid fa-folder-open"></i> <span id="folderName" data-i18n="select_folder">Select Folder...</span>
                     </button>
-                    <div class="flex justify-between items-start mt-2">
-                        <p class="text-xs text-gray-500" data-i18n="backup_info">Data will be saved as .json files in this folder automatically.</p>
-                        <button onclick="FileSystemManager.disconnectFolder()" class="text-xs text-red-400 hover:text-red-300 underline whitespace-nowrap ml-2" data-i18n="disconnect_folder">Disconnect</button>
+                    <div class="flex justify-between items-start mt-3">
+                        <p class="text-xs text-gray-400" data-i18n="backup_info">Data will be saved as .json files in this folder automatically.</p>
+                        <button onclick="FileSystemManager.disconnectFolder()" class="text-xs text-red-400 hover:text-red-300 font-semibold whitespace-nowrap ml-2 transition" data-i18n="disconnect_folder">Disconnect</button>
                     </div>
                 </div>
-                <button onclick="FileSystemManager.restoreFromLocal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full mb-4 font-bold transition"><i class="fa-solid fa-rotate-left"></i> <span data-i18n="restore_local">Restore from Local Folder</span></button>
-                <div class="flex justify-end border-t border-gray-700 pt-4">
-                    <button onclick="document.getElementById('settingsModal').classList.add('hide')" class="text-gray-300 hover:text-white px-4 py-2" data-i18n="close_btn_settings_modal">Close</button>
+                <button onclick="FileSystemManager.restoreFromLocal()" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-3 rounded-lg w-full font-bold transition shadow-lg mb-6 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> <span data-i18n="restore_local">Restore from Local Folder</span>
+                </button>
+                <div class="flex justify-end gap-2 border-t border-gray-700 pt-4">
+                    <button onclick="document.getElementById('settingsModal').classList.add('hide')" class="text-gray-300 hover:text-white px-4 py-2 font-medium transition" data-i18n="close_btn_settings_modal">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= NEW TRANSLATION SET MODAL ================= -->
+        <div id="newTransSetModal" class="fixed inset-0 bg-black/80 z-50 hide flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-darkCard p-8 rounded-xl shadow-2xl max-w-md w-full border border-gray-700">
+                <div class="flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-layer-group text-nRed text-xl"></i>
+                    <h2 class="text-2xl font-bold text-white" data-i18n="new_trans_set_title">Create Translation Set</h2>
+                </div>
+                <input type="text" id="newTransSetName" placeholder="e.g. Translation Set 01 by User A" class="w-full bg-darkBg text-white border border-gray-600 rounded-lg px-4 py-3 outline-none focus:border-nRed focus:ring-1 focus:ring-nRed/50 mb-6 transition" data-i18n-placeholder="new_trans_set_placeholder">
+                <div class="flex justify-end gap-2 border-t border-gray-700 pt-6">
+                    <button onclick="document.getElementById('newTransSetModal').classList.add('hide'); document.getElementById('newTransSetName').value = '';" class="text-gray-300 hover:text-white px-6 py-2 font-medium transition" data-i18n="cancel_btn">Cancel</button>
+                    <button onclick="TranslationManager.createNewSet()" class="bg-gradient-to-r from-nRed to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg" data-i18n="create_btn">Create</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= EXPORT TRANSLATION SETS MODAL ================= -->
+        <div id="exportTransSetModal" class="fixed inset-0 bg-black/80 z-50 hide flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+            <div class="bg-darkCard p-8 rounded-xl shadow-2xl max-w-md w-full border border-gray-700 my-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-download text-blue-400 text-xl"></i>
+                    <h2 class="text-2xl font-bold text-white" data-i18n="export_trans_sets_title">Export Translation Sets</h2>
+                </div>
+                <div id="exportTransSetList" class="max-h-64 overflow-y-auto mb-6 p-4 bg-darkBg rounded-lg border border-gray-700/50">
+                    <!-- Dynamically populated -->
+                </div>
+                <div class="flex justify-end gap-2 border-t border-gray-700 pt-6">
+                    <button onclick="document.getElementById('exportTransSetModal').classList.add('hide')" class="text-gray-300 hover:text-white px-6 py-2 font-medium transition" data-i18n="cancel_btn">Cancel</button>
+                    <button onclick="TranslationManager.exportSelected()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg flex items-center gap-2" data-i18n="export_btn">Export</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= IMPORT TRANSLATION SETS MODAL ================= -->
+        <div id="importTransSetModal" class="fixed inset-0 bg-black/80 z-50 hide flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-darkCard p-8 rounded-xl shadow-2xl max-w-md w-full border border-gray-700">
+                <div class="flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-upload text-emerald-400 text-xl"></i>
+                    <h2 class="text-2xl font-bold text-white" data-i18n="import_trans_sets_title">Import Translation Sets</h2>
+                </div>
+                <p class="text-sm text-gray-400 mb-6" data-i18n="import_trans_sets_desc">Select a .json file with translation sets</p>
+                <div class="relative mb-6">
+                    <input type="file" id="importTransSetFile" accept=".json" class="w-full px-4 py-3 rounded-lg bg-darkBg border border-gray-600 text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-emerald-600 file:to-emerald-700 file:text-white hover:file:from-emerald-700 hover:file:to-emerald-800 cursor-pointer transition">
+                </div>
+                <div class="flex justify-end gap-2 border-t border-gray-700 pt-6">
+                    <button onclick="document.getElementById('importTransSetModal').classList.add('hide'); document.getElementById('importTransSetFile').value = '';" class="text-gray-300 hover:text-white px-6 py-2 font-medium transition" data-i18n="cancel_btn">Cancel</button>
+                    <button onclick="TranslationManager.importFromFile()" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg flex items-center gap-2" data-i18n="import_btn">Import</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= DELETE TRANSLATION SETS MODAL ================= -->
+        <div id="deleteTransSetModal" class="fixed inset-0 bg-black/80 z-50 hide flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+            <div class="bg-darkCard p-8 rounded-xl shadow-2xl max-w-md w-full border border-gray-700 my-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-trash text-red-400 text-xl"></i>
+                    <h2 class="text-2xl font-bold text-white" data-i18n="delete_trans_sets_title">Delete Translation Sets</h2>
+                </div>
+                <p class="text-sm text-gray-400 mb-4">เลือกชุดแปลที่ต้องการลบ (Select translation sets to delete):</p>
+                <div id="deleteTransSetList" class="max-h-64 overflow-y-auto mb-6 p-4 bg-darkBg rounded-lg border border-gray-700/50">
+                    <!-- Dynamically populated -->
+                </div>
+                <div class="flex justify-end gap-2 border-t border-gray-700 pt-6">
+                    <button onclick="document.getElementById('deleteTransSetModal').classList.add('hide')" class="text-gray-300 hover:text-white px-6 py-2 font-medium transition" data-i18n="cancel_btn">Cancel</button>
+                    <button onclick="TranslationManager.deleteSelected()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg flex items-center gap-2" data-i18n="delete_btn_text">Delete</button>
                 </div>
             </div>
         </div>
@@ -426,7 +538,9 @@
                 alert_no_random: "ไม่มีเรื่องให้สุ่มในหน้านี้", alert_no_cover: "กรุณาเลือกหน้าปกหรืออัปโหลดรูปภาพอย่างน้อย 1 รูป",
                 alert_save_error: "เกิดข้อผิดพลาดในการบันทึก: ", alert_edit_success: "แก้ไขเรียบร้อย!", alert_save_success: "บันทึกสำเร็จ!",
                 alert_import_success: "นำเข้า {count} รายการสำเร็จ", alert_file_error: "รูปแบบไฟล์ไม่ถูกต้อง", alert_import_error: "ไฟล์เสียหายหรือผิดพลาด: ", alert_no_pages: "ไม่มีรูปภาพให้อ่าน",
-                settingmodal: "ตั้งค่า", local_backup_folder: "โฟลเดอร์สำรองข้อมูล", select_folder: "เลือกโฟลเดอร์...", backup_info: "ข้อมูลจะถูกบันทึกเป็นไฟล์ .json ในโฟลเดอร์นี้โดยอัตโนมัติ", restore_local: "กู้คืนจากโฟลเดอร์ในเครื่อง", close_btn_settings_modal: "ปิด", disconnect_folder: "ยกเลิกการสำรองข้อมูล"
+                settingmodal: "ตั้งค่า", local_backup_folder: "โฟลเดอร์สำรองข้อมูล", select_folder: "เลือกโฟลเดอร์...", backup_info: "ข้อมูลจะถูกบันทึกเป็นไฟล์ .json ในโฟลเดอร์นี้โดยอัตโนมัติ", restore_local: "กู้คืนจากโฟลเดอร์ในเครื่อง", close_btn_settings_modal: "ปิด", disconnect_folder: "ยกเลิกการสำรองข้อมูล",
+                new_trans_set_title: "สร้างชุดแปลใหม่", new_trans_set_placeholder: "เช่น แปลเล่น01 โดย ผู้ใช้A", create_btn: "สร้าง", export_trans_sets_title: "ส่งออกชุดแปล", export_btn: "ส่งออก", import_trans_sets_title: "นำเข้าชุดแปล", import_trans_sets_desc: "เลือกไฟล์ .json ของชุดแปล", import_btn: "นำเข้า", trans_sets_section: "ชุดแปล:",
+                addnewtranscollect: "+ชุดคำแปลใหม่",grid_edit_delete_title: "แก้ไข / ลบ",shape_rect: "สี่เหลี่ยม", shape_circle: "วงกลม", shape_oval: "วงรี", italic: "ตัวเอียง", delete_trans_sets: "ลบชุดคำแปล", delete_trans_sets_title: "ลบชุดคำแปล", delete_confirm_msg: "คุณแน่ใจหรือไม่ว่าต้องการลบชุดแปลที่เลือก?", delete_btn_text: "ลบ"
             },
             en: {
                 tags: "Tags", artists: "Artists",
@@ -462,7 +576,9 @@
                 alert_no_random: "No items to random in this view", alert_no_cover: "Please select a cover or upload at least 1 page",
                 alert_save_error: "Error saving: ", alert_edit_success: "Edited successfully!", alert_save_success: "Saved successfully!",
                 alert_import_success: "Imported {count} items successfully", alert_file_error: "Invalid file format", alert_import_error: "File error: ", alert_no_pages: "No images to read",
-                settingmodal: "Settings", local_backup_folder: "Local Backup Folder", select_folder: "Select Folder...", backup_info: "Data will be saved as .json files in this folder automatically.", restore_local: "Restore from Local Folder", close_btn_settings_modal: "Close", disconnect_folder: "Disconnect Folder"
+                settingmodal: "Settings", local_backup_folder: "Local Backup Folder", select_folder: "Select Folder...", backup_info: "Data will be saved as .json files in this folder automatically.", restore_local: "Restore from Local Folder", close_btn_settings_modal: "Close", disconnect_folder: "Disconnect Folder",
+                new_trans_set_title: "Create Translation Set", new_trans_set_placeholder: "e.g. Translation Set 01 by User A", create_btn: "Create", export_trans_sets_title: "Export Translation Sets", export_btn: "Export", import_trans_sets_title: "Import Translation Sets", import_trans_sets_desc: "Select a .json file with translation sets", import_btn: "Import", trans_sets_section: "Translation Sets:",
+                addnewtranscollect: "+ New Set",grid_edit_delete_title: "Edit / Delete",shape_rect: "Rectangle", shape_circle: "Circle", shape_oval: "Oval", italic: "Italic", delete_trans_sets: "Delete Translation Sets", delete_trans_sets_title: "Delete Translation Sets", delete_confirm_msg: "Are you sure you want to delete selected translation sets?", delete_btn_text: "Delete"
             },
             cn: {
                 tags: "标签", artists: "作者",
@@ -498,7 +614,9 @@
                 alert_no_random: "没有可以随机的项目", alert_no_cover: "请设置封面或上传至少一张图片",
                 alert_save_error: "保存失败: ", alert_edit_success: "编辑成功！", alert_save_success: "保存成功！",
                 alert_import_success: "成功导入 {count} 个项目", alert_file_error: "文件格式无效", alert_import_error: "导入出错: ", alert_no_pages: "没有可查看的内容",
-                settingmodal: "设置", local_backup_folder: "本地备份文件夹", select_folder: "选择文件夹...", backup_info: "数据将自动保存为此文件夹中的 .json 文件", restore_local: "从本地文件夹恢复", close_btn_settings_modal: "关闭", disconnect_folder: "断开文件夹"
+                settingmodal: "设置", local_backup_folder: "本地备份文件夹", select_folder: "选择文件夹...", backup_info: "数据将自动保存为此文件夹中的 .json 文件", restore_local: "从本地文件夹恢复", close_btn_settings_modal: "关闭", disconnect_folder: "断开文件夹",
+                new_trans_set_title: "创建翻译集", new_trans_set_placeholder: "例如 翻译组01 作者 用户A", create_btn: "创建", export_trans_sets_title: "导出翻译集", export_btn: "导出", import_trans_sets_title: "导入翻译集", import_trans_sets_desc: "选择包含翻译集的.json文件", import_btn: "导入", trans_sets_section: "翻译集:",
+                addnewtranscollect: "+ 新建翻译集",grid_edit_delete_title: "编辑 / 删除"
             },
             jp: {
                 tags: "タグ", artists: "作者",
@@ -534,7 +652,9 @@
                 alert_no_random: "表示できる項目がありません", alert_no_cover: "表紙または画像を1枚以上選択してください",
                 alert_save_error: "保存エラー: ", alert_edit_success: "編集しました！", alert_save_success: "保存しました！",
                 alert_import_success: "{count} 件インポートしました", alert_file_error: "ファイル形式が正しくありません", alert_import_error: "エラーが発生しました: ", alert_no_pages: "表示する画像がありません",
-                settingmodal: "設定", local_backup_folder: "ローカルバックアップフォルダ", select_folder: "フォルダを選択...", backup_info: "データはこのフォルダに .json ファイルとして自動的に保存されます", restore_local: "ローカルフォルダから復元", close_btn_settings_modal: "閉じる", disconnect_folder: "フォルダを切断"
+                settingmodal: "設定", local_backup_folder: "ローカルバックアップフォルダ", select_folder: "フォルダを選択...", backup_info: "データはこのフォルダに .json ファイルとして自動的に保存されます", restore_local: "ローカルフォルダから復元", close_btn_settings_modal: "閉じる", disconnect_folder: "フォルダを切断",
+                new_trans_set_title: "翻訳セットを作成", new_trans_set_placeholder: "例 翻訳セット01 ユーザーA", create_btn: "作成", export_trans_sets_title: "翻訳セットを書き出し", export_btn: "書き出し", import_trans_sets_title: "翻訳セットを読み込み", import_trans_sets_desc: "翻訳セットを含む.jsonファイルを選択", import_btn: "読み込む", trans_sets_section: "翻訳セット:",
+                addnewtranscollect: "+ 新しいセット",grid_edit_delete_title: "編集 / 削除"
             }
         };
 
@@ -548,10 +668,11 @@
 
         // ================= DATABASE (Dexie.js) v3 =================
         const db = new Dexie("UrgalDB");
-        db.version(4).stores({
+        db.version(5).stores({
             galleries: '++id, title, createdAt, isFavorite, lastReadPage, totalPages',
             pages: '++id, galleryId, order',
-            settings: 'key' 
+            settings: 'key',
+            translationSets: '++id, galleryId, name'
         });
 
         // ================= GLOBAL STATE =================
@@ -569,7 +690,10 @@
                 showTranslations: true,
                 hasUnsavedChanges: false,
                 selectedBox: null,
-                imgFit: 'fit'
+                imgFit: 'fit',
+                currentTranslationSetId: null,
+                currentTranslationSetName: null,
+                availableTranslationSets: []
             }
         };
 
@@ -584,7 +708,8 @@
                     pageIndex: App.reader.currentIndex,
                     navParams: App.currentNavParams,
                     gridSort: Grid.currentSort,
-                    gridPage: Grid.currentPage
+                    gridPage: Grid.currentPage,
+                    currentTranslationSetId: App.reader.currentTranslationSetId
                 };
                 localStorage.setItem('UrgalState', JSON.stringify(stateToSave));
             },
@@ -602,8 +727,13 @@
                 if (savedState && savedState.gridPage) {
                     Grid.currentPage = savedState.gridPage;
                 }
+                
+                // 2. Restore current translation set
+                if (savedState && savedState.currentTranslationSetId) {
+                    App.reader.currentTranslationSetId = savedState.currentTranslationSetId;
+                }
 
-                // 2. Determine initial state (URL hash > localStorage > default)
+                // 3. Determine initial state (URL hash > localStorage > default)
                 let initialState = { view: 'home', params: null };
                 if (location.hash) {
                     const [_, view, paramsStr] = location.hash.match(/^#([a-zA-Z_]+)(?:\/(.*))?$/) || [];
@@ -623,7 +753,7 @@
                     }
                 }
 
-                // 3. Render initial view and set history
+                // 4. Render initial view and set history
                 history.replaceState(initialState, '', UI.stateToUrl(initialState));
                 await UI.renderView(initialState);
             }
@@ -1264,7 +1394,7 @@
                         pages: pagesWithBase64
                     };
 
-                    DataManager.downloadJSON(data, `gallery-${g.title.substring(0, 20)}.json`);
+                    DataManager.downloadJSON(data, `UrGal-gallery-${g.title.substring(0, 20)}.json`);
                 } catch(e) { alert('เกิดข้อผิดพลาดในการส่งออก: ' + e.message); }
             },
 
@@ -1366,43 +1496,15 @@
                 
                 Detail.updateFavoriteBtn();
                 
-                // Build Action Buttons
-                let buttonsHtml = `
-                    <button onclick="UI.navigate('reader', { galleryId: ${id}, index: ${gallery.lastReadPage || 0} })" class="bg-nRed hover:bg-nRedHover px-6 py-2.5 rounded font-bold text-lg shadow-lg flex items-center gap-2">
-                        <i class="fa-solid fa-book-open-reader"></i> ${gallery.lastReadPage ? T('read_continue', {page: gallery.lastReadPage + 1}) : T('read_now')}
-                    </button>
-                    <button onclick="Detail.readRandom(${id})" class="bg-purple-600 hover:bg-purple-700 px-4 py-2.5 rounded font-bold text-white transition shadow-lg" title="${T('random_read_title')}">
-                        <i class="fa-solid fa-dice"></i>
-                    </button>
-                `;
-
-                // Clear Bookmark Button
-                if (gallery.lastReadPage !== undefined && gallery.lastReadPage !== null) {
-                    buttonsHtml += `
-                        <button onclick="DataManager.clearBookmark(${id})" class="bg-gray-700 hover:bg-red-500 text-white px-4 py-2.5 rounded font-bold transition flex items-center gap-2" title="${T('clear_bookmark_title')}">
-                            <i class="fa-solid fa-bookmark"></i><i class="fa-solid fa-slash absolute text-xs ml-1 mt-1 text-black"></i> ${T('delete_bookmark')}
-                        </button>
-                    `;
-                }
-
-                // Change button text if reading in progress
-                buttonsHtml += `
-                    <button onclick="DataManager.exportGallery(${id})" class="bg-green-600 hover:bg-green-700 px-4 py-2.5 rounded font-bold text-white transition" title="${T('export_this_title')}">
-                        <i class="fa-solid fa-file-export"></i>
-                    </button>
-                    <button onclick="UI.navigate('edit', ${id})" class="bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded font-bold text-white transition" title="${T('edit_title')}">
-                        <i class="fa-solid fa-wrench"></i>
-                    </button>
-                    <button onclick="DB.deleteGallery(${id})" class="bg-gray-700 hover:bg-red-900 px-4 py-2.5 rounded font-bold text-white transition" title="${T('delete_title')}">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                `;
-
-                document.getElementById('detActionButtons').innerHTML = buttonsHtml;
-
+                // Build Action Buttons - preserve the old format but update the onclick handlers
+                // Note: Buttons are now managed by the HTML in detail view with proper event handlers
+                
                 const pages = await db.pages.where('galleryId').equals(id).sortBy('order');
                 App.pages = pages;
                 document.getElementById('detPageCount').textContent = pages.length;
+
+                // Load translation sets
+                await TranslationManager.loadTranslationSets();
 
                 const grid = document.getElementById('detPagesGrid');
                 grid.innerHTML = '';
@@ -1452,6 +1554,10 @@
                     document.getElementById('showTransToggle').checked = true;
                     Reader.selectBox(null);
                 }
+                
+                // Load translation sets for this gallery
+                TranslationManager.loadTranslationSets();
+                
                 Reader.renderPage();
             },
 
@@ -1573,7 +1679,7 @@
                     const rect = e.target.getBoundingClientRect();
                     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
                     const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
-                    Reader.createTranslationBox({ x: xPercent, y: yPercent, w: 20, h: 10, text: '', fontSize: 14, bgMode: 'white', colorMode: 'black' }, true);
+                    Reader.createTranslationBox({ x: xPercent, y: yPercent, w: 20, h: 10, text: '', fontSize: 14, bgMode: 'white', colorMode: 'black', shape: 'rect', italic: false }, true);
                     Reader.markUnsaved();
                 }
             },
@@ -1591,6 +1697,8 @@
                 box.dataset.fontSize = data.fontSize || 14;
                 box.dataset.bgMode = data.bgMode || 'white';
                 box.dataset.colorMode = data.colorMode || 'black';
+                box.dataset.shape = data.shape || 'rect';
+                box.dataset.italic = data.italic ? 'true' : 'false';
 
                 Reader.applyBoxStyle(box);
 
@@ -1643,9 +1751,20 @@
                 // Font Size
                 target.style.fontSize = box.dataset.fontSize + 'px';
                 
+                // Italic
+                if (box.dataset.italic === 'true') {
+                    target.style.fontStyle = 'italic';
+                } else {
+                    target.style.fontStyle = 'normal';
+                }
+                
                 // Bg
                 box.classList.remove('bg-white-mode', 'bg-black-mode', 'bg-clear-mode');
                 box.classList.add(`bg-${box.dataset.bgMode}-mode`);
+                
+                // Shape
+                box.classList.remove('shape-rect', 'shape-circle', 'shape-oval');
+                box.classList.add(`shape-${box.dataset.shape}`);
                 
                 // Color
                 target.classList.remove('text-dark', 'text-light');
@@ -1662,6 +1781,14 @@
                     box.classList.add('selected');
                     toolbar.classList.remove('opacity-50', 'pointer-events-none');
                     document.getElementById('tbSize').textContent = box.dataset.fontSize;
+                    
+                    // Update shape button highlights
+                    document.getElementById('tbShapeRect').classList.toggle('bg-yellow-800', box.dataset.shape === 'rect');
+                    document.getElementById('tbShapeCircle').classList.toggle('bg-yellow-800', box.dataset.shape === 'circle');
+                    document.getElementById('tbShapeOval').classList.toggle('bg-yellow-800', box.dataset.shape === 'oval');
+                    
+                    // Update italic button highlight
+                    document.getElementById('tbItalic').classList.toggle('bg-yellow-800', box.dataset.italic === 'true');
                 } else {
                     toolbar.classList.add('opacity-50', 'pointer-events-none');
                 }
@@ -1680,6 +1807,16 @@
                     box.dataset.bgMode = val;
                 } else if (type === 'color') {
                     box.dataset.colorMode = val;
+                } else if (type === 'shape') {
+                    box.dataset.shape = val;
+                } else if (type === 'italic') {
+                    box.dataset.italic = box.dataset.italic === 'true' ? 'false' : 'true';
+                    const tbItalic = document.getElementById('tbItalic');
+                    if (box.dataset.italic === 'true') {
+                        tbItalic.classList.add('bg-yellow-800');
+                    } else {
+                        tbItalic.classList.remove('bg-yellow-800');
+                    }
                 }
                 Reader.applyBoxStyle(box);
                 Reader.markUnsaved();
@@ -1693,9 +1830,17 @@
                 if (!App.reader.showTranslations && !App.reader.isEditMode) return;
 
                 const page = App.pages[App.reader.currentIndex];
-                if (page.translations) {
-                    page.translations.forEach(t => Reader.createTranslationBox(t));
+                
+                // Get translations from current set or from page if no set selected
+                let translations = [];
+                if (App.reader.currentTranslationSetId && page.translationSets) {
+                    const setData = page.translationSets.find(ts => ts.setId === App.reader.currentTranslationSetId);
+                    translations = setData ? setData.translations : [];
+                } else if (page.translations) {
+                    translations = page.translations;
                 }
+                
+                translations.forEach(t => Reader.createTranslationBox(t));
             },
 
             saveTranslations: async () => {
@@ -1717,20 +1862,323 @@
                         text: text,
                         fontSize: box.dataset.fontSize,
                         bgMode: box.dataset.bgMode,
-                        colorMode: box.dataset.colorMode
+                        colorMode: box.dataset.colorMode,
+                        shape: box.dataset.shape,
+                        italic: box.dataset.italic
                     });
                 });
 
                 const page = App.pages[App.reader.currentIndex];
-                page.translations = translations;
                 
-                await db.pages.update(page.id, { translations });
+                // Save to current translation set or to default
+                if (App.reader.currentTranslationSetId) {
+                    if (!page.translationSets) page.translationSets = [];
+                    
+                    const setIndex = page.translationSets.findIndex(ts => ts.setId === App.reader.currentTranslationSetId);
+                    if (setIndex >= 0) {
+                        page.translationSets[setIndex].translations = translations;
+                    } else {
+                        page.translationSets.push({
+                            setId: App.reader.currentTranslationSetId,
+                            setName: App.reader.currentTranslationSetName,
+                            translations: translations
+                        });
+                    }
+                    
+                    await db.pages.update(page.id, { translationSets: page.translationSets });
+                } else {
+                    page.translations = translations;
+                    await db.pages.update(page.id, { translations });
+                }
+                
                 Reader.markUnsaved(false);
                 
                 const btn = document.querySelector('#editModeBanner button:last-child');
                 const oldText = btn.innerText;
                 btn.innerText = T('saved_msg'); btn.classList.add('bg-green-500', 'text-white');
                 setTimeout(() => { btn.innerText = oldText; btn.classList.remove('bg-green-500', 'text-white'); }, 1500);
+            }
+        };
+
+        // ================= TRANSLATION SET MANAGER =================
+        const TranslationManager = {
+            showNewSetDialog: () => {
+                document.getElementById('newTransSetModal').classList.remove('hide');
+                document.getElementById('newTransSetName').focus();
+            },
+
+            createNewSet: async () => {
+                const name = document.getElementById('newTransSetName').value.trim();
+                if (!name) {
+                    alert('กรุณาใส่ชื่อชุดแปล');
+                    return;
+                }
+
+                const setRecord = {
+                    galleryId: App.currentGalleryId,
+                    name: name,
+                    createdAt: Date.now()
+                };
+
+                const id = await db.translationSets.add(setRecord);
+                App.reader.currentTranslationSetId = id;
+                App.reader.currentTranslationSetName = name;
+                
+                StateManager.save();
+                document.getElementById('newTransSetModal').classList.add('hide');
+                document.getElementById('newTransSetName').value = '';
+                
+                TranslationManager.loadTranslationSets();
+                Reader.renderTranslations();
+            },
+
+            loadTranslationSets: async () => {
+                const sets = await db.translationSets.where('galleryId').equals(App.currentGalleryId).toArray();
+                App.reader.availableTranslationSets = sets;
+                
+                const selector = document.getElementById('transSetSelector');
+                if (!selector) return;
+                
+                selector.innerHTML = '<option value="">ไม่มี</option>';
+                sets.forEach(set => {
+                    const option = document.createElement('option');
+                    option.value = set.id;
+                    option.textContent = set.name;
+                    selector.appendChild(option);
+                });
+                
+                if (App.reader.currentTranslationSetId) {
+                    selector.value = App.reader.currentTranslationSetId;
+                }
+            },
+
+            switchSet: async (setId) => {
+                if (!setId) {
+                    App.reader.currentTranslationSetId = null;
+                    App.reader.currentTranslationSetName = null;
+                } else {
+                    const set = await db.translationSets.get(Number(setId));
+                    if (set) {
+                        App.reader.currentTranslationSetId = set.id;
+                        App.reader.currentTranslationSetName = set.name;
+                    }
+                }
+                
+                StateManager.save();
+                Reader.renderTranslations();
+            },
+
+            showExportDialog: async () => {
+                await TranslationManager.loadTranslationSets();
+                const list = document.getElementById('exportTransSetList');
+                list.innerHTML = '';
+                
+                if (App.reader.availableTranslationSets.length === 0) {
+                    list.innerHTML = '<p class="text-gray-400 text-sm px-2 py-4">ไม่มีชุดแปล</p>';
+                    document.getElementById('exportTransSetModal').classList.remove('hide');
+                    return;
+                }
+                
+                App.reader.availableTranslationSets.forEach(set => {
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center gap-2 p-2 hover:bg-gray-700 rounded cursor-pointer';
+                    label.innerHTML = `
+                        <input type="checkbox" class="transSetCheckbox" value="${set.id}" data-name="${set.name}">
+                        <span>${set.name}</span>
+                    `;
+                    list.appendChild(label);
+                });
+                
+                document.getElementById('exportTransSetModal').classList.remove('hide');
+            },
+
+            exportSelected: async () => {
+                const checkboxes = document.querySelectorAll('.transSetCheckbox:checked');
+                if (checkboxes.length === 0) {
+                    alert('กรุณาเลือกชุดแปลที่ต้องการส่งออก');
+                    return;
+                }
+                
+                const setIds = Array.from(checkboxes).map(cb => Number(cb.value));
+                const setNames = Array.from(checkboxes).map(cb => cb.dataset.name);
+                
+                // Collect all pages' translations for selected sets
+                const exportData = {
+                    galleryId: App.currentGalleryId,
+                    galleryTitle: Detail.currentGallery.title,
+                    sets: [],
+                    exportDate: new Date().toISOString()
+                };
+                
+                for (let setId of setIds) {
+                    const set = await db.translationSets.get(setId);
+                    exportData.sets.push({
+                        id: set.id,
+                        name: set.name,
+                        createdAt: set.createdAt,
+                        pages: []
+                    });
+                }
+                
+                // Collect translations for each page
+                for (let pageIndex = 0; pageIndex < App.pages.length; pageIndex++) {
+                    const page = App.pages[pageIndex];
+                    for (let setIndex = 0; setIndex < exportData.sets.length; setIndex++) {
+                        const setId = setIds[setIndex];
+                        if (page.translationSets) {
+                            const setData = page.translationSets.find(ts => ts.setId === setId);
+                            if (setData) {
+                                exportData.sets[setIndex].pages.push({
+                                    pageOrder: pageIndex,
+                                    translations: setData.translations
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                const filename = `translation-sets_${Detail.currentGallery.title}_${new Date().toISOString().slice(0,10)}.json`;
+                DataManager.downloadJSON(exportData, filename);
+                
+                document.getElementById('exportTransSetModal').classList.add('hide');
+                alert(`ส่งออก ${setNames.join(', ')} สำเร็จ`);
+            },
+
+            showImportDialog: () => {
+                document.getElementById('importTransSetModal').classList.remove('hide');
+            },
+
+            importFromFile: async () => {
+                const fileInput = document.getElementById('importTransSetFile');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    alert('กรุณาเลือกไฟล์');
+                    return;
+                }
+                
+                try {
+                    const text = await file.text();
+                    const importData = JSON.parse(text);
+                    
+                    if (!importData.sets || !Array.isArray(importData.sets)) {
+                        alert('รูปแบบไฟล์ไม่ถูกต้อง');
+                        return;
+                    }
+                    
+                    // Create/update translation sets
+                    for (let setData of importData.sets) {
+                        let setRecord = await db.translationSets.where('id').equals(setData.id).first();
+                        
+                        if (!setRecord) {
+                            setRecord = {
+                                galleryId: App.currentGalleryId,
+                                name: setData.name + ' (นำเข้า)',
+                                createdAt: Date.now()
+                            };
+                            setData.id = await db.translationSets.add(setRecord);
+                        }
+                        
+                        // Apply translations to pages
+                        for (let pageData of setData.pages) {
+                            if (pageData.pageOrder < App.pages.length) {
+                                const page = App.pages[pageData.pageOrder];
+                                
+                                if (!page.translationSets) page.translationSets = [];
+                                const existingSetIndex = page.translationSets.findIndex(ts => ts.setId === setData.id);
+                                
+                                if (existingSetIndex >= 0) {
+                                    page.translationSets[existingSetIndex].translations = pageData.translations;
+                                } else {
+                                    page.translationSets.push({
+                                        setId: setData.id,
+                                        setName: setRecord.name,
+                                        translations: pageData.translations
+                                    });
+                                }
+                                
+                                await db.pages.update(page.id, { translationSets: page.translationSets });
+                            }
+                        }
+                    }
+                    
+                    TranslationManager.loadTranslationSets();
+                    Reader.renderTranslations();
+                    document.getElementById('importTransSetModal').classList.add('hide');
+                    fileInput.value = '';
+                    
+                    alert('นำเข้าสำเร็จ');
+                } catch (e) {
+                    alert('เกิดข้อผิดพลาดในการนำเข้า: ' + e.message);
+                }
+            },
+
+            showDeleteDialog: async () => {
+                await TranslationManager.loadTranslationSets();
+                const list = document.getElementById('deleteTransSetList');
+                list.innerHTML = '';
+                
+                if (App.reader.availableTranslationSets.length === 0) {
+                    list.innerHTML = '<p class="text-gray-400 text-sm px-2 py-4">ไม่มีชุดแปล</p>';
+                    document.getElementById('deleteTransSetModal').classList.remove('hide');
+                    return;
+                }
+                
+                App.reader.availableTranslationSets.forEach(set => {
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center gap-2 p-2 hover:bg-gray-700 rounded cursor-pointer';
+                    label.innerHTML = `
+                        <input type="checkbox" class="deleteTransSetCheckbox" value="${set.id}" data-name="${set.name}">
+                        <span>${set.name}</span>
+                    `;
+                    list.appendChild(label);
+                });
+                
+                document.getElementById('deleteTransSetModal').classList.remove('hide');
+            },
+
+            deleteSelected: async () => {
+                const checkboxes = document.querySelectorAll('.deleteTransSetCheckbox:checked');
+                if (checkboxes.length === 0) {
+                    alert('กรุณาเลือกชุดแปลที่ต้องการลบ');
+                    return;
+                }
+                
+                if (!confirm(T('delete_confirm_msg'))) return;
+                
+                const setIds = Array.from(checkboxes).map(cb => Number(cb.value));
+                
+                try {
+                    // Delete translation sets from database
+                    for (let setId of setIds) {
+                        await db.translationSets.delete(setId);
+                        
+                        // Remove translations for this set from all pages
+                        for (let page of App.pages) {
+                            if (page.translationSets) {
+                                const filtered = page.translationSets.filter(ts => ts.setId !== setId);
+                                if (filtered.length < page.translationSets.length) {
+                                    page.translationSets = filtered.length > 0 ? filtered : undefined;
+                                    await db.pages.update(page.id, { translationSets: page.translationSets });
+                                }
+                            }
+                        }
+                    }
+                    
+                    // If deleted set was currently selected, clear selection
+                    if (setIds.includes(App.reader.currentTranslationSetId)) {
+                        App.reader.currentTranslationSetId = null;
+                        App.reader.currentTranslationSetName = null;
+                        StateManager.save();
+                    }
+                    
+                    document.getElementById('deleteTransSetModal').classList.add('hide');
+                    TranslationManager.loadTranslationSets();
+                    Reader.renderTranslations();
+                    alert('ลบชุดแปลสำเร็จ');
+                } catch (e) {
+                    alert('เกิดข้อผิดพลาดในการลบ: ' + e.message);
+                }
             }
         };
 
