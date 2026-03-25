@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -100,9 +101,10 @@
             <div class="flex items-center gap-6">
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2">
                     <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i> UrGal</span>
-                     <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.2.4</p>
+                     <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.2.5</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
+                    <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
                     <a href="#" onclick="UI.navigate('tags')" class="hover:text-nRed transition" data-i18n="tags">แท็ก</a>
                     <a href="#" onclick="UI.navigate('artists')" class="hover:text-nRed transition" data-i18n="artists">ศิลปิน</a>
                 </div>
@@ -180,7 +182,13 @@
 
         <!-- ================= LIST VIEW (Tags, Artists) ================= -->
         <div id="view-list" class="view hide">
-            <h2 id="listTitle" class="text-2xl font-bold mb-6 border-b border-gray-700 pb-2">รายการ</h2>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-gray-700 pb-4">
+                <h2 id="listTitle" class="text-2xl font-bold">รายการ</h2>
+                <div class="w-full md:w-48 relative">
+                    <input type="text" id="listSearchInput" data-i18n-placeholder="list_search_placeholder" placeholder="ค้นหารายการ..." class="w-full bg-darkBg text-white px-4 py-2 rounded-full border border-gray-600 focus:border-nRed focus:outline-none text-sm transition-all" onkeyup="List.handleSearch(this.value)">
+                    <i class="fa-solid fa-search absolute right-3 top-2.5 text-gray-400"></i>
+                </div>
+            </div>
             <div id="list-container" class="flex flex-wrap gap-3"></div>
         </div>
 
@@ -224,10 +232,10 @@
                         <button onclick="document.getElementById('pagesInput').click()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm flex items-center gap-2">
                             <i class="fa-solid fa-plus"></i> <span data-i18n="add_image_btn">เพิ่มรูปภาพ</span>
                         </button>
-                        <input type="file" id="pagesInput" accept="image/*" multiple class="hidden" onchange="UploadManager.handlePagesSelect(event)">
+                        <input type="file" id="pagesInput" accept="image/*,application/pdf" multiple class="hidden" onchange="UploadManager.handlePagesSelect(event)">
                     </div>
 
-                    <div id="dropZonePages" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 bg-darkBg p-4 rounded min-h-[200px] border-2 border-dashed border-gray-700 transition">
+                    <div id="dropZonePages" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 bg-darkBg p-4 rounded min-h-[200px] hover:bg-darkCard border-2 border-dashed border-gray-700 transition">
                         <!-- Items -->
                     </div>
                 </div>
@@ -526,8 +534,8 @@
         // ================= I18N SYSTEM =================
         const I18N = {
             th: {
-                tags: "แท็ก", artists: "ศิลปิน", home_title: "หน้าแรก",
-                search_placeholder: "ค้นหา...", random_title: "สุ่มเรื่องจากรายการนี้",
+                tags: "แท็ก", artists: "ศิลปิน", home_title: "หน้าแรก", home_page:"หน้าหลัก",
+                search_placeholder: "ค้นหา...", list_search_placeholder: "ค้นหารายการ...", random_title: "สุ่มเรื่องจากรายการนี้",
                 export_title: "ส่งออกข้อมูลทั้งหมด (Backup)", import_title: "นำเข้าข้อมูล (Restore)",
                 upload: "อัปโหลด", profile_title: "โปรไฟล์ & รายการโปรด",
                 latest_updates: "อัปเดตล่าสุด", favorites: '<i class="fa-solid fa-heart text-nRed"></i> รายการโปรด',
@@ -564,8 +572,8 @@
                 addnewtranscollect: "+ ชุดใหม่",grid_edit_delete_title: "แก้ไข / ลบ",shape_rect: "สี่เหลี่ยม", delete_trans_sets_title: "ลบชุดคำแปล", delete_trans_sets: "ลบชุดคำแปล", delete_confirm_msg: "คุณแน่ใจหรือไม่ว่าต้องการลบชุดแปลที่เลือก?", delete_btn_text: "ลบ"
             },
             en: {
-                tags: "Tags", artists: "Artists", home_title: "Home",
-                search_placeholder: "Search...", random_title: "Random from list",
+                tags: "Tags", artists: "Artists", home_title: "Home", home_page:"Home",
+                search_placeholder: "Search...", list_search_placeholder: "Search list...", random_title: "Random from list",
                 export_title: "Export All (Backup)", import_title: "Import Data (Restore)",
                 upload: "Upload", profile_title: "Profile & Favorites",
                 latest_updates: "Latest Updates", favorites: '<i class="fa-solid fa-heart text-nRed"></i> Favorites',
@@ -602,8 +610,8 @@
                 addnewtranscollect: "+ New Set",grid_edit_delete_title: "Edit / Delete",shape_rect: "Rectangle", delete_trans_sets_title: "Delete Translation Sets", delete_trans_sets: "Delete Sets", delete_confirm_msg: "Are you sure you want to delete selected translation sets?", delete_btn_text: "Delete"
             },
             cn: {
-                tags: "标签", artists: "作者", home_title: "首页",
-                search_placeholder: "搜索...", random_title: "随机挑选",
+                tags: "标签", artists: "作者", home_title: "首页", home_page:"主页",
+                search_placeholder: "搜索...", list_search_placeholder: "搜索列表...", random_title: "随机挑选",
                 export_title: "导出全部 (备份)", import_title: "导入数据 (还原)",
                 upload: "上传", profile_title: "个人中心",
                 latest_updates: "最近更新", favorites: '<i class="fa-solid fa-heart text-nRed"></i> 我的收藏',
@@ -640,8 +648,8 @@
                 addnewtranscollect: "+ 新建翻译集",grid_edit_delete_title: "编辑 / 删除",shape_rect: "矩形", delete_trans_sets_title: "删除翻译集", delete_trans_sets: "删除翻译集", delete_confirm_msg: "确定要删除选择的翻译集吗？", delete_btn_text: "删除"
             },
             jp: {
-                tags: "タグ", artists: "作者", home_title: "ホーム",
-                search_placeholder: "検索...", random_title: "ランダムに表示",
+                tags: "タグ", artists: "作者", home_title: "ホーム", home_page:"ホーム",
+                search_placeholder: "検索...", list_search_placeholder: "リストを検索...", random_title: "ランダムに表示",
                 export_title: "全データを書き出し", import_title: "データを読み込み",
                 upload: "アップロード", profile_title: "プロフィール",
                 latest_updates: "最近の更新", favorites: '<i class="fa-solid fa-heart text-nRed"></i> お気に入り',
@@ -705,6 +713,7 @@
             currentGridIds: [], // Store current list of IDs for random feature
             searchQuery: '',
             currentNavParams: null, // Will be updated by router
+            scrollPositions: {}, // Store scroll positions for all views (key: viewKey, value: scrollY)
             reader: {
                 currentIndex: 0,
                 isEditMode: false,
@@ -716,8 +725,20 @@
                 readMode: 'single',
                 currentTranslationSetId: null,
                 currentTranslationSetName: null,
-                availableTranslationSets: []
+                availableTranslationSets: [],
+                scrollY: 0, // Track scroll position for single page mode
+                webtoonScrollY: 0 // Track scroll position for webtoon mode
             }
+        };
+
+        // Helper: Generate view key for scroll tracking
+        const getViewKey = (viewName, params) => {
+            if (!params) return viewName;
+            if (typeof params === 'object') {
+                if (params.galleryId) return `reader_${params.galleryId}_${params.index || 0}`;
+                return viewName;
+            }
+            return `${viewName}_${params}`;
         };
 
         const StateManager = {
@@ -735,7 +756,10 @@
                     readMode: App.reader.readMode,
                     imgFitType: App.reader.imgFitType,
                     imgFitPercent: App.reader.imgFitPercent,
-                    showTranslations: App.reader.showTranslations
+                    showTranslations: App.reader.showTranslations,
+                    scrollY: App.reader.scrollY,
+                    webtoonScrollY: App.reader.webtoonScrollY,
+                    scrollPositions: App.scrollPositions
                 };
                 localStorage.setItem('UrgalState', JSON.stringify(stateToSave));
             },
@@ -764,6 +788,15 @@
                 }
                 if (savedState && savedState.hasOwnProperty('showTranslations')) {
                     App.reader.showTranslations = savedState.showTranslations;
+                }
+                if (savedState && typeof savedState.scrollY === 'number') {
+                    App.reader.scrollY = savedState.scrollY;
+                }
+                if (savedState && typeof savedState.webtoonScrollY === 'number') {
+                    App.reader.webtoonScrollY = savedState.webtoonScrollY;
+                }
+                if (savedState && savedState.scrollPositions && typeof savedState.scrollPositions === 'object') {
+                    App.scrollPositions = savedState.scrollPositions;
                 }
                 
                 // 2. Restore current translation set
@@ -884,7 +917,16 @@
                     document.getElementById('navSearchZone').classList.add('hide');
                     Reader.startReading(params.index || 0, true); // Start without navigating
                 }
-                window.scrollTo(0, 0);
+                // Restore scroll position for non-reader views
+                if (viewName !== 'reader') {
+                    const viewKey = getViewKey(viewName, params);
+                    const savedScroll = App.scrollPositions[viewKey];
+                    if (typeof savedScroll === 'number' && savedScroll > 0) {
+                        setTimeout(() => window.scrollTo(0, savedScroll), 50);
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
+                }
                 StateManager.save();
                 UI.applyLanguage();
             },
@@ -1108,7 +1150,16 @@
 
         // ================= LIST CONTROLLER (Tags, Artists view) =================
         const List = {
+            currentMode: null,
+            allItems: [],
+            searchQuery: '',
+            
             load: async (mode) => {
+                List.currentMode = mode;
+                List.searchQuery = '';
+                const searchInput = document.getElementById('listSearchInput');
+                if (searchInput) searchInput.value = '';
+                
                 const galleries = await db.galleries.toArray();
                 const counts = {};
                 
@@ -1121,20 +1172,33 @@
 
                 document.getElementById('listTitle').innerHTML = mode === 'tags' ? T('all_tags') : T('all_artists');
                 
+                List.allItems = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+                List.render();
+            },
+            
+            handleSearch: (query) => {
+                List.searchQuery = query.toLowerCase();
+                List.render();
+            },
+            
+            render: () => {
                 const container = document.getElementById('list-container');
                 container.innerHTML = '';
                 
-                const sortedItems = Object.entries(counts).sort((a, b) => b[1] - a[1]); // Sort by count desc
+                let filtered = List.allItems;
+                if (List.searchQuery) {
+                    filtered = filtered.filter(([name]) => name.toLowerCase().includes(List.searchQuery));
+                }
                 
-                if(sortedItems.length === 0) {
-                    container.innerHTML = `<p class="text-gray-500">${T('no_data_simple')}</p>`;
+                if(filtered.length === 0) {
+                    container.innerHTML = `<p class="text-gray-500">${List.searchQuery ? T('no_data_search', {q: List.searchQuery}) : T('no_data_simple')}</p>`;
                     return;
                 }
 
-                const color = mode === 'tags' ? 'bg-tagBg hover:bg-gray-600' : 'bg-indigo-600 hover:bg-indigo-500';
-                const linkType = mode === 'tags' ? 'tagFilter' : 'artistFilter';
+                const color = List.currentMode === 'tags' ? 'bg-tagBg hover:bg-gray-600' : 'bg-indigo-600 hover:bg-indigo-500';
+                const linkType = List.currentMode === 'tags' ? 'tagFilter' : 'artistFilter';
 
-                sortedItems.forEach(([name, count]) => {
+                filtered.forEach(([name, count]) => {
                     container.innerHTML += `
                         <button onclick="UI.navigate('${linkType}', '${name}')" class="${color} text-white px-3 py-1.5 rounded-full text-sm transition flex items-center gap-2">
                             ${name} <span class="bg-black/30 px-1.5 rounded-full text-xs">${count}</span>
@@ -1145,6 +1209,84 @@
         };
 
         // ================= UPLOAD MANAGER (with Drag & Drop) =================
+        // ================= PDF CONVERTER =================
+        const PDFConverter = {
+            init: () => {
+                // Set pdf.js worker
+                if (typeof pdfjsLib !== 'undefined') {
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                }
+            },
+
+            // แปลง PDF file เป็น array ของ image blobs
+            convertPDFToImages: async (pdfFile) => {
+                return new Promise((resolve, reject) => {
+                    const fileReader = new FileReader();
+                    
+                    fileReader.onload = async (e) => {
+                        try {
+                            if (typeof pdfjsLib === 'undefined') {
+                                reject(new Error('pdf.js library not loaded'));
+                                return;
+                            }
+
+                            const pdfData = new Uint8Array(e.target.result);
+                            const pdfDocument = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                            const imageBlobs = [];
+                            
+                            // Loop ทุกหน้า
+                            for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+                                const page = await pdfDocument.getPage(pageNum);
+                                const scale = 2; // เพิ่มความคมชัด
+                                const viewport = page.getViewport({ scale });
+                                
+                                // สร้าง canvas
+                                const canvas = document.createElement('canvas');
+                                const context = canvas.getContext('2d');
+                                canvas.width = viewport.width;
+                                canvas.height = viewport.height;
+                                
+                                // render page ไป canvas
+                                await page.render({
+                                    canvasContext: context,
+                                    viewport: viewport
+                                }).promise;
+                                
+                                // แปลง canvas เป็น blob
+                                canvas.toBlob((blob) => {
+                                    if (blob) {
+                                        imageBlobs.push({
+                                            blob: blob,
+                                            pageNum: pageNum,
+                                            fileName: `page_${pageNum}.png`
+                                        });
+                                    }
+                                }, 'image/png', 0.95);
+                            }
+                            
+                            // รอให้ทุก blob พร้อม
+                            const interval = setInterval(() => {
+                                if (imageBlobs.length === pdfDocument.numPages) {
+                                    clearInterval(interval);
+                                    resolve(imageBlobs);
+                                }
+                            }, 10);
+                            
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    
+                    fileReader.onerror = () => {
+                        reject(new Error('Error reading PDF file'));
+                    };
+                    
+                    fileReader.readAsArrayBuffer(pdfFile);
+                });
+            }
+        };
+
+        // ================= UPLOAD MANAGER =================
         const UploadManager = {
             coverFile: null,
             pageFiles: [],
@@ -1218,13 +1360,39 @@
                 document.getElementById('coverPlaceholder').classList.add('hide');
             },
 
-            handlePagesSelect: (e) => {
-                const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
-                files.forEach(file => {
-                    UploadManager.pageFiles.push({
-                        id: Date.now() + Math.random(), file: file, url: URL.createObjectURL(file)
-                    });
-                });
+            handlePagesSelect: async (e) => {
+                const files = Array.from(e.target.files);
+                
+                for (const file of files) {
+                    // ถ้าเป็นรูปภาพ
+                    if (file.type.startsWith('image/')) {
+                        UploadManager.pageFiles.push({
+                            id: Date.now() + Math.random(),
+                            file: file,
+                            url: URL.createObjectURL(file)
+                        });
+                    }
+                    // ถ้าเป็น PDF
+                    else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+                        try {
+                            // แปลง PDF เป็นรูปภาพ
+                            const imageBlobs = await PDFConverter.convertPDFToImages(file);
+                            
+                            // เพิ่มแต่ละ page เป็น file ใน pageFiles
+                            imageBlobs.forEach((item, idx) => {
+                                UploadManager.pageFiles.push({
+                                    id: Date.now() + Math.random() + idx,
+                                    file: new File([item.blob], item.fileName, { type: 'image/png' }),
+                                    url: URL.createObjectURL(item.blob)
+                                });
+                            });
+                        } catch (error) {
+                            console.error('Error converting PDF:', error);
+                            alert('เกิดข้อผิดพลาดในการแปลง PDF: ' + error.message);
+                        }
+                    }
+                }
+                
                 UploadManager.renderPagesGrid();
                 if(e.target.id === 'pagesInput') e.target.value = '';
             },
@@ -1736,6 +1904,10 @@
                 container.classList.add('flex', 'justify-center');
                 container.classList.remove('flex-col', 'items-center', 'gap-2');
                 Reader.renderPage(); // Call original logic to populate the single page
+                // Restore scroll position after a brief delay to ensure layout is complete
+                setTimeout(() => {
+                    window.scrollTo(0, App.reader.scrollY);
+                }, 50);
             },
 
             renderWebtoonView: () => {
@@ -1805,11 +1977,17 @@
                     Reader.webtoonObserver.observe(img);
                 });
                 
-                // Scroll to the current page
+                // Scroll to the current page or restore saved scroll position
                 setTimeout(() => {
-                    const images = container.querySelectorAll('img');
-                    if (images[App.reader.currentIndex]) {
-                        images[App.reader.currentIndex].scrollIntoView({ behavior: 'auto', block: 'start' });
+                    if (App.reader.webtoonScrollY > 0) {
+                        // Restore previous scroll position
+                        window.scrollTo(0, App.reader.webtoonScrollY);
+                    } else {
+                        // First load, scroll current page into view
+                        const images = container.querySelectorAll('img');
+                        if (images[App.reader.currentIndex]) {
+                            images[App.reader.currentIndex].scrollIntoView({ behavior: 'auto', block: 'start' });
+                        }
                     }
                 }, 100);
             },
@@ -1864,7 +2042,8 @@
                 if (App.reader.hasUnsavedChanges && !confirm(T('confirm_unsaved'))) return;
                 App.reader.hasUnsavedChanges = false;
                 if (App.reader.currentIndex < App.pages.length - 1) {
-                    App.reader.currentIndex++; Reader.renderPage(); window.scrollTo(0,0);
+                    App.reader.scrollY = 0; // Reset scroll to top for new page
+                    App.reader.currentIndex++; Reader.renderPage();
                 }
             },
 
@@ -1873,7 +2052,8 @@
                 if (App.reader.hasUnsavedChanges && !confirm(T('confirm_unsaved'))) return;
                 App.reader.hasUnsavedChanges = false;
                 if (App.reader.currentIndex > 0) {
-                    App.reader.currentIndex--; Reader.renderPage(); window.scrollTo(0,0);
+                    App.reader.scrollY = 0; // Reset scroll to top for new page
+                    App.reader.currentIndex--; Reader.renderPage();
                 }
             },
 
@@ -1883,8 +2063,8 @@
                 App.reader.hasUnsavedChanges = false;
                 if(App.pages.length > 0) {
                     const newIndex = Math.floor(Math.random() * App.pages.length);
+                    App.reader.scrollY = 0; // Reset scroll for random page
                     UI.navigate('reader', { galleryId: App.currentGalleryId, index: newIndex });
-                    window.scrollTo(0,0);
                 }
             },
 
@@ -2522,6 +2702,29 @@
         };
 
         // ================= GLOBAL EVENTS =================
+        // Save scroll position when user scrolls (throttled)
+        let scrollTimeout = null;
+        window.addEventListener('scroll', () => {
+            if (App.currentView === 'reader') {
+                // Reader mode: track reader-specific scroll
+                if (App.reader.readMode === 'single') {
+                    App.reader.scrollY = window.scrollY;
+                } else if (App.reader.readMode === 'webtoon') {
+                    App.reader.webtoonScrollY = window.scrollY;
+                }
+            } else {
+                // Other views: track scroll position by view key
+                const viewKey = getViewKey(App.currentView, App.currentNavParams);
+                App.scrollPositions[viewKey] = window.scrollY;
+            }
+            // Throttle: save only once every 500ms while scrolling
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                StateManager.save();
+                scrollTimeout = null;
+            }, 500);
+        });
+
         window.addEventListener('popstate', (event) => {
             if (event.state) {
                 App.reader.hasUnsavedChanges = false; // Discard unsaved changes on history navigation
@@ -2584,6 +2787,7 @@
         }
 
         window.onload = () => {
+            PDFConverter.init();
             UploadManager.initDragAndDrop();
             StateManager.load();
             FileSystemManager.init();
