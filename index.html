@@ -189,6 +189,35 @@
             animation: slideOut 0.3s ease-in forwards;
         }
 
+        .toast.progress {
+            border-left-color: #f59e0b;
+            min-width: 320px;
+        }
+
+        .toast-progress-container {
+            width: 100%;
+            margin-top: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .toast-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .toast-progress-text {
+            font-size: 12px;
+            color: #bfdbfe;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
         /* Detail Preview Grid Optimization */
         #detPagesGrid {
             display: grid;
@@ -220,12 +249,13 @@
             <div class="flex items-center gap-6">
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2">
                     <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i> UGal</span>
-                     <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.2.8</p>
+                     <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.2.9</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
                     <a href="#" onclick="UI.navigate('tags')" class="hover:text-nRed transition" data-i18n="tags">แท็ก</a>
                     <a href="#" onclick="UI.navigate('artists')" class="hover:text-nRed transition" data-i18n="artists">ศิลปิน</a>
+                    <a href="#" onclick="UI.navigate('characters')" class="hover:text-nRed transition" data-i18n="characters">ตัวละคร</a>
                 </div>
             </div>
             
@@ -348,6 +378,13 @@
                                 <div id="artistSuggestionsList" class="divide-y divide-gray-700"></div>
                             </div>
                         </div>
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-300 mb-1" data-i18n="characters_label">ตัวละคร (Characters) <span class="text-xs text-gray-500">- คั่นด้วยลูกน้ำ (,)</span></label>
+                            <input type="text" id="upCharacters" data-i18n-placeholder="characters_placeholder" class="w-full bg-darkBg border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-nRed" placeholder="character_name" autocomplete="off">
+                            <div id="characterSuggestionsContainer" class="absolute top-full left-0 right-0 mt-1 bg-darkCard border border-gray-600 rounded shadow-lg max-h-48 overflow-y-auto z-50 hide">
+                                <div id="characterSuggestionsList" class="divide-y divide-gray-700"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -401,6 +438,10 @@
                     <div class="mb-4">
                         <span class="text-gray-400 text-sm font-semibold w-20 inline-block">Artists:</span>
                         <div id="detArtists" class="inline-flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="mb-4">
+                        <span class="text-gray-400 text-sm font-semibold w-20 inline-block" data-i18n="characters">Characters:</span>
+                        <div id="detCharacters" class="inline-flex flex-wrap gap-2"></div>
                     </div>
                     <div class="mb-6">
                         <span class="text-gray-400 text-sm font-semibold w-20 inline-block">Tags:</span>
@@ -587,8 +628,11 @@
                         <button onclick="FileSystemManager.disconnectFolder()" class="text-xs text-red-400 hover:text-red-300 font-semibold whitespace-nowrap ml-2 transition" data-i18n="disconnect_folder">Disconnect</button>
                     </div>
                 </div>
-                <button onclick="FileSystemManager.restoreFromLocal()" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-3 rounded-lg w-full font-bold transition shadow-lg mb-6 flex items-center justify-center gap-2">
+                <button onclick="FileSystemManager.restoreFromLocal()" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-3 rounded-lg w-full font-bold transition shadow-lg mb-3 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-rotate-left"></i> <span data-i18n="restore_local">Restore from Local Folder</span>
+                </button>
+                <button onclick="FileSystemManager.backupAllGalleries()" class="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white px-4 py-3 rounded-lg w-full font-bold transition shadow-lg mb-6 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-down"></i> <span data-i18n="backup_all">Backup All</span>
                 </button>
                 <div class="flex justify-end gap-2 border-t border-gray-700 pt-4">
                     <button onclick="document.getElementById('settingsModal').classList.add('hide')" class="text-gray-300 hover:text-white px-4 py-2 font-medium transition" data-i18n="close_btn_settings_modal">Close</button>
@@ -669,6 +713,8 @@
     <script>
         // ================= TOAST NOTIFICATION SYSTEM =================
         const Toast = {
+            activeProgressToast: null,
+            
             show: function(message, type = 'info', duration = 5000) {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
@@ -677,7 +723,8 @@
                 const icons = {
                     success: '✓',
                     error: '✕',
-                    info: 'ℹ'
+                    info: 'ℹ',
+                    progress: '⏳'
                 };
                 
                 toast.innerHTML = `
@@ -701,6 +748,7 @@
                     setTimeout(() => toast.remove(), 300);
                 });
             },
+            
             success: function(message, duration = 5000) {
                 this.show(message, 'success', duration);
             },
@@ -709,6 +757,61 @@
             },
             info: function(message, duration = 5000) {
                 this.show(message, 'info', duration);
+            },
+            
+            progress: function(message) {
+                // ลบ toast progress เดิมถ้ามี
+                if (this.activeProgressToast) {
+                    this.activeProgressToast.remove();
+                }
+                
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = 'toast progress';
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">⏳</div>
+                    <div class="toast-message">
+                        <div>${message}</div>
+                        <div class="toast-progress-container">
+                            <div class="toast-progress-bar" id="progressBar"></div>
+                        </div>
+                        <div class="toast-progress-text" id="progressText">0%</div>
+                    </div>
+                `;
+                
+                container.appendChild(toast);
+                this.activeProgressToast = toast;
+                
+                return {
+                    update: (percent) => {
+                        if (!this.activeProgressToast) return;
+                        const bar = this.activeProgressToast.querySelector('#progressBar');
+                        const text = this.activeProgressToast.querySelector('#progressText');
+                        if (bar) bar.style.width = Math.min(100, percent) + '%';
+                        if (text) text.textContent = Math.round(percent) + '%';
+                    },
+                    complete: (completeMessage = null) => {
+                        if (!this.activeProgressToast) return;
+                        const bar = this.activeProgressToast.querySelector('#progressBar');
+                        const text = this.activeProgressToast.querySelector('#progressText');
+                        if (bar) bar.style.width = '100%';
+                        if (text) text.textContent = '100%';
+                        if (completeMessage) {
+                            this.activeProgressToast.querySelector('.toast-message > div:first-child').textContent = completeMessage;
+                        }
+                        setTimeout(() => {
+                            this.activeProgressToast.classList.add('removing');
+                            setTimeout(() => this.activeProgressToast.remove(), 300);
+                            this.activeProgressToast = null;
+                        }, 1500);
+                    },
+                    error: () => {
+                        if (!this.activeProgressToast) return;
+                        this.activeProgressToast.remove();
+                        this.activeProgressToast = null;
+                    }
+                };
             }
         };
 
@@ -733,6 +836,8 @@
                 title_label: "ชื่อเรื่อง (Title)", title_placeholder: "ใส่ชื่อเรื่อง...",
                 tags_label: "แท็ก (Tags) <span class='text-xs text-gray-500'>- คั่นด้วยลูกน้ำ (,)</span>", tags_placeholder: "romance, school life",
                 artists_label: "ศิลปิน (Artists) <span class='text-xs text-gray-500'>- คั่นด้วยลูกน้ำ (,)</span>", artists_placeholder: "artist_name",
+                characters_label: "ตัวละคร (Characters) <span class='text-xs text-gray-500'>- คั่นด้วยลูกน้ำ (,)</span>", characters_placeholder: "character_name",
+                characters: "ตัวละคร", all_characters: '<i class="fa-solid fa-masks-theater"></i> ตัวละครทั้งหมด', no_characters: "ไม่มีตัวละคร",
                 pages_label: "หน้าทั้งหมด (Pages) - ลากวางได้หลายรูป", add_image_btn: "เพิ่มรูปภาพ",
                 pages_placeholder: "ลากรูปภาพมาวางที่นี่ หรือกดเพิ่มรูปภาพ", cancel_btn: "ยกเลิก", save_btn: "บันทึกและเผยแพร่",
                 no_tags: "ไม่มีแท็ก", no_artists: "ไม่ระบุ", pages_count: "หน้า",
@@ -749,7 +854,7 @@
                 alert_no_random: "ไม่มีเรื่องให้สุ่มในหน้านี้", alert_no_cover: "กรุณาเลือกหน้าปกหรืออัปโหลดรูปภาพอย่างน้อย 1 รูป", reading_mode_title: "รูปแบบการอ่าน", read_mode_single: "ทีละหน้า (Single Page)", read_mode_webtoon: "แนวตั้ง (Webtoon)", trans_settings_title: "การแปล",
                 alert_save_error: "เกิดข้อผิดพลาดในการบันทึก: ", alert_edit_success: "แก้ไขเรียบร้อย!", alert_save_success: "บันทึกสำเร็จ!",
                 alert_import_success: "นำเข้า {count} รายการสำเร็จ", alert_file_error: "รูปแบบไฟล์ไม่ถูกต้อง", alert_import_error: "ไฟล์เสียหายหรือผิดพลาด: ", alert_no_pages: "ไม่มีรูปภาพให้อ่าน",
-                settingmodal: "ตั้งค่า", local_backup_folder: "โฟลเดอร์สำรองข้อมูล", select_folder: "เลือกโฟลเดอร์...", backup_info: "ข้อมูลจะถูกบันทึกเป็นไฟล์ .json ในโฟลเดอร์นี้โดยอัตโนมัติ", restore_local: "กู้คืนจากโฟลเดอร์ในเครื่อง", close_btn_settings_modal: "ปิด", disconnect_folder: "ยกเลิกการสำรองข้อมูล",
+                settingmodal: "ตั้งค่า", local_backup_folder: "โฟลเดอร์สำรองข้อมูล", select_folder: "เลือกโฟลเดอร์...", backup_info: "ข้อมูลจะถูกบันทึกเป็นไฟล์ .json ในโฟลเดอร์นี้โดยอัตโนมัติ", restore_local: "กู้คืนจากโฟลเดอร์ในเครื่อง", backup_all: "สำรองข้อมูลทั้งหมด", close_btn_settings_modal: "ปิด", disconnect_folder: "ยกเลิกการสำรองข้อมูล",
                 new_trans_set_title: "สร้างชุดแปลใหม่", new_trans_set_placeholder: "เช่น แปลเล่น01 โดย ผู้ใช้A", create_btn: "สร้าง", export_trans_sets_title: "ส่งออกชุดแปล", export_btn: "ส่งออก", import_trans_sets_title: "นำเข้าชุดแปล", import_trans_sets_desc: "เลือกไฟล์ .json ของชุดแปล", import_btn: "นำเข้า", trans_sets_section: "ชุดแปล:",
                 addnewtranscollect: "+ ชุดใหม่",grid_edit_delete_title: "แก้ไข / ลบ",shape_rect: "สี่เหลี่ยม", delete_trans_sets_title: "ลบชุดคำแปล", delete_trans_sets: "ลบชุดคำแปล", delete_confirm_msg: "คุณแน่ใจหรือไม่ว่าต้องการลบชุดแปลที่เลือก?", delete_btn_text: "ลบ"
             },
@@ -772,6 +877,8 @@
                 title_label: "Title", title_placeholder: "Enter title...",
                 tags_label: "Tags <span class='text-xs text-gray-500'>- comma separated</span>", tags_placeholder: "romance, school life",
                 artists_label: "Artists <span class='text-xs text-gray-500'>- comma separated</span>", artists_placeholder: "artist_name",
+                characters_label: "Characters <span class='text-xs text-gray-500'>- comma separated</span>", characters_placeholder: "character_name",
+                characters: "Characters", all_characters: '<i class="fa-solid fa-masks-theater"></i> All Characters', no_characters: "No Characters",
                 pages_label: "Pages - Drag & Drop multiple", add_image_btn: "Add Images",
                 pages_placeholder: "Drag images here or click Add Images", cancel_btn: "Cancel", save_btn: "Save & Publish",
                 no_tags: "No Tags", no_artists: "Unknown", pages_count: "pages",
@@ -788,7 +895,7 @@
                 alert_no_random: "No items to random in this view", alert_no_cover: "Please select a cover or upload at least 1 page", reading_mode_title: "Reading Mode", read_mode_single: "Single Page", read_mode_webtoon: "Webtoon (Vertical)", trans_settings_title: "Translation",
                 alert_save_error: "Error saving: ", alert_edit_success: "Edited successfully!", alert_save_success: "Saved successfully!",
                 alert_import_success: "Imported {count} items successfully", alert_file_error: "Invalid file format", alert_import_error: "File error: ", alert_no_pages: "No images to read",
-                settingmodal: "Settings", local_backup_folder: "Local Backup Folder", select_folder: "Select Folder...", backup_info: "Data will be saved as .json files in this folder automatically.", restore_local: "Restore from Local Folder", close_btn_settings_modal: "Close", disconnect_folder: "Disconnect Folder",
+                settingmodal: "Settings", local_backup_folder: "Local Backup Folder", select_folder: "Select Folder...", backup_info: "Data will be saved as .json files in this folder automatically.", restore_local: "Restore from Local Folder", backup_all: "Backup All", close_btn_settings_modal: "Close", disconnect_folder: "Disconnect Folder",
                 new_trans_set_title: "Create Translation Set", new_trans_set_placeholder: "e.g. Translation Set 01 by User A", create_btn: "Create", export_trans_sets_title: "Export Translation Sets", export_btn: "Export", import_trans_sets_title: "Import Translation Sets", import_trans_sets_desc: "Select a .json file with translation sets", import_btn: "Import", trans_sets_section: "Translation Sets:",
                 addnewtranscollect: "+ New Set",grid_edit_delete_title: "Edit / Delete",shape_rect: "Rectangle", delete_trans_sets_title: "Delete Translation Sets", delete_trans_sets: "Delete Sets", delete_confirm_msg: "Are you sure you want to delete selected translation sets?", delete_btn_text: "Delete"
             },
@@ -811,6 +918,8 @@
                 title_label: "标题", title_placeholder: "输入标题...",
                 tags_label: "标签 <span class='text-xs text-gray-500'>- 用逗号 (,) 分隔</span>", tags_placeholder: "校园, 恋爱",
                 artists_label: "作者 <span class='text-xs text-gray-500'>- 用逗号 (,) 分隔</span>", artists_placeholder: "作者名",
+                characters_label: "角色 <span class='text-xs text-gray-500'>- 用逗号 (,) 分隔</span>", characters_placeholder: "角色名",
+                characters: "角色", all_characters: '<i class="fa-solid fa-masks-theater"></i> 所有角色', no_characters: "无角色",
                 pages_label: "内容页 - 可多选拖拽", add_image_btn: "添加图片",
                 pages_placeholder: "将图片拖到这里或点击添加", cancel_btn: "取消", save_btn: "保存并发布",
                 no_tags: "暂无标签", no_artists: "未知作者", pages_count: "页",
@@ -827,7 +936,7 @@
                 alert_no_random: "没有可以随机的项目", alert_no_cover: "请设置封面或上传至少一张图片", reading_mode_title: "阅读模式", read_mode_single: "单页模式", read_mode_webtoon: "长条模式 (Webtoon)", trans_settings_title: "翻译",
                 alert_save_error: "保存失败: ", alert_edit_success: "编辑成功！", alert_save_success: "保存成功！",
                 alert_import_success: "成功导入 {count} 个项目", alert_file_error: "文件格式无效", alert_import_error: "导入出错: ", alert_no_pages: "没有可查看的内容",
-                settingmodal: "设置", local_backup_folder: "本地备份文件夹", select_folder: "选择文件夹...", backup_info: "数据将自动保存为此文件夹中的 .json 文件", restore_local: "从本地文件夹恢复", close_btn_settings_modal: "关闭", disconnect_folder: "断开文件夹",
+                settingmodal: "设置", local_backup_folder: "本地备份文件夹", select_folder: "选择文件夹...", backup_info: "数据将自动保存为此文件夹中的 .json 文件", restore_local: "从本地文件夹恢复", backup_all: "备份所有", close_btn_settings_modal: "关闭", disconnect_folder: "断开文件夹",
                 new_trans_set_title: "创建翻译集", new_trans_set_placeholder: "例如 翻译组01 作者 用户A", create_btn: "创建", export_trans_sets_title: "导出翻译集", export_btn: "导出", import_trans_sets_title: "导入翻译集", import_trans_sets_desc: "选择包含翻译集的.json文件", import_btn: "导入", trans_sets_section: "翻译集:",
                 addnewtranscollect: "+ 新建翻译集",grid_edit_delete_title: "编辑 / 删除",shape_rect: "矩形", delete_trans_sets_title: "删除翻译集", delete_trans_sets: "删除翻译集", delete_confirm_msg: "确定要删除选择的翻译集吗？", delete_btn_text: "删除"
             },
@@ -850,6 +959,8 @@
                 title_label: "タイトル", title_placeholder: "タイトルを入力してください...",
                 tags_label: "タグ <span class='text-xs text-gray-500'>- カンマ (,) 区切り</span>", tags_placeholder: "恋愛, 学園",
                 artists_label: "作者 <span class='text-xs text-gray-500'>- カンマ (,) 区切り</span>", artists_placeholder: "作者名",
+                characters_label: "キャラクター <span class='text-xs text-gray-500'>- カンマ (,) 区切り</span>", characters_placeholder: "キャラ名",
+                characters: "キャラクター", all_characters: '<i class="fa-solid fa-masks-theater"></i> 全キャラクター', no_characters: "キャラなし",
                 pages_label: "ページ - 複数ドラッグ＆ドロップ可", add_image_btn: "画像を追加",
                 pages_placeholder: "画像をここにドラッグするかクリックして追加", cancel_btn: "キャンセル", save_btn: "保存して公開",
                 no_tags: "タグなし", no_artists: "不明", pages_count: "枚",
@@ -866,7 +977,7 @@
                 alert_no_random: "表示できる項目がありません", alert_no_cover: "表紙または画像を1枚以上選択してください", reading_mode_title: "閲覧モード", read_mode_single: "単ページ", read_mode_webtoon: "縦読み (Webtoon)", trans_settings_title: "翻訳",
                 alert_save_error: "保存エラー: ", alert_edit_success: "編集しました！", alert_save_success: "保存しました！",
                 alert_import_success: "{count} 件インポートしました", alert_file_error: "ファイル形式が正しくありません", alert_import_error: "エラーが発生しました: ", alert_no_pages: "表示する画像がありません",
-                settingmodal: "設定", local_backup_folder: "ローカルバックアップフォルダ", select_folder: "フォルダを選択...", backup_info: "データはこのフォルダに .json ファイルとして自動的に保存されます", restore_local: "ローカルフォルダから復元", close_btn_settings_modal: "閉じる", disconnect_folder: "フォルダを切断",
+                settingmodal: "設定", local_backup_folder: "ローカルバックアップフォルダ", select_folder: "フォルダを選択...", backup_info: "データはこのフォルダに .json ファイルとして自動的に保存されます", restore_local: "ローカルフォルダから復元", backup_all: "すべてをバックアップ", close_btn_settings_modal: "閉じる", disconnect_folder: "フォルダを切断",
                 new_trans_set_title: "翻訳セットを作成", new_trans_set_placeholder: "例 翻訳セット01 ユーザーA", create_btn: "作成", export_trans_sets_title: "翻訳セットを書き出し", export_btn: "書き出し", import_trans_sets_title: "翻訳セットを読み込み", import_trans_sets_desc: "翻訳セットを含む.jsonファイルを選択", import_btn: "読み込む", trans_sets_section: "翻訳セット:",
                 addnewtranscollect: "+ 新しいセット",grid_edit_delete_title: "編集 / 削除",shape_rect: "四角形", delete_trans_sets_title: "翻訳セットを削除", delete_trans_sets: "翻訳セットを削除",delete_confirm_msg: "本当に削除しますか？", delete_btn_text: "削除"
             }
@@ -882,11 +993,25 @@
 
         // ================= DATABASE (Dexie.js) v3 =================
         const db = new Dexie("UGalDB");
-        db.version(5).stores({
+        db.version(6).stores({
             galleries: '++id, title, createdAt, isFavorite, lastReadPage, totalPages',
             pages: '++id, galleryId, order',
             settings: 'key',
             translationSets: '++id, galleryId, name'
+        });
+        
+        // Migration for version 6 - add characters field
+        db.on('populate', () => {
+            const batchSize = 100;
+            db.galleries.toArray().then(galleries => {
+                for (let i = 0; i < galleries.length; i += batchSize) {
+                    const batch = galleries.slice(i, i + batchSize);
+                    batch.forEach(g => {
+                        if (!g.characters) g.characters = [];
+                    });
+                    db.galleries.bulkPut(batch);
+                }
+            });
         });
 
         // ================= GLOBAL STATE =================
@@ -1069,7 +1194,7 @@
                 document.querySelectorAll('.view').forEach(v => v.classList.add('hide'));
                 
                 // Reset search bar when navigating away from grids
-                if (!['home', 'tags', 'artists', 'user'].includes(viewName) && document.getElementById('searchInput')) {
+                if (!['home', 'tags', 'artists', 'characters', 'user'].includes(viewName) && document.getElementById('searchInput')) {
                     document.getElementById('searchInput').value = '';
                     App.searchQuery = '';
                 }
@@ -1082,11 +1207,11 @@
                     document.getElementById('view-grid').classList.remove('hide');
                     document.getElementById('navSearchZone').classList.remove('hide');
                     await Grid.load('user');
-                } else if (viewName === 'tags' || viewName === 'artists') {
+                } else if (viewName === 'tags' || viewName === 'artists' || viewName === 'characters') {
                     document.getElementById('view-list').classList.remove('hide');
                     document.getElementById('navSearchZone').classList.add('hide');
                     await List.load(viewName);
-                } else if (viewName === 'tagFilter' || viewName === 'artistFilter') {
+                } else if (viewName === 'tagFilter' || viewName === 'artistFilter' || viewName === 'characterFilter') {
                     document.getElementById('view-grid').classList.remove('hide');
                     document.getElementById('navSearchZone').classList.remove('hide');
                     await Grid.load(viewName, params);
@@ -1133,8 +1258,17 @@
                 return `#${state.view}${state.params ? '/' + state.params : ''}`;
             },
             createTagBadge: (text, type = 'tag') => {
-                const color = type === 'artist' ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-tagBg hover:bg-gray-600';
-                const linkType = type === 'artist' ? 'artistFilter' : 'tagFilter';
+                let color, linkType;
+                if (type === 'artist') {
+                    color = 'bg-indigo-600 hover:bg-indigo-500';
+                    linkType = 'artistFilter';
+                } else if (type === 'character') {
+                    color = 'bg-purple-600 hover:bg-purple-500';
+                    linkType = 'characterFilter';
+                } else {
+                    color = 'bg-tagBg hover:bg-gray-600';
+                    linkType = 'tagFilter';
+                }
                 return `<span onclick="UI.navigate('${linkType}', '${text}')" class="px-2 py-1 ${color} rounded text-xs font-semibold cursor-pointer transition inline-block">${text.trim()}</span>`;
             },
             handleSearch: (e) => {
@@ -1175,6 +1309,9 @@
                 } else if (mode === 'artistFilter') {
                     Grid.currentTitle = `<i class="fa-solid fa-palette"></i> ${param}`;
                     galleries = galleries.filter(g => g.artists.includes(param));
+                } else if (mode === 'characterFilter') {
+                    Grid.currentTitle = `<i class="fa-solid fa-masks-theater"></i> ${param}`;
+                    galleries = galleries.filter(g => g.characters && g.characters.includes(param));
                 }
 
                 Grid.allGalleries = galleries;
@@ -1359,13 +1496,23 @@
                 const counts = {};
                 
                 galleries.forEach(g => {
-                    const items = mode === 'tags' ? g.tags : g.artists;
+                    let items = [];
+                    if (mode === 'tags') items = g.tags;
+                    else if (mode === 'artists') items = g.artists;
+                    else if (mode === 'characters') items = g.characters || [];
+                    
                     items.forEach(item => {
                         counts[item] = (counts[item] || 0) + 1;
                     });
                 });
 
-                document.getElementById('listTitle').innerHTML = mode === 'tags' ? T('all_tags') : T('all_artists');
+                if (mode === 'tags') {
+                    document.getElementById('listTitle').innerHTML = T('all_tags');
+                } else if (mode === 'artists') {
+                    document.getElementById('listTitle').innerHTML = T('all_artists');
+                } else if (mode === 'characters') {
+                    document.getElementById('listTitle').innerHTML = T('all_characters');
+                }
                 
                 List.allItems = Object.entries(counts).sort((a, b) => b[1] - a[1]);
                 List.render();
@@ -1390,8 +1537,17 @@
                     return;
                 }
 
-                const color = List.currentMode === 'tags' ? 'bg-tagBg hover:bg-gray-600' : 'bg-indigo-600 hover:bg-indigo-500';
-                const linkType = List.currentMode === 'tags' ? 'tagFilter' : 'artistFilter';
+                let color, linkType;
+                if (List.currentMode === 'tags') {
+                    color = 'bg-tagBg hover:bg-gray-600';
+                    linkType = 'tagFilter';
+                } else if (List.currentMode === 'artists') {
+                    color = 'bg-indigo-600 hover:bg-indigo-500';
+                    linkType = 'artistFilter';
+                } else if (List.currentMode === 'characters') {
+                    color = 'bg-purple-600 hover:bg-purple-500';
+                    linkType = 'characterFilter';
+                }
 
                 filtered.forEach(([name, count]) => {
                     container.innerHTML += `
@@ -1786,6 +1942,155 @@
             }
         };
 
+        // ================= CHARACTER SUGGESTIONS MANAGER =================
+        const CharacterSuggestions = {
+            allCharacters: [], // Array of {character, lastUsed} sorted by most recent
+            currentSuggestions: [],
+            selectedIndex: -1,
+            currentInputValue: '',
+
+            init: async () => {
+                await CharacterSuggestions.loadAllCharacters();
+                CharacterSuggestions.attachEventListeners();
+            },
+
+            loadAllCharacters: async () => {
+                try {
+                    const galleries = await db.galleries.toArray();
+                    const characterMap = {}; // {character: lastUsedDate}
+                    
+                    // Collect all characters with their last used dates
+                    galleries.forEach(g => {
+                        if (g.characters && Array.isArray(g.characters)) {
+                            g.characters.forEach(character => {
+                                if (character.trim()) {
+                                    if (!characterMap[character] || new Date(g.createdAt) > new Date(characterMap[character])) {
+                                        characterMap[character] = g.createdAt || new Date().toISOString();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Convert to array and sort by most recent, limit to 100
+                    CharacterSuggestions.allCharacters = Object.entries(characterMap)
+                        .map(([character, date]) => ({ character, lastUsed: new Date(date) }))
+                        .sort((a, b) => b.lastUsed - a.lastUsed)
+                        .slice(0, 100);
+                } catch (e) {
+                    console.error('Error loading characters:', e);
+                }
+            },
+
+            attachEventListeners: () => {
+                const input = document.getElementById('upCharacters');
+                if (!input) return;
+                
+                input.addEventListener('input', (e) => CharacterSuggestions.handleInput(e));
+                input.addEventListener('keydown', (e) => CharacterSuggestions.handleKeydown(e));
+                input.addEventListener('blur', () => setTimeout(() => CharacterSuggestions.hideSuggestions(), 200));
+            },
+
+            handleInput: (e) => {
+                const input = e.target;
+                const fullText = input.value;
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                const currentCharacter = fullText.substring(lastCommaIndex + 1).trim();
+                
+                CharacterSuggestions.currentInputValue = currentCharacter;
+                CharacterSuggestions.selectedIndex = -1;
+                
+                if (currentCharacter.length === 0) {
+                    CharacterSuggestions.hideSuggestions();
+                    return;
+                }
+                
+                // Filter suggestions - top 10 matching current character
+                CharacterSuggestions.currentSuggestions = CharacterSuggestions.allCharacters
+                    .filter(({character}) => character.toLowerCase().includes(currentCharacter.toLowerCase()))
+                    .slice(0, 10);
+                
+                if (CharacterSuggestions.currentSuggestions.length > 0) {
+                    CharacterSuggestions.renderSuggestions();
+                } else {
+                    CharacterSuggestions.hideSuggestions();
+                }
+            },
+
+            handleKeydown: (e) => {
+                const container = document.getElementById('characterSuggestionsContainer');
+                
+                if (container.classList.contains('hide')) return;
+                
+                switch(e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        CharacterSuggestions.selectedIndex = Math.min(
+                            CharacterSuggestions.selectedIndex + 1,
+                            CharacterSuggestions.currentSuggestions.length - 1
+                        );
+                        CharacterSuggestions.renderSuggestions();
+                        break;
+                    
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        CharacterSuggestions.selectedIndex = Math.max(CharacterSuggestions.selectedIndex - 1, -1);
+                        CharacterSuggestions.renderSuggestions();
+                        break;
+                    
+                    case 'Enter':
+                        if (CharacterSuggestions.selectedIndex >= 0) {
+                            e.preventDefault();
+                            CharacterSuggestions.selectCharacter(CharacterSuggestions.currentSuggestions[CharacterSuggestions.selectedIndex].character);
+                        }
+                        break;
+                    
+                    case 'Escape':
+                        CharacterSuggestions.hideSuggestions();
+                        break;
+                }
+            },
+
+            selectCharacter: (character) => {
+                const input = document.getElementById('upCharacters');
+                const fullText = input.value;
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                
+                // Build new text with selected character
+                const beforeCharacter = lastCommaIndex >= 0 ? fullText.substring(0, lastCommaIndex + 1) : '';
+                const newValue = (beforeCharacter + ' ' + character + ', ').replace(/^\s*,\s*/, '').replace(/^\s+/, '');
+                
+                input.value = newValue;
+                CharacterSuggestions.hideSuggestions();
+                input.focus();
+                // Move cursor to end
+                input.setSelectionRange(input.value.length, input.value.length);
+            },
+
+            renderSuggestions: () => {
+                const list = document.getElementById('characterSuggestionsList');
+                list.innerHTML = '';
+                
+                CharacterSuggestions.currentSuggestions.forEach(({character}, index) => {
+                    const isSelected = index === CharacterSuggestions.selectedIndex;
+                    const item = document.createElement('div');
+                    item.className = `px-3 py-2 cursor-pointer transition ${
+                        isSelected ? 'bg-nRed text-white' : 'hover:bg-gray-700 text-gray-300'
+                    }`;
+                    item.textContent = character;
+                    item.onclick = () => CharacterSuggestions.selectCharacter(character);
+                    list.appendChild(item);
+                });
+                
+                document.getElementById('characterSuggestionsContainer').classList.remove('hide');
+            },
+
+            hideSuggestions: () => {
+                document.getElementById('characterSuggestionsContainer').classList.add('hide');
+                CharacterSuggestions.selectedIndex = -1;
+            }
+        };
+
         // ================= UPLOAD MANAGER =================
         const UploadManager = {
             coverFile: null,
@@ -1816,6 +2121,7 @@
                 // Header reset handled in UI.navigate
                 document.getElementById('upTags').value = '';
                 document.getElementById('upArtists').value = '';
+                document.getElementById('upCharacters').value = '';
                 UploadManager.coverFile = null;
                 document.getElementById('coverPreview').src = '';
                 document.getElementById('coverPreview').classList.add('hide');
@@ -1835,6 +2141,7 @@
                 UploadManager.renderPagesGrid();
                 TagSuggestions.hideSuggestions();
                 ArtistSuggestions.hideSuggestions();
+                CharacterSuggestions.hideSuggestions();
             },
 
             loadForEdit: async (id) => {
@@ -1847,6 +2154,7 @@
                 document.getElementById('upTitle').value = g.title;
                 document.getElementById('upTags').value = g.tags.join(', ');
                 document.getElementById('upArtists').value = g.artists.join(', ');
+                document.getElementById('upCharacters').value = (g.characters ? g.characters.join(', ') : '');
 
                 if (g.coverBlob) {
                     UploadManager.coverFile = g.coverBlob;
@@ -1863,9 +2171,10 @@
                 }));
                 UploadManager.renderPagesGrid();
                 
-                // Reload suggestions to ensure latest tags and artists are available
+                // Reload suggestions to ensure latest tags, artists, and characters are available
                 await TagSuggestions.loadAllTags();
                 await ArtistSuggestions.loadAllArtists();
+                await CharacterSuggestions.loadAllCharacters();
             },
 
             handleCoverSelect: (e) => {
@@ -2039,6 +2348,7 @@
                 const title = document.getElementById('upTitle').value.trim() || 'Untitled Gallery';
                 const tags = document.getElementById('upTags').value.split(',').map(t => t.trim()).filter(t => t);
                 const artists = document.getElementById('upArtists').value.split(',').map(t => t.trim()).filter(t => t);
+                const characters = document.getElementById('upCharacters').value.split(',').map(c => c.trim()).filter(c => c);
                 
                 if (!UploadManager.coverFile && UploadManager.pageFiles.length === 0) return Toast.error(T('alert_no_cover'));
                 const coverBlob = UploadManager.coverFile || UploadManager.pageFiles[0].file;
@@ -2048,7 +2358,7 @@
                     if (UploadManager.editingId) {
                         // Update existing
                         galleryId = UploadManager.editingId;
-                        await db.galleries.update(galleryId, { title, tags, artists, coverBlob, totalPages: UploadManager.pageFiles.length });
+                        await db.galleries.update(galleryId, { title, tags, artists, characters, coverBlob, totalPages: UploadManager.pageFiles.length });
                         
                         // Replace pages (delete old, insert current state)
                         await db.pages.where('galleryId').equals(galleryId).delete();
@@ -2059,16 +2369,17 @@
                         await FileSystemManager.syncToLocal(galleryId);
                     } else {
                         // Create new
-                        galleryId = await db.galleries.add({ title, tags, artists, coverBlob, createdAt: new Date().toISOString(), isFavorite: false, totalPages: UploadManager.pageFiles.length });
+                        galleryId = await db.galleries.add({ title, tags, artists, characters, coverBlob, createdAt: new Date().toISOString(), isFavorite: false, totalPages: UploadManager.pageFiles.length });
                         const pagesToSave = UploadManager.pageFiles.map((p, index) => ({ galleryId, order: index, imageBlob: p.file, translations: [] }));
                         if(pagesToSave.length > 0) await db.pages.bulkAdd(pagesToSave);
                         Toast.success(T('alert_save_success'));
                         await FileSystemManager.syncToLocal(galleryId);
                     }
 
-                    // Reload suggestions with newly added/updated tags and artists
+                    // Reload suggestions with newly added/updated tags, artists, and characters
                     await TagSuggestions.loadAllTags();
                     await ArtistSuggestions.loadAllArtists();
+                    await CharacterSuggestions.loadAllCharacters();
                     
                     UI.navigate('detail', galleryId);
                 } catch (e) { Toast.error(T('alert_save_error') + e.message); }
@@ -2083,10 +2394,50 @@
                 try {
                     const record = await db.settings.get('backupDir');
                     if (record && record.handle) {
-                        FileSystemManager.dirHandle = record.handle;
-                        document.getElementById('folderName').innerText = record.name || 'Folder Selected';
+                        try {
+                            // Validate that the stored handle is still valid
+                            await record.handle.queryPermission();
+                            FileSystemManager.dirHandle = record.handle;
+                            document.getElementById('folderName').innerText = record.name || 'Folder Selected';
+                            // Restore folder name from localStorage as backup
+                            localStorage.setItem('selectedFolderName', record.name);
+                        } catch (e) {
+                            // Handle became invalid, try to restore from localStorage
+                            const savedName = localStorage.getItem('selectedFolderName');
+                            if (savedName) {
+                                document.getElementById('folderName').innerText = savedName;
+                            }
+                            console.warn("Stored folder handle became invalid", e);
+                        }
+                    } else {
+                        // Try to restore folder name from localStorage
+                        const savedName = localStorage.getItem('selectedFolderName');
+                        if (savedName) {
+                            document.getElementById('folderName').innerText = savedName;
+                        }
                     }
                 } catch (e) { console.error("FS Init error", e); }
+                
+                // Watch for settings modal being opened to refresh folder name display
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal) {
+                    const observer = new MutationObserver(() => {
+                        if (!settingsModal.classList.contains('hide')) {
+                            // Modal is shown, refresh folder name display
+                            FileSystemManager.refreshDisplay();
+                        }
+                    });
+                    observer.observe(settingsModal, { attributes: true, attributeFilter: ['class'] });
+                }
+            },
+
+            refreshDisplay: async () => {
+                const savedName = localStorage.getItem('selectedFolderName');
+                if (savedName) {
+                    document.getElementById('folderName').innerText = savedName;
+                } else {
+                    document.getElementById('folderName').innerText = T('select_folder');
+                }
             },
 
             selectFolder: async () => {
@@ -2095,6 +2446,8 @@
                     FileSystemManager.dirHandle = handle;
                     // Save handle to IndexedDB to remember user's choice
                     await db.settings.put({ key: 'backupDir', handle: handle, name: handle.name });
+                    // Also save folder name to localStorage as backup
+                    localStorage.setItem('selectedFolderName', handle.name);
                     document.getElementById('folderName').innerText = handle.name;
                 } catch (e) { console.error("Folder selection cancelled", e); }
             },
@@ -2102,6 +2455,7 @@
             disconnectFolder: async () => {
                 FileSystemManager.dirHandle = null;
                 await db.settings.delete('backupDir');
+                localStorage.removeItem('selectedFolderName');
                 document.getElementById('folderName').innerText = T('select_folder');
             },
 
@@ -2147,38 +2501,93 @@
                 const count = await db.galleries.count();
                 if (count > 0 && !confirm("Database is not empty. Continue restoring? (Duplicates may occur)")) return;
 
-                let importedCount = 0;
+                // Count JSON files first
+                let jsonFiles = [];
                 try {
                     for await (const entry of FileSystemManager.dirHandle.values()) {
                         if (entry.kind === 'file' && entry.name.endsWith('.json')) {
-                            try {
-                                const file = await entry.getFile();
-                                const text = await file.text();
-                                const json = JSON.parse(text);
-                                
-                                if (json.type === 'single_gallery') {
-                                    // Check if this ID already exists to prevent duplicate key error if reusing IDs
-                                    const exists = await db.galleries.get(json.gallery.id);
-                                    if (!exists) {
-                                        if(json.gallery.coverBlob) json.gallery.coverBlob = await DataManager.base64ToBlob(json.gallery.coverBlob);
-                                        
-                                        // Restore with original ID
-                                        await db.galleries.put(json.gallery);
-                                        
-                                        const pages = await Promise.all(json.pages.map(async p => ({ 
-                                            ...p, 
-                                            imageBlob: await DataManager.base64ToBlob(p.imageBlob) 
-                                        })));
-                                        await db.pages.bulkPut(pages);
-                                        importedCount++;
-                                    }
-                                }
-                            } catch (e) { console.error("Error reading file", entry.name, e); }
+                            jsonFiles.push(entry);
                         }
                     }
-                    Toast.success(`Restored ${importedCount} items.`);
-                    UI.navigate('home');
-                } catch (e) { Toast.error("Restore failed: " + e.message); }
+                } catch (e) { console.error("Error counting files", e); }
+
+                if (jsonFiles.length === 0) {
+                    Toast.info("No backup files found in the folder.");
+                    return;
+                }
+
+                const progressBar = Toast.progress(`Restoring ${jsonFiles.length} files...`);
+                let importedCount = 0;
+                
+                try {
+                    for (let i = 0; i < jsonFiles.length; i++) {
+                        const entry = jsonFiles[i];
+                        try {
+                            const file = await entry.getFile();
+                            const text = await file.text();
+                            const json = JSON.parse(text);
+                            
+                            if (json.type === 'single_gallery') {
+                                // Check if this ID already exists to prevent duplicate key error if reusing IDs
+                                const exists = await db.galleries.get(json.gallery.id);
+                                if (!exists) {
+                                    if(json.gallery.coverBlob) json.gallery.coverBlob = await DataManager.base64ToBlob(json.gallery.coverBlob);
+                                    
+                                    // Restore with original ID
+                                    await db.galleries.put(json.gallery);
+                                    
+                                    const pages = await Promise.all(json.pages.map(async p => ({ 
+                                        ...p, 
+                                        imageBlob: await DataManager.base64ToBlob(p.imageBlob) 
+                                    })));
+                                    await db.pages.bulkPut(pages);
+                                    importedCount++;
+                                }
+                            }
+                        } catch (e) { console.error("Error reading file", entry.name, e); }
+                        
+                        // Update progress
+                        progressBar.update(((i + 1) / jsonFiles.length) * 100);
+                    }
+                    progressBar.complete(`Restored ${importedCount} of ${jsonFiles.length} items.`);
+                    setTimeout(() => UI.navigate('home'), 1000);
+                } catch (e) { 
+                    progressBar.error();
+                    Toast.error("Restore failed: " + e.message); 
+                }
+            },
+
+            backupAllGalleries: async () => {
+                if (!FileSystemManager.dirHandle) return Toast.error("Please select a folder first.");
+                if (!(await FileSystemManager.verifyPermission(true))) return;
+
+                const galleries = await db.galleries.toArray();
+                if (galleries.length === 0) {
+                    Toast.info("No galleries to backup.");
+                    return;
+                }
+
+                const progressBar = Toast.progress(`Backing up ${galleries.length} galleries...`);
+                let backupCount = 0;
+
+                try {
+                    for (let i = 0; i < galleries.length; i++) {
+                        try {
+                            await FileSystemManager.syncToLocal(galleries[i].id);
+                            backupCount++;
+                        } catch (e) {
+                            console.error("Error backing up gallery", galleries[i].id, e);
+                        }
+                        
+                        // Update progress
+                        progressBar.update(((i + 1) / galleries.length) * 100);
+                    }
+                    progressBar.complete(`Backed up ${backupCount} of ${galleries.length} galleries.`);
+                    Toast.success("Backup completed successfully!");
+                } catch (e) {
+                    progressBar.error();
+                    Toast.error("Backup failed: " + e.message);
+                }
             }
         };
 
@@ -2202,12 +2611,26 @@
                     const g = await db.galleries.get(id);
                     const pages = await db.pages.where('galleryId').equals(id).sortBy('order');
                     
-                    // Convert Blobs to Base64
+                    // แสดง progress toast
+                    const progress = Toast.progress(`กำลังส่งออก: ${g.title}`);
+                    
+                    // Convert Blobs to Base64 with progress tracking
+                    let processed = 0;
+                    progress.update(5);
+                    
                     const coverBase64 = g.coverBlob ? await DataManager.blobToBase64(g.coverBlob) : null;
-                    const pagesWithBase64 = await Promise.all(pages.map(async p => ({
-                        ...p,
-                        imageBlob: await DataManager.blobToBase64(p.imageBlob)
-                    })));
+                    processed += 10;
+                    progress.update(Math.min(50, processed));
+                    
+                    const pagesWithBase64 = await Promise.all(pages.map(async (p, idx) => {
+                        const pageData = {
+                            ...p,
+                            imageBlob: await DataManager.blobToBase64(p.imageBlob)
+                        };
+                        processed += (40 / pages.length);
+                        progress.update(Math.min(90, processed));
+                        return pageData;
+                    }));
 
                     const data = {
                         type: 'single_gallery',
@@ -2216,16 +2639,24 @@
                     };
 
                     DataManager.downloadJSON(data, `UGal-gallery-${g.title.substring(0, 20)}.json`);
-                } catch(e) { Toast.error('เกิดข้อผิดพลาดในการส่งออก: ' + e.message); }
+                    progress.complete('ส่งออกสำเร็จ!');
+                } catch(e) { 
+                    if (Toast.activeProgressToast) Toast.activeProgressToast.querySelector('.toast-icon').textContent = '✕';
+                    Toast.error('เกิดข้อผิดพลาดในการส่งออก: ' + e.message); 
+                }
             },
 
             exportAll: async () => {
                 if(!confirm(T('confirm_export_all'))) return;
                 try {
                     const galleries = await db.galleries.toArray();
+                    
+                    // แสดง progress toast
+                    const progress = Toast.progress(`กำลังส่งออก ${galleries.length} เรื่อง...`);
+                    
                     const allData = [];
-
-                    for(let g of galleries) {
+                    for(let i = 0; i < galleries.length; i++) {
+                        const g = galleries[i];
                         const pages = await db.pages.where('galleryId').equals(g.id).sortBy('order');
                         const coverBase64 = g.coverBlob ? await DataManager.blobToBase64(g.coverBlob) : null;
                         const pagesWithBase64 = await Promise.all(pages.map(async p => ({
@@ -2233,11 +2664,19 @@
                             imageBlob: await DataManager.blobToBase64(p.imageBlob)
                         })));
                         allData.push({ gallery: { ...g, coverBlob: coverBase64 }, pages: pagesWithBase64 });
+                        
+                        // อัปเดต progress
+                        const percent = ((i + 1) / galleries.length) * 100;
+                        progress.update(percent);
                     }
 
                     const backup = { type: 'full_backup', data: allData, date: new Date().toISOString() };
                     DataManager.downloadJSON(backup, `UGal-full-backup-${Date.now()}.json`);
-                } catch(e) { Toast.error('เกิดข้อผิดพลาด: ' + e.message); }
+                    progress.complete('ส่งออกสำเร็จ!');
+                } catch(e) { 
+                    if (Toast.activeProgressToast) Toast.activeProgressToast.querySelector('.toast-icon').textContent = '✕';
+                    Toast.error('เกิดข้อผิดพลาด: ' + e.message); 
+                }
             },
 
             downloadJSON: (data, filename) => {
@@ -2252,11 +2691,17 @@
                 const file = event.target.files[0];
                 if(!file) return;
                 
+                // แสดง progress toast
+                const progress = Toast.progress(`กำลังอ่านไฟล์...`);
+                
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     try {
+                        progress.update(20);
                         const json = JSON.parse(e.target.result);
-                        const importItem = async (item) => {
+                        progress.update(30);
+                        
+                        const importItem = async (item, index, total) => {
                             const gData = item.gallery;
                             const pData = item.pages;
                             
@@ -2273,20 +2718,32 @@
                             })));
                             
                             if(pagesToSave.length > 0) await db.pages.bulkAdd(pagesToSave);
+                            
+                            // อัปเดต progress
+                            const percent = 30 + ((index + 1) / total) * 70;
+                            progress.update(percent);
                         };
 
                         if (json.type === 'single_gallery') {
-                            await importItem(json);
+                            await importItem(json, 0, 1);
+                            progress.complete('นำเข้าสำเร็จ!');
                             Toast.success(T('alert_import_success', {count: 1}));
                         } else if (json.type === 'full_backup') {
-                            for(let item of json.data) await importItem(item);
+                            for(let i = 0; i < json.data.length; i++) {
+                                await importItem(json.data[i], i, json.data.length);
+                            }
+                            progress.complete('นำเข้าสำเร็จ!');
                             Toast.success(T('alert_import_success', {count: json.data.length}));
                         } else {
+                            progress.error();
                             Toast.error(T('alert_file_error'));
                         }
                         
                         UI.navigate('home');
-                    } catch(err) { Toast.error(T('alert_import_error') + err.message); }
+                    } catch(err) { 
+                        progress.error();
+                        Toast.error(T('alert_import_error') + err.message); 
+                    }
                 };
                 reader.readAsText(file);
                 event.target.value = ''; // Reset input
@@ -2313,6 +2770,7 @@
                 document.getElementById('detCover').src = URL.createObjectURL(gallery.coverBlob);
                 document.getElementById('detTags').innerHTML = gallery.tags.length ? gallery.tags.map(t => UI.createTagBadge(t, 'tag')).join('') : `<span class="text-gray-500 text-sm">${T('no_tags')}</span>`;
                 document.getElementById('detArtists').innerHTML = gallery.artists.length ? gallery.artists.map(t => UI.createTagBadge(t, 'artist')).join('') : `<span class="text-gray-500 text-sm">${T('no_artists')}</span>`;
+                document.getElementById('detCharacters').innerHTML = (gallery.characters && gallery.characters.length) ? gallery.characters.map(c => UI.createTagBadge(c, 'character')).join('') : `<span class="text-gray-500 text-sm">${T('no_characters')}</span>`;
                 document.getElementById('detDate').textContent = new Date(gallery.createdAt).toLocaleDateString('th-TH');
                 
                 Detail.updateFavoriteBtn();
@@ -2950,6 +3408,13 @@
 
                     textarea.addEventListener('focus', () => Reader.selectBox(box));
                     textarea.addEventListener('input', () => Reader.markUnsaved());
+                    textarea.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+                            e.preventDefault();
+                            document.execCommand('insertLineBreak', false, null);
+                            Reader.markUnsaved();
+                        }
+                    });
                     
                     box.querySelector('.trans-box-delete').addEventListener('click', (e) => {
                         e.stopPropagation(); box.remove(); Reader.selectBox(null); Reader.markUnsaved();
@@ -3532,6 +3997,7 @@
             UploadManager.initDragAndDrop();
             TagSuggestions.init();
             ArtistSuggestions.init();
+            CharacterSuggestions.init();
             StateManager.load();
             FileSystemManager.init();
         };
