@@ -183,7 +183,7 @@
             <div class="flex items-center gap-6">
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2">
                     <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i> UGal</span>
-                     <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.2.6</p>
+                     <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.2.7</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
@@ -297,13 +297,19 @@
                             <label class="block text-sm font-medium text-gray-300 mb-1" data-i18n="title_label">ชื่อเรื่อง (Title)</label>
                             <input type="text" id="upTitle" data-i18n-placeholder="title_placeholder" class="w-full bg-darkBg border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-nRed" placeholder="ใส่ชื่อเรื่อง...">
                         </div>
-                        <div>
+                        <div class="relative">
                             <label class="block text-sm font-medium text-gray-300 mb-1" data-i18n="tags_label">แท็ก (Tags) <span class="text-xs text-gray-500">- คั่นด้วยลูกน้ำ (,)</span></label>
-                            <input type="text" id="upTags" data-i18n-placeholder="tags_placeholder" class="w-full bg-darkBg border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-nRed" placeholder="romance, school life">
+                            <input type="text" id="upTags" data-i18n-placeholder="tags_placeholder" class="w-full bg-darkBg border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-nRed" placeholder="romance, school life" autocomplete="off">
+                            <div id="tagSuggestionsContainer" class="absolute top-full left-0 right-0 mt-1 bg-darkCard border border-gray-600 rounded shadow-lg max-h-48 overflow-y-auto z-50 hide">
+                                <div id="tagSuggestionsList" class="divide-y divide-gray-700"></div>
+                            </div>
                         </div>
-                        <div>
+                        <div class="relative">
                             <label class="block text-sm font-medium text-gray-300 mb-1" data-i18n="artists_label">ศิลปิน (Artists) <span class="text-xs text-gray-500">- คั่นด้วยลูกน้ำ (,)</span></label>
-                            <input type="text" id="upArtists" data-i18n-placeholder="artists_placeholder" class="w-full bg-darkBg border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-nRed" placeholder="artist_name">
+                            <input type="text" id="upArtists" data-i18n-placeholder="artists_placeholder" class="w-full bg-darkBg border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-nRed" placeholder="artist_name" autocomplete="off">
+                            <div id="artistSuggestionsContainer" class="absolute top-full left-0 right-0 mt-1 bg-darkCard border border-gray-600 rounded shadow-lg max-h-48 overflow-y-auto z-50 hide">
+                                <div id="artistSuggestionsList" class="divide-y divide-gray-700"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1417,6 +1423,306 @@
             }
         };
 
+        // ================= TAG SUGGESTIONS MANAGER =================
+        const TagSuggestions = {
+            allTags: [], // Array of {tag, lastUsed} sorted by most recent
+            currentSuggestions: [],
+            selectedIndex: -1,
+            currentInputValue: '',
+
+            init: async () => {
+                await TagSuggestions.loadAllTags();
+                TagSuggestions.attachEventListeners();
+            },
+
+            loadAllTags: async () => {
+                try {
+                    const galleries = await db.galleries.toArray();
+                    const tagMap = {}; // {tag: lastUsedDate}
+                    
+                    // Collect all tags with their last used dates
+                    galleries.forEach(g => {
+                        if (g.tags && Array.isArray(g.tags)) {
+                            g.tags.forEach(tag => {
+                                if (tag.trim()) {
+                                    // Use createdAt if this is new, otherwise use latest
+                                    if (!tagMap[tag] || new Date(g.createdAt) > new Date(tagMap[tag])) {
+                                        tagMap[tag] = g.createdAt || new Date().toISOString();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Convert to array and sort by most recent, limit to 100
+                    TagSuggestions.allTags = Object.entries(tagMap)
+                        .map(([tag, date]) => ({ tag, lastUsed: new Date(date) }))
+                        .sort((a, b) => b.lastUsed - a.lastUsed)
+                        .slice(0, 100);
+                } catch (e) {
+                    console.error('Error loading tags:', e);
+                }
+            },
+
+            attachEventListeners: () => {
+                const input = document.getElementById('upTags');
+                if (!input) return;
+                
+                input.addEventListener('input', (e) => TagSuggestions.handleInput(e));
+                input.addEventListener('keydown', (e) => TagSuggestions.handleKeydown(e));
+                input.addEventListener('blur', () => setTimeout(() => TagSuggestions.hideSuggestions(), 200));
+            },
+
+            handleInput: (e) => {
+                const input = e.target;
+                const fullText = input.value;
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                const currentTag = fullText.substring(lastCommaIndex + 1).trim();
+                
+                TagSuggestions.currentInputValue = currentTag;
+                TagSuggestions.selectedIndex = -1;
+                
+                if (currentTag.length === 0) {
+                    TagSuggestions.hideSuggestions();
+                    return;
+                }
+                
+                // Filter suggestions - top 10 matching current tag
+                TagSuggestions.currentSuggestions = TagSuggestions.allTags
+                    .filter(({tag}) => tag.toLowerCase().includes(currentTag.toLowerCase()))
+                    .slice(0, 10);
+                
+                if (TagSuggestions.currentSuggestions.length > 0) {
+                    TagSuggestions.renderSuggestions();
+                } else {
+                    TagSuggestions.hideSuggestions();
+                }
+            },
+
+            handleKeydown: (e) => {
+                const container = document.getElementById('tagSuggestionsContainer');
+                
+                if (container.classList.contains('hide')) return;
+                
+                switch(e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        TagSuggestions.selectedIndex = Math.min(
+                            TagSuggestions.selectedIndex + 1,
+                            TagSuggestions.currentSuggestions.length - 1
+                        );
+                        TagSuggestions.renderSuggestions();
+                        break;
+                    
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        TagSuggestions.selectedIndex = Math.max(TagSuggestions.selectedIndex - 1, -1);
+                        TagSuggestions.renderSuggestions();
+                        break;
+                    
+                    case 'Enter':
+                        if (TagSuggestions.selectedIndex >= 0) {
+                            e.preventDefault();
+                            TagSuggestions.selectTag(TagSuggestions.currentSuggestions[TagSuggestions.selectedIndex].tag);
+                        }
+                        break;
+                    
+                    case 'Escape':
+                        TagSuggestions.hideSuggestions();
+                        break;
+                }
+            },
+
+            selectTag: (tag) => {
+                const input = document.getElementById('upTags');
+                const fullText = input.value;
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                
+                // Build new text with selected tag
+                const beforeTag = lastCommaIndex >= 0 ? fullText.substring(0, lastCommaIndex + 1) : '';
+                const newValue = (beforeTag + ' ' + tag + ', ').replace(/^\s*,\s*/, '').replace(/^\s+/, '');
+                
+                input.value = newValue;
+                TagSuggestions.hideSuggestions();
+                input.focus();
+                // Move cursor to end
+                input.setSelectionRange(input.value.length, input.value.length);
+            },
+
+            renderSuggestions: () => {
+                const list = document.getElementById('tagSuggestionsList');
+                list.innerHTML = '';
+                
+                TagSuggestions.currentSuggestions.forEach(({tag}, index) => {
+                    const isSelected = index === TagSuggestions.selectedIndex;
+                    const item = document.createElement('div');
+                    item.className = `px-3 py-2 cursor-pointer transition ${
+                        isSelected ? 'bg-nRed text-white' : 'hover:bg-gray-700 text-gray-300'
+                    }`;
+                    item.textContent = tag;
+                    item.onclick = () => TagSuggestions.selectTag(tag);
+                    list.appendChild(item);
+                });
+                
+                document.getElementById('tagSuggestionsContainer').classList.remove('hide');
+            },
+
+            hideSuggestions: () => {
+                document.getElementById('tagSuggestionsContainer').classList.add('hide');
+                TagSuggestions.selectedIndex = -1;
+            }
+        };
+
+        // ================= ARTIST SUGGESTIONS MANAGER =================
+        const ArtistSuggestions = {
+            allArtists: [], // Array of {artist, lastUsed} sorted by most recent
+            currentSuggestions: [],
+            selectedIndex: -1,
+            currentInputValue: '',
+
+            init: async () => {
+                await ArtistSuggestions.loadAllArtists();
+                ArtistSuggestions.attachEventListeners();
+            },
+
+            loadAllArtists: async () => {
+                try {
+                    const galleries = await db.galleries.toArray();
+                    const artistMap = {}; // {artist: lastUsedDate}
+                    
+                    // Collect all artists with their last used dates
+                    galleries.forEach(g => {
+                        if (g.artists && Array.isArray(g.artists)) {
+                            g.artists.forEach(artist => {
+                                if (artist.trim()) {
+                                    // Use createdAt if this is new, otherwise use latest
+                                    if (!artistMap[artist] || new Date(g.createdAt) > new Date(artistMap[artist])) {
+                                        artistMap[artist] = g.createdAt || new Date().toISOString();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Convert to array and sort by most recent, limit to 100
+                    ArtistSuggestions.allArtists = Object.entries(artistMap)
+                        .map(([artist, date]) => ({ artist, lastUsed: new Date(date) }))
+                        .sort((a, b) => b.lastUsed - a.lastUsed)
+                        .slice(0, 100);
+                } catch (e) {
+                    console.error('Error loading artists:', e);
+                }
+            },
+
+            attachEventListeners: () => {
+                const input = document.getElementById('upArtists');
+                if (!input) return;
+                
+                input.addEventListener('input', (e) => ArtistSuggestions.handleInput(e));
+                input.addEventListener('keydown', (e) => ArtistSuggestions.handleKeydown(e));
+                input.addEventListener('blur', () => setTimeout(() => ArtistSuggestions.hideSuggestions(), 200));
+            },
+
+            handleInput: (e) => {
+                const input = e.target;
+                const fullText = input.value;
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                const currentArtist = fullText.substring(lastCommaIndex + 1).trim();
+                
+                ArtistSuggestions.currentInputValue = currentArtist;
+                ArtistSuggestions.selectedIndex = -1;
+                
+                if (currentArtist.length === 0) {
+                    ArtistSuggestions.hideSuggestions();
+                    return;
+                }
+                
+                // Filter suggestions - top 10 matching current artist
+                ArtistSuggestions.currentSuggestions = ArtistSuggestions.allArtists
+                    .filter(({artist}) => artist.toLowerCase().includes(currentArtist.toLowerCase()))
+                    .slice(0, 10);
+                
+                if (ArtistSuggestions.currentSuggestions.length > 0) {
+                    ArtistSuggestions.renderSuggestions();
+                } else {
+                    ArtistSuggestions.hideSuggestions();
+                }
+            },
+
+            handleKeydown: (e) => {
+                const container = document.getElementById('artistSuggestionsContainer');
+                
+                if (container.classList.contains('hide')) return;
+                
+                switch(e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        ArtistSuggestions.selectedIndex = Math.min(
+                            ArtistSuggestions.selectedIndex + 1,
+                            ArtistSuggestions.currentSuggestions.length - 1
+                        );
+                        ArtistSuggestions.renderSuggestions();
+                        break;
+                    
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        ArtistSuggestions.selectedIndex = Math.max(ArtistSuggestions.selectedIndex - 1, -1);
+                        ArtistSuggestions.renderSuggestions();
+                        break;
+                    
+                    case 'Enter':
+                        if (ArtistSuggestions.selectedIndex >= 0) {
+                            e.preventDefault();
+                            ArtistSuggestions.selectArtist(ArtistSuggestions.currentSuggestions[ArtistSuggestions.selectedIndex].artist);
+                        }
+                        break;
+                    
+                    case 'Escape':
+                        ArtistSuggestions.hideSuggestions();
+                        break;
+                }
+            },
+
+            selectArtist: (artist) => {
+                const input = document.getElementById('upArtists');
+                const fullText = input.value;
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                
+                // Build new text with selected artist
+                const beforeArtist = lastCommaIndex >= 0 ? fullText.substring(0, lastCommaIndex + 1) : '';
+                const newValue = (beforeArtist + ' ' + artist + ', ').replace(/^\s*,\s*/, '').replace(/^\s+/, '');
+                
+                input.value = newValue;
+                ArtistSuggestions.hideSuggestions();
+                input.focus();
+                // Move cursor to end
+                input.setSelectionRange(input.value.length, input.value.length);
+            },
+
+            renderSuggestions: () => {
+                const list = document.getElementById('artistSuggestionsList');
+                list.innerHTML = '';
+                
+                ArtistSuggestions.currentSuggestions.forEach(({artist}, index) => {
+                    const isSelected = index === ArtistSuggestions.selectedIndex;
+                    const item = document.createElement('div');
+                    item.className = `px-3 py-2 cursor-pointer transition ${
+                        isSelected ? 'bg-nRed text-white' : 'hover:bg-gray-700 text-gray-300'
+                    }`;
+                    item.textContent = artist;
+                    item.onclick = () => ArtistSuggestions.selectArtist(artist);
+                    list.appendChild(item);
+                });
+                
+                document.getElementById('artistSuggestionsContainer').classList.remove('hide');
+            },
+
+            hideSuggestions: () => {
+                document.getElementById('artistSuggestionsContainer').classList.add('hide');
+                ArtistSuggestions.selectedIndex = -1;
+            }
+        };
+
         // ================= UPLOAD MANAGER =================
         const UploadManager = {
             coverFile: null,
@@ -1452,6 +1758,8 @@
                 UploadManager.pageFiles.forEach(p => URL.revokeObjectURL(p.url));
                 UploadManager.pageFiles = [];
                 UploadManager.renderPagesGrid();
+                TagSuggestions.hideSuggestions();
+                ArtistSuggestions.hideSuggestions();
             },
 
             loadForEdit: async (id) => {
@@ -1479,6 +1787,10 @@
                     translations: p.translations || []
                 }));
                 UploadManager.renderPagesGrid();
+                
+                // Reload suggestions to ensure latest tags and artists are available
+                await TagSuggestions.loadAllTags();
+                await ArtistSuggestions.loadAllArtists();
             },
 
             handleCoverSelect: (e) => {
@@ -1589,6 +1901,10 @@
                         await FileSystemManager.syncToLocal(galleryId);
                     }
 
+                    // Reload suggestions with newly added/updated tags and artists
+                    await TagSuggestions.loadAllTags();
+                    await ArtistSuggestions.loadAllArtists();
+                    
                     UI.navigate('detail', galleryId);
                 } catch (e) { Toast.error(T('alert_save_error') + e.message); }
             }
@@ -2921,6 +3237,8 @@
         window.onload = () => {
             PDFConverter.init();
             UploadManager.initDragAndDrop();
+            TagSuggestions.init();
+            ArtistSuggestions.init();
             StateManager.load();
             FileSystemManager.init();
         };
