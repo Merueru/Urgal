@@ -1754,10 +1754,9 @@
             handleKeydown: (e) => {
                 const container = document.getElementById('tagSuggestionsContainer');
                 
-                if (container.classList.contains('hide')) return;
-                
                 switch(e.key) {
                     case 'ArrowDown':
+                        if (container.classList.contains('hide')) return;
                         e.preventDefault();
                         TagSuggestions.selectedIndex = Math.min(
                             TagSuggestions.selectedIndex + 1,
@@ -1767,15 +1766,28 @@
                         break;
                     
                     case 'ArrowUp':
+                        if (container.classList.contains('hide')) return;
                         e.preventDefault();
                         TagSuggestions.selectedIndex = Math.max(TagSuggestions.selectedIndex - 1, -1);
                         TagSuggestions.renderSuggestions();
                         break;
                     
                     case 'Enter':
-                        if (TagSuggestions.selectedIndex >= 0) {
-                            e.preventDefault();
+                        e.preventDefault();
+                        if (TagSuggestions.selectedIndex >= 0 && !container.classList.contains('hide')) {
                             TagSuggestions.selectTag(TagSuggestions.currentSuggestions[TagSuggestions.selectedIndex].tag);
+                        } else {
+                            // Add comma when Enter is pressed without selection
+                            const input = document.getElementById('upTags');
+                            const currentValue = input.value.trim();
+                            if (currentValue && !currentValue.endsWith(',')) {
+                                input.value = currentValue + ', ';
+                            } else if (!currentValue.endsWith(', ')) {
+                                input.value = currentValue + ', ';
+                            }
+                            TagSuggestions.hideSuggestions();
+                            input.focus();
+                            input.setSelectionRange(input.value.length, input.value.length);
                         }
                         break;
                     
@@ -1904,10 +1916,9 @@
             handleKeydown: (e) => {
                 const container = document.getElementById('artistSuggestionsContainer');
                 
-                if (container.classList.contains('hide')) return;
-                
                 switch(e.key) {
                     case 'ArrowDown':
+                        if (container.classList.contains('hide')) return;
                         e.preventDefault();
                         ArtistSuggestions.selectedIndex = Math.min(
                             ArtistSuggestions.selectedIndex + 1,
@@ -1917,15 +1928,28 @@
                         break;
                     
                     case 'ArrowUp':
+                        if (container.classList.contains('hide')) return;
                         e.preventDefault();
                         ArtistSuggestions.selectedIndex = Math.max(ArtistSuggestions.selectedIndex - 1, -1);
                         ArtistSuggestions.renderSuggestions();
                         break;
                     
                     case 'Enter':
-                        if (ArtistSuggestions.selectedIndex >= 0) {
-                            e.preventDefault();
+                        e.preventDefault();
+                        if (ArtistSuggestions.selectedIndex >= 0 && !container.classList.contains('hide')) {
                             ArtistSuggestions.selectArtist(ArtistSuggestions.currentSuggestions[ArtistSuggestions.selectedIndex].artist);
+                        } else {
+                            // Add comma when Enter is pressed without selection
+                            const input = document.getElementById('upArtists');
+                            const currentValue = input.value.trim();
+                            if (currentValue && !currentValue.endsWith(',')) {
+                                input.value = currentValue + ', ';
+                            } else if (!currentValue.endsWith(', ')) {
+                                input.value = currentValue + ', ';
+                            }
+                            ArtistSuggestions.hideSuggestions();
+                            input.focus();
+                            input.setSelectionRange(input.value.length, input.value.length);
                         }
                         break;
                     
@@ -2053,10 +2077,9 @@
             handleKeydown: (e) => {
                 const container = document.getElementById('characterSuggestionsContainer');
                 
-                if (container.classList.contains('hide')) return;
-                
                 switch(e.key) {
                     case 'ArrowDown':
+                        if (container.classList.contains('hide')) return;
                         e.preventDefault();
                         CharacterSuggestions.selectedIndex = Math.min(
                             CharacterSuggestions.selectedIndex + 1,
@@ -2066,15 +2089,28 @@
                         break;
                     
                     case 'ArrowUp':
+                        if (container.classList.contains('hide')) return;
                         e.preventDefault();
                         CharacterSuggestions.selectedIndex = Math.max(CharacterSuggestions.selectedIndex - 1, -1);
                         CharacterSuggestions.renderSuggestions();
                         break;
                     
                     case 'Enter':
-                        if (CharacterSuggestions.selectedIndex >= 0) {
-                            e.preventDefault();
+                        e.preventDefault();
+                        if (CharacterSuggestions.selectedIndex >= 0 && !container.classList.contains('hide')) {
                             CharacterSuggestions.selectCharacter(CharacterSuggestions.currentSuggestions[CharacterSuggestions.selectedIndex].character);
+                        } else {
+                            // Add comma when Enter is pressed without selection
+                            const input = document.getElementById('upCharacters');
+                            const currentValue = input.value.trim();
+                            if (currentValue && !currentValue.endsWith(',')) {
+                                input.value = currentValue + ', ';
+                            } else if (!currentValue.endsWith(', ')) {
+                                input.value = currentValue + ', ';
+                            }
+                            CharacterSuggestions.hideSuggestions();
+                            input.focus();
+                            input.setSelectionRange(input.value.length, input.value.length);
                         }
                         break;
                     
@@ -2202,10 +2238,9 @@
             handleKeydown: (e) => {
                 const container = document.getElementById('seriesSuggestionsContainer');
                 
-                if (container.classList.contains('hide')) return;
-                
                 switch(e.key) {
                     case 'ArrowDown':
+                        if (container.classList.contains('hide')) return;
                         e.preventDefault();
                         SeriesSuggestions.selectedIndex = Math.min(
                             SeriesSuggestions.selectedIndex + 1,
@@ -2215,15 +2250,28 @@
                         break;
                     
                     case 'ArrowUp':
+                        if (container.classList.contains('hide')) return;
                         e.preventDefault();
                         SeriesSuggestions.selectedIndex = Math.max(SeriesSuggestions.selectedIndex - 1, -1);
                         SeriesSuggestions.renderSuggestions();
                         break;
                     
                     case 'Enter':
-                        if (SeriesSuggestions.selectedIndex >= 0) {
-                            e.preventDefault();
+                        e.preventDefault();
+                        if (SeriesSuggestions.selectedIndex >= 0 && !container.classList.contains('hide')) {
                             SeriesSuggestions.selectSeries(SeriesSuggestions.currentSuggestions[SeriesSuggestions.selectedIndex].series);
+                        } else {
+                            // Add comma when Enter is pressed without selection
+                            const input = document.getElementById('upSeries');
+                            const currentValue = input.value.trim();
+                            if (currentValue && !currentValue.endsWith(',')) {
+                                input.value = currentValue + ', ';
+                            } else if (!currentValue.endsWith(', ')) {
+                                input.value = currentValue + ', ';
+                            }
+                            SeriesSuggestions.hideSuggestions();
+                            input.focus();
+                            input.setSelectionRange(input.value.length, input.value.length);
                         }
                         break;
                     
