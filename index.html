@@ -249,7 +249,7 @@
             <div class="flex items-center gap-6">
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2">
                     <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i> UGal</span>
-                     <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.3.4</p>
+                     <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.3.4a</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
@@ -270,9 +270,12 @@
 
                 <!-- Global Search/Random (visible in Home, Tags, Artists, User) -->
                 <div id="navSearchZone" class="hidden md:flex relative items-center gap-2">
-                    <div class="relative group">
-                        <input type="text" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="ค้นหา..." class="bg-darkBg text-white px-4 py-1.5 rounded-full border border-gray-600 focus:border-nRed focus:outline-none w-48 text-sm transition-all" onkeyup="UI.handleSearch(event)">
+                    <div class="relative w-48">
+                        <input type="text" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="ค้นหา..." class="w-full bg-darkBg text-white px-4 py-1.5 rounded-full border border-gray-600 focus:border-nRed focus:outline-none text-sm transition-all" onkeyup="UI.handleSearch(event)" onkeydown="SearchSuggestions.handleKeydown(event)" onblur="setTimeout(() => SearchSuggestions.hideSuggestions(), 200)">
                         <i class="fa-solid fa-search absolute right-3 top-2 text-gray-400"></i>
+                        <div id="searchSuggestionsContainer" class="absolute top-full left-0 right-0 mt-1 bg-darkCard border border-gray-600 rounded shadow-lg max-h-80 overflow-y-auto z-50 hide">
+                            <!-- Suggestions will be rendered here -->
+                        </div>
                     </div>
                     <button onclick="UI.handleRandom()" class="bg-gray-700 hover:bg-nRed px-3 py-1.5 rounded-full text-white transition" data-i18n-title="random_title" title="สุ่มเรื่องจากรายการนี้">
                         <i class="fa-solid fa-dice"></i>
@@ -1313,6 +1316,14 @@
             handleSearch: (e) => {
                 App.searchQuery = e.target.value.toLowerCase();
                 Grid.currentPage = 1;
+                
+                // Show suggestions only on home and user views
+                if (App.currentView === 'home' || App.currentView === 'user') {
+                    SearchSuggestions.handleInput(e);
+                } else {
+                    SearchSuggestions.hideSuggestions();
+                }
+                
                 Grid.renderCurrentList();
             },
             handleRandom: () => {
@@ -1452,9 +1463,23 @@
                 
                 let filtered = Grid.allGalleries;
                 if (App.searchQuery) {
-                    filtered = filtered.filter(g => g.title.toLowerCase().includes(App.searchQuery) || 
-                                                    g.tags.some(t => t.toLowerCase().includes(App.searchQuery)) ||
-                                                    g.artists.some(a => a.toLowerCase().includes(App.searchQuery)));
+                    // Parse search query: support comma-separated items for AND filtering
+                    const searchTerms = App.searchQuery.split(',').map(t => t.trim()).filter(t => t);
+                    
+                    filtered = filtered.filter(g => {
+                        // Check if title matches any search term (OR)
+                        const titleMatch = searchTerms.some(term => g.title.toLowerCase().includes(term));
+                        
+                        // Check if ALL search terms are found in tags, artists, characters, or series (AND)
+                        const allTagsMatch = searchTerms.every(term => 
+                            (g.tags && g.tags.some(t => t.toLowerCase().includes(term))) ||
+                            (g.artists && g.artists.some(a => a.toLowerCase().includes(term))) ||
+                            (g.characters && g.characters.some(c => c.toLowerCase().includes(term))) ||
+                            (g.series && g.series.some(s => s.toLowerCase().includes(term)))
+                        );
+                        
+                        return titleMatch || allTagsMatch;
+                    });
                 }
 
                 document.getElementById('gridTitle').innerHTML = Grid.currentTitle;
@@ -1874,7 +1899,258 @@
             }
         };
 
+        // ================= SEARCH SUGGESTIONS MANAGER =================
+        const SearchSuggestions = {
+            allSuggestions: [], // Array of all searchable items from all galleries
+            currentSuggestions: [],
+            selectedIndex: -1,
+            currentInputValue: '',
+
+            init: async () => {
+                await SearchSuggestions.loadAllSuggestions();
+            },
+
+            loadAllSuggestions: async () => {
+                try {
+                    const galleries = await db.galleries.toArray();
+                    const suggestionMap = {}; // {suggestion: {title, type, lastUsed}}
+                    
+                    galleries.forEach(g => {
+                        // Add title as suggestion
+                        if (g.title && !suggestionMap[g.title]) {
+                            suggestionMap[g.title] = {
+                                text: g.title,
+                                type: 'title',
+                                lastUsed: new Date(g.lastAccessedAt || g.createdAt || new Date()).getTime()
+                            };
+                        }
+                        
+                        // Add tags
+                        if (g.tags && Array.isArray(g.tags)) {
+                            g.tags.forEach(tag => {
+                                if (tag.trim()) {
+                                    const key = `tag:${tag}`;
+                                    if (!suggestionMap[key]) {
+                                        suggestionMap[key] = {
+                                            text: tag,
+                                            type: 'tag',
+                                            lastUsed: new Date(g.createdAt || new Date()).getTime()
+                                        };
+                                    } else {
+                                        suggestionMap[key].lastUsed = Math.max(
+                                            suggestionMap[key].lastUsed,
+                                            new Date(g.createdAt || new Date()).getTime()
+                                        );
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Add artists
+                        if (g.artists && Array.isArray(g.artists)) {
+                            g.artists.forEach(artist => {
+                                if (artist.trim()) {
+                                    const key = `artist:${artist}`;
+                                    if (!suggestionMap[key]) {
+                                        suggestionMap[key] = {
+                                            text: artist,
+                                            type: 'artist',
+                                            lastUsed: new Date(g.createdAt || new Date()).getTime()
+                                        };
+                                    } else {
+                                        suggestionMap[key].lastUsed = Math.max(
+                                            suggestionMap[key].lastUsed,
+                                            new Date(g.createdAt || new Date()).getTime()
+                                        );
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Add characters
+                        if (g.characters && Array.isArray(g.characters)) {
+                            g.characters.forEach(char => {
+                                if (char.trim()) {
+                                    const key = `character:${char}`;
+                                    if (!suggestionMap[key]) {
+                                        suggestionMap[key] = {
+                                            text: char,
+                                            type: 'character',
+                                            lastUsed: new Date(g.createdAt || new Date()).getTime()
+                                        };
+                                    } else {
+                                        suggestionMap[key].lastUsed = Math.max(
+                                            suggestionMap[key].lastUsed,
+                                            new Date(g.createdAt || new Date()).getTime()
+                                        );
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Add series
+                        if (g.series && Array.isArray(g.series)) {
+                            g.series.forEach(s => {
+                                if (s.trim()) {
+                                    const key = `series:${s}`;
+                                    if (!suggestionMap[key]) {
+                                        suggestionMap[key] = {
+                                            text: s,
+                                            type: 'series',
+                                            lastUsed: new Date(g.createdAt || new Date()).getTime()
+                                        };
+                                    } else {
+                                        suggestionMap[key].lastUsed = Math.max(
+                                            suggestionMap[key].lastUsed,
+                                            new Date(g.createdAt || new Date()).getTime()
+                                        );
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Convert to array and sort by most recent
+                    SearchSuggestions.allSuggestions = Object.values(suggestionMap)
+                        .sort((a, b) => b.lastUsed - a.lastUsed)
+                        .slice(0, 200); // Keep top 200 suggestions
+                    
+                } catch (e) {
+                    console.error('Error loading search suggestions:', e);
+                }
+            },
+
+            handleInput: (e) => {
+                const input = e.target;
+                const fullText = input.value.toLowerCase();
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                const currentTerm = fullText.substring(lastCommaIndex + 1).trim();
+                
+                // Only show suggestions on home and user views
+                if (App.currentView !== 'home' && App.currentView !== 'user') {
+                    SearchSuggestions.hideSuggestions();
+                    return;
+                }
+                
+                SearchSuggestions.currentInputValue = currentTerm;
+                SearchSuggestions.selectedIndex = -1;
+                
+                if (currentTerm.length === 0) {
+                    SearchSuggestions.hideSuggestions();
+                    return;
+                }
+                
+                // Filter suggestions - top 10 matching current term
+                SearchSuggestions.currentSuggestions = SearchSuggestions.allSuggestions
+                    .filter(item => item.text.toLowerCase().includes(currentTerm))
+                    .slice(0, 10);
+                
+                if (SearchSuggestions.currentSuggestions.length > 0) {
+                    SearchSuggestions.renderSuggestions();
+                } else {
+                    SearchSuggestions.hideSuggestions();
+                }
+            },
+
+            handleKeydown: (e) => {
+                const container = document.getElementById('searchSuggestionsContainer');
+                if (!container) return;
+                
+                switch(e.key) {
+                    case 'ArrowDown':
+                        if (container.classList.contains('hide')) return;
+                        e.preventDefault();
+                        SearchSuggestions.selectedIndex = Math.min(
+                            SearchSuggestions.selectedIndex + 1,
+                            SearchSuggestions.currentSuggestions.length - 1
+                        );
+                        SearchSuggestions.renderSuggestions();
+                        break;
+                    
+                    case 'ArrowUp':
+                        if (container.classList.contains('hide')) return;
+                        e.preventDefault();
+                        SearchSuggestions.selectedIndex = Math.max(SearchSuggestions.selectedIndex - 1, -1);
+                        SearchSuggestions.renderSuggestions();
+                        break;
+                    
+                    case 'Enter':
+                        if (SearchSuggestions.selectedIndex >= 0 && !container.classList.contains('hide')) {
+                            e.preventDefault();
+                            SearchSuggestions.selectSuggestion(SearchSuggestions.currentSuggestions[SearchSuggestions.selectedIndex].text);
+                        }
+                        break;
+                    
+                    case 'Escape':
+                        SearchSuggestions.hideSuggestions();
+                        break;
+                }
+            },
+
+            selectSuggestion: (text) => {
+                const input = document.getElementById('searchInput');
+                const fullText = input.value.toLowerCase();
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                
+                // Build new text with selected suggestion
+                const beforeTerm = lastCommaIndex >= 0 ? input.value.substring(0, lastCommaIndex + 1) : '';
+                const newValue = (beforeTerm + ' ' + text + ', ').replace(/^\s*,\s*/, '').replace(/^\s+/, '');
+                
+                input.value = newValue;
+                SearchSuggestions.hideSuggestions();
+                input.focus();
+                // Move cursor to end
+                input.setSelectionRange(input.value.length, input.value.length);
+                
+                // Trigger search
+                UI.handleSearch({target: input});
+            },
+
+            renderSuggestions: () => {
+                const container = document.getElementById('searchSuggestionsContainer');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                SearchSuggestions.currentSuggestions.forEach((item, index) => {
+                    const isSelected = index === SearchSuggestions.selectedIndex;
+                    const typeColor = {
+                        'title': 'text-white',
+                        'tag': 'text-blue-400',
+                        'artist': 'text-purple-400',
+                        'character': 'text-pink-400',
+                        'series': 'text-amber-400'
+                    }[item.type] || 'text-gray-400';
+                    
+                    const typeIcon = {
+                        'title': '📕',
+                        'tag': '#',
+                        'artist': '🎨',
+                        'character': '👤',
+                        'series': '📚'
+                    }[item.type] || '•';
+                    
+                    const div = document.createElement('div');
+                    div.className = `px-3 py-2 cursor-pointer transition ${
+                        isSelected ? 'bg-nRed text-white' : 'hover:bg-gray-700 text-gray-300'
+                    }`;
+                    div.innerHTML = `<span class="${isSelected ? '' : typeColor}">${typeIcon}</span> <span>${item.text.trim()}</span>`;
+                    div.onclick = () => SearchSuggestions.selectSuggestion(item.text);
+                    container.appendChild(div);
+                });
+                
+                container.classList.remove('hide');
+            },
+
+            hideSuggestions: () => {
+                const container = document.getElementById('searchSuggestionsContainer');
+                if (container) container.classList.add('hide');
+                SearchSuggestions.selectedIndex = -1;
+            }
+        };
+
         // ================= ARTIST SUGGESTIONS MANAGER =================
+
         const ArtistSuggestions = {
             allArtists: [], // Array of {artist, lastUsed} sorted by most recent
             currentSuggestions: [],
@@ -4298,6 +4574,13 @@
             if (settingsBtn && settingsDropdown && !settingsBtn.contains(e.target) && !settingsDropdown.contains(e.target)) {
                 settingsDropdown.classList.add('hide');
             }
+            
+            // Hide search suggestions when clicking outside
+            const searchInput = document.getElementById('searchInput');
+            const searchContainer = document.getElementById('searchSuggestionsContainer');
+            if (searchContainer && searchInput && !searchInput.contains(e.target) && !searchContainer.contains(e.target)) {
+                SearchSuggestions.hideSuggestions();
+            }
         });
 
         document.addEventListener('keydown', (e) => {
@@ -4334,6 +4617,7 @@
             PDFConverter.init();
             UploadManager.initDragAndDrop();
             TagSuggestions.init();
+            SearchSuggestions.init();
             ArtistSuggestions.init();
             CharacterSuggestions.init();
             SeriesSuggestions.init();
