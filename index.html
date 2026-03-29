@@ -236,6 +236,163 @@
             object-fit: cover;
             display: block;
         }
+
+        /* ===== MOBILE NAVBAR RESPONSIVE ===== */
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .navbar-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        @media (max-width: 640px) {
+            nav { height: auto; }
+            nav .max-w-7xl { padding: 0.75rem 1rem; height: auto; }
+            .navbar-logo-group p { display: none !important; }
+        }
+
+        /* Hamburger Menu Button */
+        #hamburgerBtn {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+            padding: 0.5rem;
+        }
+        
+        #hamburgerBtn span {
+            width: 24px;
+            height: 2px;
+            background-color: #f3f4f6;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        #hamburgerBtn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+        
+        #hamburgerBtn.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        #hamburgerBtn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+        
+        @media (max-width: 768px) {
+            #hamburgerBtn {
+                display: flex;
+            }
+            
+            .hidden.md\:flex {
+                display: none !important;
+            }
+        }
+
+        /* Mobile Menu Dropdown */
+        #mobileMenu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #2e3033;
+            border-bottom: 1px solid #374151;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            z-index: 50;
+        }
+        
+        #mobileMenu.open {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        #mobileMenu .menu-section {
+            padding: 1rem;
+            border-bottom: 1px solid #374151;
+        }
+        
+        #mobileMenu .menu-section:last-child {
+            border-bottom: none;
+        }
+        
+        #mobileMenu .menu-title {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+        
+        #mobileMenu a,
+        #mobileMenu button {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 0.75rem 0;
+            text-align: left;
+            color: #d1d5db;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        
+        #mobileMenu a:hover,
+        #mobileMenu button:hover {
+            color: #ed2553;
+        }
+        
+        #mobileMenu .search-box-mobile {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        
+        #mobileMenu .search-box-mobile input {
+            width: 100%;
+            background: #1f2122;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            color: #f3f4f6;
+            font-size: 0.9rem;
+        }
+        
+        #mobileMenu .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        #mobileMenu .action-buttons button {
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            border: 1px solid #374151;
+            background: #374151;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        #mobileMenu .action-buttons button:hover {
+            background: #4b5563;
+            color: #f3f4f6;
+        }
+        
+        #mobileSearchInput::placeholder {
+            color: #6b7280;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -244,12 +401,13 @@
     <div id="toastContainer"></div>
 
     <!-- Navbar -->
-    <nav class="bg-darkCard shadow-md border-b border-gray-700 sticky top-0 z-40">
+    <nav class="bg-darkCard shadow-md border-b border-gray-700 sticky top-0 z-40 relative">
         <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div class="flex items-center gap-6">
-                <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2">
-                    <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i> UGal</span>
-                     <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.3.4a</p>
+            <div class="flex items-center gap-6 flex-1">
+                <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2 navbar-logo-group">
+                    <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i></span>
+                    <span class="hidden sm:inline text-xl font-bold">UGal</span>
+                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.3.5</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
@@ -260,7 +418,7 @@
                 </div>
             </div>
             
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 sm:gap-4">
                 <select id="langSelect" onchange="UI.changeLang(this.value)" class="bg-darkBg text-white border border-gray-600 rounded text-xs px-2 py-1 outline-none focus:border-nRed">
                     <option value="th">🇹🇭 TH</option>
                     <option value="en">🇬🇧 EN</option>
@@ -292,13 +450,67 @@
                     <input type="file" id="importInput" class="hidden" accept=".json" onchange="DataManager.importData(event)">
                 </div>
 
-                <button onclick="UI.navigate('upload')" class="bg-nRed hover:bg-nRedHover text-white px-4 py-1.5 rounded text-sm font-semibold transition flex items-center gap-2">
+                <button onclick="UI.navigate('upload')" class="bg-nRed hover:bg-nRedHover text-white px-3 sm:px-4 py-1.5 rounded text-xs sm:text-sm font-semibold transition flex items-center gap-2">
                     <i class="fa-solid fa-upload"></i> <span class="hidden sm:inline" data-i18n="upload">อัปโหลด</span>
                 </button>
                 <div onclick="UI.navigate('user')" class="w-8 h-8 bg-gray-600 hover:bg-nRed transition rounded-full flex items-center justify-center cursor-pointer text-white" data-i18n-title="profile_title" title="โปรไฟล์ & รายการโปรด">
                     <i class="fa-solid fa-user text-sm"></i>
                 </div>
-                <button onclick="document.getElementById('settingsModal').classList.remove('hide')" class="text-gray-400 hover:text-white transition" data-i18n-title="mainmenu_setting"><i class="fa-solid fa-gear"></i></button>
+                <button onclick="document.getElementById('settingsModal').classList.remove('hide')" class="hidden md:block text-gray-400 hover:text-white transition" data-i18n-title="mainmenu_setting"><i class="fa-solid fa-gear"></i></button>
+                
+                <!-- Hamburger Menu Button -->
+                <button id="hamburgerBtn" onclick="MobileMenu.toggle()" class="flex flex-col cursor-pointer gap-1 md:hidden">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobileMenu" class="md:hidden">
+            <!-- Navigation Links -->
+            <div class="menu-section">
+                <div class="menu-title" data-i18n="home_page">นำทาง</div>
+                <a href="#" onclick="UI.navigate('home'); MobileMenu.close()" class="hover:text-nRed transition" data-i18n="home_page">หน้าหลัก</a>
+                <a href="#" onclick="UI.navigate('tags'); MobileMenu.close()" class="hover:text-nRed transition" data-i18n="tags">แท็ก</a>
+                <a href="#" onclick="UI.navigate('artists'); MobileMenu.close()" class="hover:text-nRed transition" data-i18n="artists">ศิลปิน</a>
+                <a href="#" onclick="UI.navigate('characters'); MobileMenu.close()" class="hover:text-nRed transition" data-i18n="characters">ตัวละคร</a>
+                <a href="#" onclick="UI.navigate('series'); MobileMenu.close()" class="hover:text-nRed transition" data-i18n="series">ซีรี่ย์</a>
+            </div>
+            
+            <!-- Search & Random -->
+            <div class="menu-section">
+                <div class="menu-title" data-i18n="search_placeholder">ค้นหา</div>
+                <div class="search-box-mobile">
+                    <input type="text" id="mobileSearchInput" data-i18n-placeholder="search_placeholder" placeholder="ค้นหา..." class="focus:border-nRed" onkeyup="UI.handleSearch(event)" onkeydown="SearchSuggestions.handleKeydown(event)" onblur="setTimeout(() => SearchSuggestions.hideSuggestions(), 200)">
+                    <div id="mobilesearchSuggestionsContainer" class="absolute top-full left-0 right-0 mt-1 bg-darkCard border border-gray-600 rounded shadow-lg max-h-64 overflow-y-auto z-50 hide">
+                        <!-- Suggestions will be rendered here -->
+                    </div>
+                </div>
+                <button onclick="UI.handleRandom(); MobileMenu.close()" class="flex items-center gap-3 w-full transition hover:text-nRed" data-i18n-title="random_title" title="สุ่มเรื่องจากรายการนี้">
+                    <i class="fa-solid fa-dice"></i> <span data-i18n="random_title">สุ่ม</span>
+                </button>
+            </div>
+            
+            <!-- Import/Export -->
+            <div class="menu-section">
+                <div class="menu-title">Backup</div>
+                <div class="action-buttons">
+                    <button onclick="DataManager.exportAll()" class="transition" data-i18n-title="export_title" title="ส่งออก">
+                        <i class="fa-solid fa-file-export"></i> <span data-i18n="export_btn">ส่งออก</span>
+                    </button>
+                    <button onclick="document.getElementById('importInput').click()" class="transition" data-i18n-title="import_title" title="นำเข้า">
+                        <i class="fa-solid fa-file-import"></i> <span data-i18n="import_btn">นำเข้า</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Settings -->
+            <div class="menu-section">
+                <button onclick="document.getElementById('settingsModal').classList.remove('hide'); MobileMenu.close()" class="flex items-center gap-3 w-full transition hover:text-nRed" data-i18n-title="mainmenu_setting">
+                    <i class="fa-solid fa-gear"></i> <span data-i18n="settingmodal">ตั้งค่า</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -308,13 +520,13 @@
         
         <!-- ================= SHARED GRID VIEW (Home, Filtered, User) ================= -->
         <div id="view-grid" class="view hide">
-            <div class="flex justify-between items-end mb-6 border-b border-gray-700 pb-2">
-                <div class="flex items-center gap-3">
-                    <h2 id="gridTitle" class="text-2xl font-bold">อัปเดตล่าสุด</h2>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0 mb-6 border-b border-gray-700 pb-2">
+                <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                    <h2 id="gridTitle" class="text-lg sm:text-2xl font-bold">อัปเดตล่าสุด</h2>
                     <button onclick="Grid.toggleEditMode()" id="btnGridEdit" class="text-gray-400 hover:text-white transition text-sm pb-1" data-i18n-title="grid_edit_delete_title" title="แก้ไข / ลบ"><i class="fa-solid fa-pen"></i></button>
                 </div>
-                <div class="flex items-center gap-3">
-                    <select id="sortGrid" onchange="Grid.handleSortChange(this.value)" class="bg-darkBg text-white border border-gray-600 rounded text-xs px-2 py-1 outline-none focus:border-nRed">
+                <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto">
+                    <select id="sortGrid" onchange="Grid.handleSortChange(this.value)" class="bg-darkBg text-white border border-gray-600 rounded text-xs px-2 py-1 outline-none focus:border-nRed flex-1 sm:flex-none">
                         <option value="newest" data-i18n="sort_newest">ใหม่ - เก่า</option>
                         <option value="oldest" data-i18n="sort_oldest">เก่า - ใหม่</option>
                         <option value="most_pages" data-i18n="sort_most_pages">หน้าเยอะ</option>
@@ -1043,6 +1255,39 @@
                     db.galleries.bulkPut(batch);
                 }
             });
+        });
+
+        // ================= MOBILE MENU CONTROLLER =================
+        const MobileMenu = {
+            toggle: function() {
+                const menu = document.getElementById('mobileMenu');
+                const btn = document.getElementById('hamburgerBtn');
+                menu.classList.toggle('open');
+                btn.classList.toggle('active');
+            },
+            
+            open: function() {
+                const menu = document.getElementById('mobileMenu');
+                const btn = document.getElementById('hamburgerBtn');
+                menu.classList.add('open');
+                btn.classList.add('active');
+            },
+            
+            close: function() {
+                const menu = document.getElementById('mobileMenu');
+                const btn = document.getElementById('hamburgerBtn');
+                menu.classList.remove('open');
+                btn.classList.remove('active');
+            }
+        };
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('mobileMenu');
+            const btn = document.getElementById('hamburgerBtn');
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                MobileMenu.close();
+            }
         });
 
         // ================= GLOBAL STATE =================
