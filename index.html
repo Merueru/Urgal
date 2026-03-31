@@ -46,6 +46,8 @@
 
         /* Translation Layer */
         #translationLayer.edit-mode { cursor: crosshair; }
+
+
         
         /* Translation Box Styles */
         .trans-box {
@@ -85,6 +87,17 @@
             display: none;
         }
         .trans-box:not(.view-only):hover .trans-box-delete { display: block; }
+
+        /* Copy Button */
+        .trans-box-copy {
+            position: absolute; bottom: 4px; left: 4px;
+            color: white; cursor: pointer; font-size: 12px; font-weight: bold; z-index: 51;
+            background: #ed2553; border-radius: 50%; width: 16px; height: 16px; text-align: center; line-height: 16px;
+            display: none;
+            transition: all 0.2s ease;
+        }
+        .trans-box:not(.view-only):hover .trans-box-copy { display: flex; align-items: center; justify-content: center; }
+        .trans-box-copy:hover { background: #c41d42; transform: scale(1.1); }
 
         /* Custom Resize Handle */
         .trans-box .resize-handle {
@@ -406,8 +419,8 @@
             <div class="flex items-center gap-6 flex-1">
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2 navbar-logo-group">
                     <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i></span>
-                    <span class="hidden sm:inline text-xl font-bold">UGal</span>
-                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.3.5</p>
+                    <span class="hidden sm:inline text-xl text-nRed hover:scale-110 transition" >UGal</span>
+                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.3.6</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
@@ -535,6 +548,8 @@
                         <option value="za" data-i18n="sort_za">Z - A</option>
                         <option value="last_read_newest" data-i18n="sort_last_read_newest">อ่านล่าสุด</option>
                         <option value="last_read_oldest" data-i18n="sort_last_read_oldest">อ่านนานแล้ว</option>
+                        <option value="most_viewed" data-i18n="sort_most_viewed">อ่านบ่อยสุด</option>
+                        <option value="least_viewed" data-i18n="sort_least_viewed">อ่านน้อยสุด</option>
                     </select>
                     <span id="gridCount" class="text-gray-400 text-sm">0 รายการ</span>
                 </div>
@@ -792,7 +807,7 @@
                                     <button onclick="TranslationManager.showNewSetDialog()" class="bg-nRed hover:bg-nRedHover px-2 py-1 rounded text-xs font-bold transition" data-i18n-title="new_trans_set_title" title="สร้างชุดแปลใหม่" data-i18n="addnewtranscollect">+ ชุดใหม่</button>
                                 </div>
                             </div>
-                            <div class="p-2">
+                            <div class="p-2 space-y-2">
                                 <button onclick="Reader.toggleEditMode()" id="btnEditTrans" class="w-full bg-yellow-600 hover:bg-yellow-500 px-3 py-1.5 rounded text-sm font-bold transition flex items-center justify-center gap-1">
                                     <i class="fa-solid fa-plus"></i> <span data-i18n="add_trans">เพิ่มคำแปล</span>
                                 </button>
@@ -1088,7 +1103,8 @@
                 alert_import_success: "นำเข้า {count} รายการสำเร็จ", alert_file_error: "รูปแบบไฟล์ไม่ถูกต้อง", alert_import_error: "ไฟล์เสียหายหรือผิดพลาด: ", alert_no_pages: "ไม่มีรูปภาพให้อ่าน",
                 settingmodal: "ตั้งค่า", local_backup_folder: "โฟลเดอร์สำรองข้อมูล", select_folder: "เลือกโฟลเดอร์...", backup_info: "ข้อมูลจะถูกบันทึกเป็นไฟล์ .json ในโฟลเดอร์นี้โดยอัตโนมัติ", restore_local: "กู้คืนจากโฟลเดอร์ในเครื่อง", backup_all: "สำรองข้อมูลทั้งหมด", close_btn_settings_modal: "ปิด", disconnect_folder: "ยกเลิกการสำรองข้อมูล",
                 new_trans_set_title: "สร้างชุดแปลใหม่", new_trans_set_placeholder: "เช่น แปลเล่น01 โดย ผู้ใช้A", create_btn: "สร้าง", export_trans_sets_title: "ส่งออกชุดแปล", export_btn: "ส่งออก", import_trans_sets_title: "นำเข้าชุดแปล", import_trans_sets_desc: "เลือกไฟล์ .json ของชุดแปล", import_btn: "นำเข้า", trans_sets_section: "ชุดแปล:",
-                addnewtranscollect: "+ ชุดใหม่",grid_edit_delete_title: "แก้ไข / ลบ",shape_rect: "สี่เหลี่ยม", delete_trans_sets_title: "ลบชุดคำแปล", delete_trans_sets: "ลบชุดคำแปล", delete_confirm_msg: "คุณแน่ใจหรือไม่ว่าต้องการลบชุดแปลที่เลือก?", delete_btn_text: "ลบ", create_continuation_title: "สร้างตอนต่อ"
+                addnewtranscollect: "+ ชุดใหม่",grid_edit_delete_title: "แก้ไข / ลบ",shape_rect: "สี่เหลี่ยม", delete_trans_sets_title: "ลบชุดคำแปล", delete_trans_sets: "ลบชุดคำแปล", delete_confirm_msg: "คุณแน่ใจหรือไม่ว่าต้องการลบชุดแปลที่เลือก?", delete_btn_text: "ลบ", create_continuation_title: "สร้างตอนต่อ",
+                sort_most_viewed: "อ่านบ่อยสุด", sort_least_viewed: "อ่านน้อยสุด"
             },
             en: {
                 decrease_size_title: "Decrease text size", increase_size_title: "Increase text size", shape_rect_title: "Rectangle", bg_white_title: "White background", bg_black_title: "Black background", bg_clear_title: "Transparent background", color_black_title: "Black text", color_white_title: "White text",
@@ -1132,7 +1148,8 @@
                 alert_import_success: "Imported {count} items successfully", alert_file_error: "Invalid file format", alert_import_error: "File error: ", alert_no_pages: "No images to read",
                 settingmodal: "Settings", local_backup_folder: "Local Backup Folder", select_folder: "Select Folder...", backup_info: "Data will be saved as .json files in this folder automatically.", restore_local: "Restore from Local Folder", backup_all: "Backup All", close_btn_settings_modal: "Close", disconnect_folder: "Disconnect Folder",
                 new_trans_set_title: "Create Translation Set", new_trans_set_placeholder: "e.g. Translation Set 01 by User A", create_btn: "Create", export_trans_sets_title: "Export Translation Sets", export_btn: "Export", import_trans_sets_title: "Import Translation Sets", import_trans_sets_desc: "Select a .json file with translation sets", import_btn: "Import", trans_sets_section: "Translation Sets:",
-                addnewtranscollect: "+ New Set",grid_edit_delete_title: "Edit / Delete",shape_rect: "Rectangle", delete_trans_sets_title: "Delete Translation Sets", delete_trans_sets: "Delete Sets", delete_confirm_msg: "Are you sure you want to delete selected translation sets?", delete_btn_text: "Delete", create_continuation_title: "Create Continuation"
+                addnewtranscollect: "+ New Set",grid_edit_delete_title: "Edit / Delete",shape_rect: "Rectangle", delete_trans_sets_title: "Delete Translation Sets", delete_trans_sets: "Delete Sets", delete_confirm_msg: "Are you sure you want to delete selected translation sets?", delete_btn_text: "Delete", create_continuation_title: "Create Continuation",
+                sort_most_viewed: "Most Viewed", sort_least_viewed: "Least Viewed"
             },
             cn: {
                 decrease_size_title: "减小文字大小", increase_size_title: "增大文字大小", shape_rect_title: "矩形", bg_white_title: "白色背景", bg_black_title: "黑色背景", bg_clear_title: "透明背景", color_black_title: "黑色文字", color_white_title: "白色文字",
@@ -1176,7 +1193,8 @@
                 alert_import_success: "成功导入 {count} 个项目", alert_file_error: "文件格式无效", alert_import_error: "导入出错: ", alert_no_pages: "没有可查看的内容",
                 settingmodal: "设置", local_backup_folder: "本地备份文件夹", select_folder: "选择文件夹...", backup_info: "数据将自动保存为此文件夹中的 .json 文件", restore_local: "从本地文件夹恢复", backup_all: "备份所有", close_btn_settings_modal: "关闭", disconnect_folder: "断开文件夹",
                 new_trans_set_title: "创建翻译集", new_trans_set_placeholder: "例如 翻译组01 作者 用户A", create_btn: "创建", export_trans_sets_title: "导出翻译集", export_btn: "导出", import_trans_sets_title: "导入翻译集", import_trans_sets_desc: "选择包含翻译集的.json文件", import_btn: "导入", trans_sets_section: "翻译集:",
-                addnewtranscollect: "+ 新建翻译集",grid_edit_delete_title: "编辑 / 删除",shape_rect: "矩形", delete_trans_sets_title: "删除翻译集", delete_trans_sets: "删除翻译集", delete_confirm_msg: "确定要删除选择的翻译集吗？", delete_btn_text: "删除", create_continuation_title: "创建续篇"
+                addnewtranscollect: "+ 新建翻译集",grid_edit_delete_title: "编辑 / 删除",shape_rect: "矩形", delete_trans_sets_title: "删除翻译集", delete_trans_sets: "删除翻译集", delete_confirm_msg: "确定要删除选择的翻译集吗？", delete_btn_text: "删除", create_continuation_title: "创建续篇",
+                sort_most_viewed: "最常查看", sort_least_viewed: "最少查看"
             },
             jp: {
                 decrease_size_title: "テキストサイズを縮小", increase_size_title: "テキストサイズを拡大", shape_rect_title: "矩形", bg_white_title: "白い背景", bg_black_title: "黒い背景", bg_clear_title: "透明な背景", color_black_title: "黒いテキスト", color_white_title: "白いテキスト",
@@ -1220,7 +1238,8 @@
                 alert_import_success: "{count} 件インポートしました", alert_file_error: "ファイル形式が正しくありません", alert_import_error: "エラーが発生しました: ", alert_no_pages: "表示する画像がありません",
                 settingmodal: "設定", local_backup_folder: "ローカルバックアップフォルダ", select_folder: "フォルダを選択...", backup_info: "データはこのフォルダに .json ファイルとして自動的に保存されます", restore_local: "ローカルフォルダから復元", backup_all: "すべてをバックアップ", close_btn_settings_modal: "閉じる", disconnect_folder: "フォルダを切断",
                 new_trans_set_title: "翻訳セットを作成", new_trans_set_placeholder: "例 翻訳セット01 ユーザーA", create_btn: "作成", export_trans_sets_title: "翻訳セットを書き出し", export_btn: "書き出し", import_trans_sets_title: "翻訳セットを読み込み", import_trans_sets_desc: "翻訳セットを含む.jsonファイルを選択", import_btn: "読み込む", trans_sets_section: "翻訳セット:",
-                addnewtranscollect: "+ 新しいセット",grid_edit_delete_title: "編集 / 削除",shape_rect: "四角形", delete_trans_sets_title: "翻訳セットを削除", delete_trans_sets: "翻訳セットを削除",delete_confirm_msg: "本当に削除しますか？", delete_btn_text: "削除", create_continuation_title: "続編を作成"
+                addnewtranscollect: "+ 新しいセット",grid_edit_delete_title: "編集 / 削除",shape_rect: "四角形", delete_trans_sets_title: "翻訳セットを削除", delete_trans_sets: "翻訳セットを削除",delete_confirm_msg: "本当に削除しますか？", delete_btn_text: "削除", create_continuation_title: "続編を作成",
+                sort_most_viewed: "最も多く読まれた", sort_least_viewed: "最も読まれていない"
             }
         };
 
@@ -1234,8 +1253,8 @@
 
         // ================= DATABASE (Dexie.js) v3 =================
         const db = new Dexie("UGalDB");
-        db.version(85).stores({
-            galleries: '++id, title, createdAt, isFavorite, lastReadPage, lastAccessedAt, totalPages',
+        db.version(86).stores({
+            galleries: '++id, title, createdAt, isFavorite, lastReadPage, lastAccessedAt, totalPages, viewCount',
             pages: '++id, galleryId, order',
             settings: 'key',
             translationSets: '++id, galleryId, name'
@@ -1318,7 +1337,8 @@
                 currentTranslationSetName: null,
                 availableTranslationSets: [],
                 scrollY: 0, // Track scroll position for single page mode
-                webtoonScrollY: 0 // Track scroll position for webtoon mode
+                webtoonScrollY: 0, // Track scroll position for webtoon mode
+                zIndexCounter: 100
             }
         };
 
@@ -1619,8 +1639,25 @@
                 Grid.renderCurrentList();
             },
 
-            handleSortChange: (sortMode) => {
+            handleSortChange: async (sortMode) => {
                 Grid.currentSort = sortMode;
+                // Reload galleries from database to get latest viewCount data
+                let galleries = await db.galleries.toArray();
+                
+                // Reapply current filter if viewing filtered list
+                if (App.gridMode === 'user') {
+                    galleries = galleries.filter(g => g.isFavorite);
+                } else if (App.gridMode === 'tagFilter') {
+                    galleries = galleries.filter(g => g.tags.includes(App.currentNavParams));
+                } else if (App.gridMode === 'artistFilter') {
+                    galleries = galleries.filter(g => g.artists.includes(App.currentNavParams));
+                } else if (App.gridMode === 'characterFilter') {
+                    galleries = galleries.filter(g => g.characters && g.characters.includes(App.currentNavParams));
+                } else if (App.gridMode === 'seriesFilter') {
+                    galleries = galleries.filter(g => g.series && g.series.includes(App.currentNavParams));
+                }
+                
+                Grid.allGalleries = galleries;
                 Grid.applySort();
                 Grid.currentPage = 1;
                 Grid.renderCurrentList();
@@ -1636,6 +1673,8 @@
                     if (sort === 'za') return b.title.localeCompare(a.title);
                     if (sort === 'most_pages') return (b.totalPages || 0) - (a.totalPages || 0);
                     if (sort === 'least_pages') return (a.totalPages || 0) - (b.totalPages || 0);
+                    if (sort === 'most_viewed') return (b.viewCount || 0) - (a.viewCount || 0);
+                    if (sort === 'least_viewed') return (a.viewCount || 0) - (b.viewCount || 0);
                     if (sort === 'last_read_newest') {
                         const aDate = a.lastAccessedAt ? new Date(a.lastAccessedAt) : new Date(a.createdAt);
                         const bDate = b.lastAccessedAt ? new Date(b.lastAccessedAt) : new Date(b.createdAt);
@@ -2153,6 +2192,64 @@
 
             init: async () => {
                 await SearchSuggestions.loadAllSuggestions();
+                SearchSuggestions.attachFocusListeners();
+            },
+
+            attachFocusListeners: () => {
+                const desktopInput = document.getElementById('searchInput');
+                const mobileInput = document.getElementById('mobileSearchInput');
+                
+                if (desktopInput) {
+                    desktopInput.addEventListener('focus', () => SearchSuggestions.showTopSuggestions('searchSuggestionsContainer'));
+                }
+                
+                if (mobileInput) {
+                    mobileInput.addEventListener('focus', () => SearchSuggestions.showTopSuggestions('mobilesearchSuggestionsContainer'));
+                }
+            },
+
+            showTopSuggestions: (containerId) => {
+                // Show top 5 most used suggestions when user clicks/focuses on search input
+                const topSuggestions = SearchSuggestions.allSuggestions.slice(0, 5);
+                SearchSuggestions.currentSuggestions = topSuggestions;
+                SearchSuggestions.selectedIndex = -1;
+                SearchSuggestions.renderSuggestionsToContainer(containerId);
+            },
+
+            renderSuggestionsToContainer: (containerId) => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                SearchSuggestions.currentSuggestions.forEach((item, index) => {
+                    const isSelected = index === SearchSuggestions.selectedIndex;
+                    const typeColor = {
+                        'title': 'text-white',
+                        'tag': 'text-blue-400',
+                        'artist': 'text-purple-400',
+                        'character': 'text-pink-400',
+                        'series': 'text-amber-400'
+                    }[item.type] || 'text-gray-400';
+                    
+                    const typeIcon = {
+                        'title': '📕',
+                        'tag': '#',
+                        'artist': '🎨',
+                        'character': '👤',
+                        'series': '📚'
+                    }[item.type] || '•';
+                    
+                    const div = document.createElement('div');
+                    div.className = `px-3 py-2 cursor-pointer transition ${
+                        isSelected ? 'bg-nRed text-white' : 'hover:bg-gray-700 text-gray-300'
+                    }`;
+                    div.innerHTML = `<span class="${isSelected ? '' : typeColor}">${typeIcon}</span> <span>${item.text.trim()}</span>`;
+                    div.onclick = () => SearchSuggestions.selectSuggestion(item.text);
+                    container.appendChild(div);
+                });
+                
+                container.classList.remove('hide');
             },
 
             loadAllSuggestions: async () => {
@@ -2352,39 +2449,7 @@
             },
 
             renderSuggestions: () => {
-                const container = document.getElementById('searchSuggestionsContainer');
-                if (!container) return;
-                
-                container.innerHTML = '';
-                
-                SearchSuggestions.currentSuggestions.forEach((item, index) => {
-                    const isSelected = index === SearchSuggestions.selectedIndex;
-                    const typeColor = {
-                        'title': 'text-white',
-                        'tag': 'text-blue-400',
-                        'artist': 'text-purple-400',
-                        'character': 'text-pink-400',
-                        'series': 'text-amber-400'
-                    }[item.type] || 'text-gray-400';
-                    
-                    const typeIcon = {
-                        'title': '📕',
-                        'tag': '#',
-                        'artist': '🎨',
-                        'character': '👤',
-                        'series': '📚'
-                    }[item.type] || '•';
-                    
-                    const div = document.createElement('div');
-                    div.className = `px-3 py-2 cursor-pointer transition ${
-                        isSelected ? 'bg-nRed text-white' : 'hover:bg-gray-700 text-gray-300'
-                    }`;
-                    div.innerHTML = `<span class="${isSelected ? '' : typeColor}">${typeIcon}</span> <span>${item.text.trim()}</span>`;
-                    div.onclick = () => SearchSuggestions.selectSuggestion(item.text);
-                    container.appendChild(div);
-                });
-                
-                container.classList.remove('hide');
+                SearchSuggestions.renderSuggestionsToContainer('searchSuggestionsContainer');
             },
 
             hideSuggestions: () => {
@@ -3785,6 +3850,24 @@
                 TranslationManager.loadTranslationSets();
                 
                 Reader.setupAutoHideBar();
+                
+                // Track view count (increment by 1 per session)
+                (async () => {
+                    const currentGallery = await db.galleries.get(App.currentGalleryId);
+                    if (currentGallery) {
+                        const today = new Date().toISOString().split('T')[0];
+                        const lastViewedDate = currentGallery.lastViewedDate || '';
+                        
+                        // Only increment if not viewed today
+                        if (lastViewedDate !== today) {
+                            await db.galleries.update(App.currentGalleryId, {
+                                viewCount: (currentGallery.viewCount || 0) + 1,
+                                lastViewedDate: today
+                            });
+                        }
+                    }
+                })();
+                
                 Reader.renderView(); // Changed from renderPage
             },
 
@@ -3814,6 +3897,7 @@
                 
                 imgEl.onload = () => {
                     const layer = document.getElementById('translationLayer');
+                    
                     layer.style.width = imgEl.clientWidth + 'px';
                     layer.style.height = imgEl.clientHeight + 'px';
                     layer.style.left = imgEl.offsetLeft + 'px';
@@ -4144,7 +4228,8 @@
             toggleEditMode: () => {
                 App.reader.isEditMode = !App.reader.isEditMode;
                 if (App.reader.isEditMode) {
-                    App.reader.showTranslations = true; document.getElementById('showTransToggle').checked = true;
+                    App.reader.showTranslations = true; 
+                    document.getElementById('showTransToggle').checked = true;
                 } else {
                     Reader.selectBox(null);
                 }
@@ -4218,6 +4303,10 @@
                 box.style.left = `${data.x}%`; box.style.top = `${data.y}%`;
                 box.style.width = data.w ? `${data.w}%` : 'auto'; box.style.height = data.h ? `${data.h}%` : 'auto';
                 
+                // Initialize and increment z-index counter
+                App.reader.zIndexCounter = (App.reader.zIndexCounter || 100) + 1;
+                box.style.zIndex = App.reader.zIndexCounter;
+                
                 // Store format data in DOM for easy access
                 box.dataset.fontSize = data.fontSize || 14;
                 box.dataset.bgMode = data.bgMode || 'white';
@@ -4231,6 +4320,7 @@
                 } else {
                     box.innerHTML = `
                         <div class="trans-box-delete" title="ลบกล่องนี้"><i class="fa-solid fa-xmark"></i></div>
+                        <div class="trans-box-copy" title="ก๊อปปี้กล่องนี้"><i class="fa-solid fa-copy"></i></div>
                         <div class="trans-content" contenteditable="true" spellcheck="false">${data.text}</div>
                         <div class="resize-handle"></div> <!-- Add custom resize handle -->
                     `;
@@ -4239,8 +4329,8 @@
                     
                     // Box interactions
                     box.addEventListener('mousedown', (e) => {
-                        // Prevent dragging if clicking textarea or delete button
-                        if(e.target === textarea || e.target.closest('.trans-box-delete')) return; 
+                        // Prevent dragging if clicking textarea, delete button, or copy button
+                        if(e.target === textarea || e.target.closest('.trans-box-delete') || e.target.closest('.trans-box-copy')) return; 
                         
                         Reader.selectBox(box);
                         Reader.dragTarget = box;
@@ -4265,6 +4355,11 @@
                     
                     box.querySelector('.trans-box-delete').addEventListener('click', (e) => {
                         e.stopPropagation(); box.remove(); Reader.selectBox(null); Reader.markUnsaved();
+                    });
+
+                    box.querySelector('.trans-box-copy').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        Reader.copyTranslationBox(box);
                     });
                     
                     // Track resizing (MutationObserver is overkill, let's just use mouseup on the whole document to check if size changed, or simpler: just mark unsaved on any mouseup if selected)
@@ -4344,6 +4439,34 @@
                 target.classList.add(box.dataset.colorMode === 'black' ? 'text-dark' : 'text-light');
             },
 
+            copyTranslationBox: (sourceBox) => {
+                const layer = document.getElementById('translationLayer');
+                const sourceRect = sourceBox.getBoundingClientRect();
+                const layerRect = layer.getBoundingClientRect();
+
+                // Create copy data from source box
+                const copyData = {
+                    x: ((sourceRect.left - layerRect.left) / layerRect.width) * 100,
+                    y: ((sourceRect.top - layerRect.top) / layerRect.height) * 100,
+                    w: (sourceRect.width / layerRect.width) * 100,
+                    h: (sourceRect.height / layerRect.height) * 100,
+                    text: sourceBox.querySelector('.trans-content')?.innerText || '',
+                    fontSize: sourceBox.dataset.fontSize,
+                    bgMode: sourceBox.dataset.bgMode,
+                    colorMode: sourceBox.dataset.colorMode,
+                    shape: sourceBox.dataset.shape
+                };
+
+                // Offset the copy slightly to the right and down
+                copyData.x = Math.min(copyData.x + 3, 100 - copyData.w);
+                copyData.y = Math.min(copyData.y + 3, 100 - copyData.h);
+
+                // Create the new box
+                Reader.createTranslationBox(copyData, true);
+                Reader.markUnsaved();
+            },
+
+
             selectBox: (box) => {
                 const layer = document.getElementById('translationLayer');
                 layer.querySelectorAll('.trans-box').forEach(b => b.classList.remove('selected'));
@@ -4357,6 +4480,10 @@
                     
                     // Update shape button highlights
                     document.getElementById('tbShapeRect').classList.toggle('bg-yellow-800', box.dataset.shape === 'rect');
+                    
+                    // Update z-index: bring selected box to top
+                    App.reader.zIndexCounter = (App.reader.zIndexCounter || 100) + 1;
+                    box.style.zIndex = App.reader.zIndexCounter;
                     
                 } else {
                     toolbar.classList.add('opacity-50', 'pointer-events-none');
