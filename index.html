@@ -1388,7 +1388,11 @@
             detail: {
                 currentPage: 1,
                 itemsPerPage: 21,
-                previewUrls: [] // Track URLs for cleanup
+                previewUrls: [], // Track URLs for cleanup
+                thumbCache: new Map(),
+                thumbGenerationToken: 0,
+                thumbnailWidth: 320,
+                thumbnailQuality: 0.72
             },
             reader: {
                 currentIndex: 0,
@@ -2070,7 +2074,7 @@
                                             resolve(imageBlobs);
                                         }
                                     }
-                                }, 'image/webp', 0.9); // คุณภาพ 95% 
+                                }, 'image/webp', 0.9); // คุณภาพ 90% 
                             }
                             
                         } catch (error) {
@@ -4431,6 +4435,61 @@
             }
         };
 
+        const PreviewThumb = {
+            create: async (blob, maxWidth = App.detail.thumbnailWidth, quality = App.detail.thumbnailQuality) => {
+                return new Promise((resolve, reject) => {
+                    const sourceUrl = URL.createObjectURL(blob);
+                    const img = new Image();
+
+                    const cleanup = () => {
+                        URL.revokeObjectURL(sourceUrl);
+                    };
+
+                    img.onload = () => {
+                        try {
+                            const scale = Math.min(1, maxWidth / img.naturalWidth);
+                            const targetWidth = Math.max(1, Math.round(img.naturalWidth * scale));
+                            const targetHeight = Math.max(1, Math.round(img.naturalHeight * scale));
+
+                            const canvas = document.createElement('canvas');
+                            canvas.width = targetWidth;
+                            canvas.height = targetHeight;
+
+                            const ctx = canvas.getContext('2d', { alpha: false });
+                            if (!ctx) {
+                                cleanup();
+                                reject(new Error('Canvas context unavailable'));
+                                return;
+                            }
+
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
+                            ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                            canvas.toBlob((thumbBlob) => {
+                                cleanup();
+                                if (!thumbBlob) {
+                                    reject(new Error('Thumbnail generation failed'));
+                                    return;
+                                }
+                                resolve(thumbBlob);
+                            }, 'image/webp', quality);
+                        } catch (error) {
+                            cleanup();
+                            reject(error);
+                        }
+                    };
+
+                    img.onerror = () => {
+                        cleanup();
+                        reject(new Error('Image decode failed'));
+                    };
+
+                    img.src = sourceUrl;
+                });
+            }
+        };
+
         // ================= DETAIL CONTROLLER =================
         const Detail = {
             currentGallery: null,
@@ -4481,9 +4540,9 @@
 
                 if (!App.pages || App.pages.length === 0) return;
 
-                // Revoke old preview URLs to free memory
-                App.detail.previewUrls.forEach(url => URL.revokeObjectURL(url));
+                const previousUrls = App.detail.previewUrls;
                 App.detail.previewUrls = [];
+                const renderToken = ++App.detail.thumbGenerationToken;
 
                 // Pagination Logic
                 const totalPages = Math.ceil(App.pages.length / App.detail.itemsPerPage);
@@ -4493,24 +4552,51 @@
                 const end = start + App.detail.itemsPerPage;
                 const itemsToShow = App.pages.slice(start, end);
 
-                // Render images directly (faster than compression)
                 itemsToShow.forEach((page, index) => {
                     const actualIndex = start + index;
-                    const imageUrl = URL.createObjectURL(page.imageBlob);
-                    App.detail.previewUrls.push(imageUrl);
-                    
                     const previewDiv = document.createElement('div');
                     previewDiv.className = 'aspect-a4 bg-gray-800 rounded overflow-hidden cursor-pointer hover:ring-2 hover:ring-nRed transition';
                     previewDiv.onclick = () => UI.navigate('reader', { galleryId: App.currentGalleryId, index: actualIndex });
-                    
+
                     const img = document.createElement('img');
-                    img.src = imageUrl;
                     img.className = 'w-full h-full object-cover';
-                    img.loading = 'lazy'; 
-                    
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+
+                    const cachedThumbBlob = App.detail.thumbCache.get(page.id);
+                    if (cachedThumbBlob) {
+                        const thumbUrl = URL.createObjectURL(cachedThumbBlob);
+                        App.detail.previewUrls.push(thumbUrl);
+                        img.src = thumbUrl;
+                    } else {
+                        const fallbackUrl = URL.createObjectURL(page.imageBlob);
+                        App.detail.previewUrls.push(fallbackUrl);
+                        img.src = fallbackUrl;
+
+                        PreviewThumb.create(page.imageBlob).then((thumbBlob) => {
+                            App.detail.thumbCache.set(page.id, thumbBlob);
+
+                            if (App.detail.thumbGenerationToken !== renderToken) return;
+
+                            const currentSrc = img.getAttribute('src');
+                            if (currentSrc && currentSrc.startsWith('blob:')) {
+                                URL.revokeObjectURL(currentSrc);
+                                App.detail.previewUrls = App.detail.previewUrls.filter(url => url !== currentSrc);
+                            }
+
+                            const thumbUrl = URL.createObjectURL(thumbBlob);
+                            App.detail.previewUrls.push(thumbUrl);
+                            img.src = thumbUrl;
+                        }).catch(() => {
+                            // Keep fallback original preview if thumbnail generation fails
+                        });
+                    }
+
                     previewDiv.appendChild(img);
                     grid.appendChild(previewDiv);
                 });
+
+                previousUrls.forEach(url => URL.revokeObjectURL(url));
 
                 // Render Pagination Controls
                 if (totalPages > 1 && pagination) {
