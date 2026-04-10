@@ -436,7 +436,7 @@
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2 navbar-logo-group">
                     <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i></span>
                     <span class="hidden sm:inline text-xl text-nRed hover:scale-110 transition" >UGal</span>
-                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.3.9</p>
+                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.4.0</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
@@ -555,6 +555,12 @@
                     <button onclick="Grid.toggleEditMode()" id="btnGridEdit" class="text-gray-400 hover:text-white transition text-sm pb-1" data-i18n-title="grid_edit_delete_title" title="แก้ไข / ลบ"><i class="fa-solid fa-pen"></i></button>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto">
+                    <button id="btnUserModeToggle" onclick="Grid.toggleUserMode()" class="bg-gray-700 hover:bg-cyan-600 px-3 py-1 rounded text-sm transition flex items-center gap-1 hide" title="">
+                        <i class="fa-solid fa-exchange"></i> <span class="hidden sm:inline text-xs"></span>
+                    </button>
+                    <button id="shuffleBtn" onclick="Grid.shuffleAgain()" class="bg-gray-700 hover:bg-nRed px-3 py-1 rounded text-sm transition flex items-center gap-1 hide" data-i18n-title="shuffle_title" title="สุ่มเรียงลำดับใหม่">
+                        <i class="fa-solid fa-shuffle"></i> <span class="hidden sm:inline text-xs" data-i18n="shuffle_btn">สุ่มใหม่</span>
+                    </button>
                     <select id="sortGrid" onchange="Grid.handleSortChange(this.value)" class="bg-darkBg text-white border border-gray-600 rounded text-xs px-2 py-1 outline-none focus:border-nRed flex-1 sm:flex-none">
                         <option value="newest" data-i18n="sort_newest">ใหม่ - เก่า</option>
                         <option value="oldest" data-i18n="sort_oldest">เก่า - ใหม่</option>
@@ -566,6 +572,7 @@
                         <option value="last_read_oldest" data-i18n="sort_last_read_oldest">อ่านนานแล้ว</option>
                         <option value="most_viewed" data-i18n="sort_most_viewed">อ่านบ่อยสุด</option>
                         <option value="least_viewed" data-i18n="sort_least_viewed">อ่านน้อยสุด</option>
+                        <option value="shuffle" data-i18n="sort_shuffle">สุ่ม</option>
                     </select>
                     <span id="gridCount" class="text-gray-400 text-sm">0 รายการ</span>
                 </div>
@@ -714,6 +721,9 @@
                     <div class="flex items-center gap-4 text-gray-400 text-sm mb-6">
                         <span><i class="fa-solid fa-file-lines"></i> <span id="detPageCount">0</span> pages</span>
                         <span><i class="fa-solid fa-clock"></i> <span id="detDate"></span></span>
+                        <button id="btnWatchLater" onclick="Detail.toggleWatchLater()" class="text-gray-400 hover:text-cyan-400 transition" data-i18n-title="add_to_watch_later" title="เพิ่มไปดูภายหลัง">
+                            <i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i>
+                        </button>
                     </div>
 
                     <div class="flex flex-wrap gap-3" id="detActionButtons">
@@ -1135,7 +1145,7 @@
                 read_progress: 'อ่านถึง {current}/{total}', pagesett_none:"ไม่มี",
                 sort_newest: "ใหม่ - เก่า", sort_oldest: "เก่า - ใหม่",
                 sort_most_pages: "หน้าเยอะ", sort_least_pages: "หน้าน้อย", sort_az: "A - Z", sort_za: "Z - A",
-                sort_last_read_newest: "อ่านล่าสุด", sort_last_read_oldest: "อ่านนานแล้ว",
+                sort_last_read_newest: "อ่านล่าสุด", sort_last_read_oldest: "อ่านนานแล้ว", sort_shuffle: "สุ่ม", shuffle_btn: "สุ่มใหม่", shuffle_title: "สุ่มเรียงลำดับใหม่",
                 list_header: "รายการ", all_tags: '<i class="fa-solid fa-tags"></i> แท็กทั้งหมด', all_artists: '<i class="fa-solid fa-users"></i> ศิลปินทั้งหมด',
                 no_data_simple: "ยังไม่มีข้อมูล", read_from_cover: "อ่านเลย",
                 upload_header_new: "อัปโหลดเรื่องใหม่", upload_header_edit: "แก้ไขข้อมูล",
@@ -1167,7 +1177,8 @@
                 new_trans_set_title: "สร้างชุดแปลใหม่", new_trans_set_placeholder: "เช่น แปลเล่น01 โดย ผู้ใช้A", create_btn: "สร้าง", export_trans_sets_title: "ส่งออกชุดแปล", export_btn: "ส่งออก", import_trans_sets_title: "นำเข้าชุดแปล", import_trans_sets_desc: "เลือกไฟล์ .json ของชุดแปล", import_btn: "นำเข้า", trans_sets_section: "ชุดแปล:",
                 addnewtranscollect: "+ ชุดใหม่",grid_edit_delete_title: "แก้ไข / ลบ",shape_rect: "สี่เหลี่ยม", delete_trans_sets_title: "ลบชุดคำแปล", delete_trans_sets: "ลบชุดคำแปล", delete_confirm_msg: "คุณแน่ใจหรือไม่ว่าต้องการลบชุดแปลที่เลือก?", delete_btn_text: "ลบ", create_continuation_title: "สร้างตอนต่อ",
                 sort_most_viewed: "อ่านบ่อยสุด", sort_least_viewed: "อ่านน้อยสุด",
-                storage_usage: "พื้นที่เก็บข้อมูล", storage_used: "ใช้ไป", storage_total: "เต็ม", storage_percent: "ใช้ไป", refresh_storage_btn: "อัปเดต", storage_info: "ข้อมูล IndexedDB"
+                storage_usage: "พื้นที่เก็บข้อมูล", storage_used: "ใช้ไป", storage_total: "เต็ม", storage_percent: "ใช้ไป", refresh_storage_btn: "อัปเดต", storage_info: "ข้อมูล IndexedDB",
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> ดูภายหลัง', watch_later_list: "ดูภายหลัง", add_to_watch_later: "เพิ่มไปดูภายหลัง", added_to_watch_later: "เพิ่มไปดูภายหลังแล้ว"
             },
             en: {
                 decrease_size_title: "Decrease text size", increase_size_title: "Increase text size", shape_rect_title: "Rectangle", bg_white_title: "White background", bg_black_title: "Black background", bg_clear_title: "Transparent background", color_black_title: "Black text", color_white_title: "White text",
@@ -1181,7 +1192,7 @@
                 read_progress: 'Read {current}/{total}', pagesett_none:"None",
                 sort_newest: "Newest - Oldest", sort_oldest: "Oldest - Newest",
                 sort_most_pages: "Most Pages", sort_least_pages: "Least Pages", sort_az: "A - Z", sort_za: "Z - A",
-                sort_last_read_newest: "Last Read - Newest", sort_last_read_oldest: "Last Read - Oldest",
+                sort_last_read_newest: "Last Read - Newest", sort_last_read_oldest: "Last Read - Oldest", sort_shuffle: "Shuffle", shuffle_btn: "Shuffle Again", shuffle_title: "Shuffle order again",
                 list_header: "List", all_tags: '<i class="fa-solid fa-tags"></i> All Tags', all_artists: '<i class="fa-solid fa-users"></i> All Artists', all_series: '<i class="fa-solid fa-book"></i> All Series',
                 no_data_simple: "No data available", read_from_cover: "Read now",
                 upload_header_new: "Upload New", upload_header_edit: "Edit Info",
@@ -1213,7 +1224,8 @@
                 new_trans_set_title: "Create Translation Set", new_trans_set_placeholder: "e.g. Translation Set 01 by User A", create_btn: "Create", export_trans_sets_title: "Export Translation Sets", export_btn: "Export", import_trans_sets_title: "Import Translation Sets", import_trans_sets_desc: "Select a .json file with translation sets", import_btn: "Import", trans_sets_section: "Translation Sets:",
                 addnewtranscollect: "+ New Set",grid_edit_delete_title: "Edit / Delete",shape_rect: "Rectangle", delete_trans_sets_title: "Delete Translation Sets", delete_trans_sets: "Delete Sets", delete_confirm_msg: "Are you sure you want to delete selected translation sets?", delete_btn_text: "Delete", create_continuation_title: "Create Continuation",
                 sort_most_viewed: "Most Viewed", sort_least_viewed: "Least Viewed",
-                storage_usage: "Storage Usage", storage_used: "Used", storage_total: "Total", storage_percent: "Used", refresh_storage_btn: "Refresh", storage_info: "IndexedDB Storage"
+                storage_usage: "Storage Usage", storage_used: "Used", storage_total: "Total", storage_percent: "Used", refresh_storage_btn: "Refresh", storage_info: "IndexedDB Storage",
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> Watch Later', watch_later_list: "Watch Later", add_to_watch_later: "Add to Watch Later", added_to_watch_later: "Added to Watch Later"
             },
             cn: {
                 decrease_size_title: "减小文字大小", increase_size_title: "增大文字大小", shape_rect_title: "矩形", bg_white_title: "白色背景", bg_black_title: "黑色背景", bg_clear_title: "透明背景", color_black_title: "黑色文字", color_white_title: "白色文字",
@@ -1227,7 +1239,7 @@
                 read_progress: '阅读进度 {current}/{total}', pagesett_none:"无",
                 sort_newest: "最新 - 最旧", sort_oldest: "最旧 - 最新",
                 sort_most_pages: "页数最多", sort_least_pages: "页数最少", sort_az: "A - Z", sort_za: "Z - A",
-                sort_last_read_newest: "最近阅读", sort_last_read_oldest: "很久没读",
+                sort_last_read_newest: "最近阅读", sort_last_read_oldest: "很久没读", sort_shuffle: "随机", shuffle_btn: "重新随机", shuffle_title: "重新随机排序",
                 list_header: "列表", all_tags: '<i class="fa-solid fa-tags"></i> 所有标签', all_artists: '<i class="fa-solid fa-users"></i> 所有作者',
                 no_data_simple: "暂无内容", read_from_cover: "立即阅读",
                 upload_header_new: "上传新项目", upload_header_edit: "编辑信息",
@@ -1259,7 +1271,8 @@
                 new_trans_set_title: "创建翻译集", new_trans_set_placeholder: "例如 翻译组01 作者 用户A", create_btn: "创建", export_trans_sets_title: "导出翻译集", export_btn: "导出", import_trans_sets_title: "导入翻译集", import_trans_sets_desc: "选择包含翻译集的.json文件", import_btn: "导入", trans_sets_section: "翻译集:",
                 addnewtranscollect: "+ 新建翻译集",grid_edit_delete_title: "编辑 / 删除",shape_rect: "矩形", delete_trans_sets_title: "删除翻译集", delete_trans_sets: "删除翻译集", delete_confirm_msg: "确定要删除选择的翻译集吗？", delete_btn_text: "删除", create_continuation_title: "创建续篇",
                 sort_most_viewed: "最常查看", sort_least_viewed: "最少查看",
-                storage_usage: "数据存储", storage_used: "已用", storage_total: "总容量", storage_percent: "已用", refresh_storage_btn: "刷新", storage_info: "IndexedDB 存储"
+                storage_usage: "数据存储", storage_used: "已用", storage_total: "总容量", storage_percent: "已用", refresh_storage_btn: "刷新", storage_info: "IndexedDB 存储",
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> 稍后查看', watch_later_list: "稍后查看", add_to_watch_later: "添加到稍后查看", added_to_watch_later: "已添加到稍后查看"
             },
             jp: {
                 decrease_size_title: "テキストサイズを縮小", increase_size_title: "テキストサイズを拡大", shape_rect_title: "矩形", bg_white_title: "白い背景", bg_black_title: "黒い背景", bg_clear_title: "透明な背景", color_black_title: "黒いテキスト", color_white_title: "白いテキスト",
@@ -1273,7 +1286,7 @@
                 read_progress: '{current}/{total} ページ', pagesett_none:"なし",
                 sort_newest: "新しい順", sort_oldest: "古い順",
                 sort_most_pages: "ページ多い順", sort_least_pages: "ページ少ない順", sort_az: "A - Z", sort_za: "Z - A",
-                sort_last_read_newest: "最後に読んだ", sort_last_read_oldest: "ずっと読んでない",
+                sort_last_read_newest: "最後に読んだ", sort_last_read_oldest: "ずっと読んでない", sort_shuffle: "ランダム", shuffle_btn: "もう一度ランダム", shuffle_title: "ランダム順にもう一度並べ替え",
                 list_header: "リスト", all_tags: '<i class="fa-solid fa-tags"></i> すべてのタグ', all_artists: '<i class="fa-solid fa-users"></i> すべての作者',
                 no_data_simple: "データなし", read_from_cover: "今すぐ読む",
                 upload_header_new: "新規登録", upload_header_edit: "情報を編集",
@@ -1305,7 +1318,8 @@
                 new_trans_set_title: "翻訳セットを作成", new_trans_set_placeholder: "例 翻訳セット01 ユーザーA", create_btn: "作成", export_trans_sets_title: "翻訳セットを書き出し", export_btn: "書き出し", import_trans_sets_title: "翻訳セットを読み込み", import_trans_sets_desc: "翻訳セットを含む.jsonファイルを選択", import_btn: "読み込む", trans_sets_section: "翻訳セット:",
                 addnewtranscollect: "+ 新しいセット",grid_edit_delete_title: "編集 / 削除",shape_rect: "四角形", delete_trans_sets_title: "翻訳セットを削除", delete_trans_sets: "翻訳セットを削除",delete_confirm_msg: "本当に削除しますか？", delete_btn_text: "削除", create_continuation_title: "続編を作成",
                 sort_most_viewed: "最も多く読まれた", sort_least_viewed: "最も読まれていない",
-                storage_usage: "ストレージ使用量", storage_used: "使用", storage_total: "容量", storage_percent: "使用", refresh_storage_btn: "更新", storage_info: "IndexedDB ストレージ"
+                storage_usage: "ストレージ使用量", storage_used: "使用", storage_total: "容量", storage_percent: "使用", refresh_storage_btn: "更新", storage_info: "IndexedDB ストレージ",
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> あとで見る', watch_later_list: "あとで見る", add_to_watch_later: "あとで見るに追加", added_to_watch_later: "あとで見るに追加しました"
             }
         };
 
@@ -1319,8 +1333,8 @@
 
         // ================= DATABASE (Dexie.js) v3 =================
         const db = new Dexie("UGalDB");
-        db.version(88).stores({
-            galleries: '++id, title, createdAt, isFavorite, lastReadPage, lastAccessedAt, totalPages, viewCount',
+        db.version(89).stores({
+            galleries: '++id, title, createdAt, isFavorite, isWatchLater, lastReadPage, lastAccessedAt, totalPages, viewCount',
             pages: '++id, galleryId, order',
             settings: 'key',
             translationSets: '++id, galleryId, name'
@@ -1336,6 +1350,7 @@
                         if (!g.characters) g.characters = [];
                         if (!g.series) g.series = [];
                         if (!g.lastAccessedAt) g.lastAccessedAt = null; // Initialize new field
+                        if (!g.isWatchLater) g.isWatchLater = false; // Initialize watch later field
                     });
                     db.galleries.bulkPut(batch);
                 }
@@ -1433,6 +1448,8 @@
                     navParams: App.currentNavParams,
                     gridSort: Grid.currentSort,
                     gridPage: Grid.currentPage,
+                    randomOrder: Grid.randomOrder,
+                    userMode: Grid.userMode,
                     detailPage: App.detail.currentPage,
                     currentTranslationSetId: App.reader.currentTranslationSetId,
                     readMode: App.reader.readMode,
@@ -1458,6 +1475,12 @@
                 }
                 if (savedState && savedState.gridPage) {
                     Grid.currentPage = savedState.gridPage;
+                }
+                if (savedState && savedState.randomOrder && Array.isArray(savedState.randomOrder)) {
+                    Grid.randomOrder = savedState.randomOrder;
+                }
+                if (savedState && savedState.userMode) {
+                    Grid.userMode = savedState.userMode;
                 }
                 if (savedState && savedState.detailPage) {
                     App.detail.currentPage = savedState.detailPage;
@@ -1678,6 +1701,8 @@
             currentPage: 1,
             itemsPerPage: 60,
             currentSort: 'newest',
+            randomOrder: [], // Store shuffled IDs for persistence after reload
+            userMode: 'favorites', // 'favorites' or 'watchLater'
             
             load: async (mode, param = null) => {
                 App.gridMode = mode;
@@ -1686,8 +1711,14 @@
                 if (mode === 'home') {
                     Grid.currentTitle = T('latest_updates');
                 } else if (mode === 'user') {
-                    Grid.currentTitle = T('favorites');
-                    galleries = galleries.filter(g => g.isFavorite);
+                    // Use userMode to determine which list to show
+                    if (Grid.userMode === 'favorites') {
+                        Grid.currentTitle = T('favorites');
+                        galleries = galleries.filter(g => g.isFavorite);
+                    } else {
+                        Grid.currentTitle = T('watch_later');
+                        galleries = galleries.filter(g => g.isWatchLater);
+                    }
                 } else if (mode === 'tagFilter') {
                     Grid.currentTitle = `<i class="fa-solid fa-tag"></i> ${param}`;
                     galleries = galleries.filter(g => g.tags.includes(param));
@@ -1705,8 +1736,20 @@
                 Grid.allGalleries = galleries;
                 // Reset button state
                 if(document.getElementById('btnGridEdit')) document.getElementById('btnGridEdit').innerHTML = '<i class="fa-solid fa-pen"></i>';
+                
+                // Show/hide shuffle button based on current sort
+                const shuffleBtn = document.getElementById('shuffleBtn');
+                if (shuffleBtn) {
+                    if (Grid.currentSort === 'shuffle') {
+                        shuffleBtn.classList.remove('hide');
+                    } else {
+                        shuffleBtn.classList.add('hide');
+                    }
+                }
+                
                 Grid.applySort(); // Apply default or current sort
                 Grid.renderCurrentList();
+                Grid.updateUserModeBtn(); // Ensure button is initialized
             },
 
             handleSortChange: async (sortMode) => {
@@ -1716,7 +1759,11 @@
                 
                 // Reapply current filter if viewing filtered list
                 if (App.gridMode === 'user') {
-                    galleries = galleries.filter(g => g.isFavorite);
+                    if (Grid.userMode === 'favorites') {
+                        galleries = galleries.filter(g => g.isFavorite);
+                    } else {
+                        galleries = galleries.filter(g => g.isWatchLater);
+                    }
                 } else if (App.gridMode === 'tagFilter') {
                     galleries = galleries.filter(g => g.tags.includes(App.currentNavParams));
                 } else if (App.gridMode === 'artistFilter') {
@@ -1728,6 +1775,15 @@
                 }
                 
                 Grid.allGalleries = galleries;
+                
+                // Show/hide shuffle button
+                const shuffleBtn = document.getElementById('shuffleBtn');
+                if (sortMode === 'shuffle') {
+                    shuffleBtn.classList.remove('hide');
+                } else {
+                    shuffleBtn.classList.add('hide');
+                }
+                
                 Grid.applySort();
                 Grid.currentPage = 1;
                 Grid.renderCurrentList();
@@ -1736,6 +1792,26 @@
 
             applySort: () => {
                 const sort = Grid.currentSort;
+                
+                // Handle shuffle - use pre-generated randomOrder if available
+                if (sort === 'shuffle') {
+                    if (Grid.randomOrder.length === 0) {
+                        // Generate new random order
+                        Grid.randomOrder = Grid.allGalleries.map((_, i) => i);
+                        for (let i = Grid.randomOrder.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [Grid.randomOrder[i], Grid.randomOrder[j]] = [Grid.randomOrder[j], Grid.randomOrder[i]];
+                        }
+                    }
+                    // Reorder galleries based on randomOrder indices
+                    const reordered = Grid.randomOrder.map(i => Grid.allGalleries[i]).filter(g => g);
+                    Grid.allGalleries = reordered;
+                    return;
+                }
+                
+                // Clear randomOrder when switching away from shuffle
+                Grid.randomOrder = [];
+                
                 Grid.allGalleries.sort((a, b) => {
                     if (sort === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
                     if (sort === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
@@ -1766,6 +1842,44 @@
                 StateManager.save();
             },
 
+            shuffleAgain: () => {
+                // Clear randomOrder to generate new shuffled order next time
+                Grid.randomOrder = [];
+                Grid.applySort();
+                Grid.currentPage = 1;
+                Grid.renderCurrentList();
+                StateManager.save();
+            },
+
+            toggleUserMode: async () => {
+                Grid.userMode = Grid.userMode === 'favorites' ? 'watchLater' : 'favorites';
+                Grid.currentPage = 1;
+                Grid.randomOrder = [];
+                await Grid.load('user');
+                StateManager.save();
+            },
+
+            updateUserModeBtn: () => {
+                const userModeBtn = document.getElementById('btnUserModeToggle');
+                if (!userModeBtn) return;
+                
+                if (App.gridMode === 'user') {
+                    userModeBtn.classList.remove('hide');
+                    if (Grid.userMode === 'favorites') {
+                        const watchLaterText = T('watch_later_list');
+                        userModeBtn.innerHTML = `<i class="fa-solid fa-eye"></i> <span class="hidden sm:inline text-xs">${watchLaterText}</span>`;
+                        userModeBtn.title = watchLaterText;
+                    } else {
+                        // Extract text from favorites translation (remove HTML tags)
+                        const favText = T('favorites').replace(/<[^>]*>/g, '').trim();
+                        userModeBtn.innerHTML = `<i class="fa-solid fa-heart"></i> <span class="hidden sm:inline text-xs">${favText}</span>`;
+                        userModeBtn.title = favText;
+                    }
+                } else {
+                    userModeBtn.classList.add('hide');
+                }
+            },
+
             toggleEditMode: () => {
                 Grid.isEditMode = !Grid.isEditMode;
                 const btn = document.getElementById('btnGridEdit');
@@ -1777,6 +1891,17 @@
                     btn.innerHTML = '<i class="fa-solid fa-pen"></i>';
                 }
                 Grid.renderCurrentList();
+            },
+
+            toggleWatchLaterCard: async (id, e) => {
+                e.stopPropagation();
+                const gallery = Grid.allGalleries.find(g => g.id === id);
+                if (gallery) {
+                    gallery.isWatchLater = !gallery.isWatchLater;
+                    await db.galleries.update(id, { isWatchLater: gallery.isWatchLater });
+                    Grid.renderCurrentList();
+                    Toast.success(gallery.isWatchLater ? T('added_to_watch_later') : T('add_to_watch_later'));
+                }
             },
 
             deleteItem: async (id, e) => {
@@ -1807,6 +1932,9 @@
 
                 grid.innerHTML = '';
                 if(pagination) pagination.innerHTML = '';
+
+                // Show/hide user mode toggle button
+                Grid.updateUserModeBtn();
 
                 // Restore button state if needed (in case of re-render without full load)
                 const btn = document.getElementById('btnGridEdit');
@@ -1872,6 +2000,7 @@
                                     ${Grid.isEditMode ? `<button onclick="Grid.createContinuation(${g.id}, event)" class="absolute bottom-0 right-0 bg-green-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-green-700 transition shadow-md rounded-tl-lg" data-i18n-title="create_continuation_title"><i class="fa-solid fa-plus"></i></button>` : ''}
                                     <div class="absolute top-2 right-2 flex flex-col gap-1 items-end">
                                         ${g.isFavorite ? '<div class="text-nRed text-lg shadow-black drop-shadow-md"><i class="fa-solid fa-heart"></i></div>' : ''}
+                                        ${g.isWatchLater ? '<div class="text-cyan-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:opacity-80 transition" onclick="Grid.toggleWatchLaterCard(' + g.id + ', event)" title="' + T('added_to_watch_later') + '"><i class="fa-solid fa-eye"></i></div>' : '<div class="text-gray-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:text-cyan-400 transition opacity-40 hover:opacity-100" onclick="Grid.toggleWatchLaterCard(' + g.id + ', event)" title="' + T('add_to_watch_later') + '"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i></div>'}
                                         ${(hasProgress && !isFinished) ? '<div class="text-yellow-400 text-lg shadow-black drop-shadow-md"><i class="fa-solid fa-bookmark"></i></div>' : ''}
                                     </div>
                                     <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2 pt-6" title="${g.title}">
@@ -3806,7 +3935,7 @@
                         await FileSystemManager.syncToLocal(galleryId);
                     } else {
                         // Create new
-                        galleryId = await db.galleries.add({ title, tags, artists, characters, series, coverBlob, createdAt: new Date().toISOString(), isFavorite: false, totalPages: UploadManager.pageFiles.length });
+                        galleryId = await db.galleries.add({ title, tags, artists, characters, series, coverBlob, createdAt: new Date().toISOString(), isFavorite: false, isWatchLater: false, totalPages: UploadManager.pageFiles.length });
                         const pagesToSave = UploadManager.pageFiles.map((p, index) => ({ galleryId, order: index, imageBlob: p.file, translations: [], translationSets: [] }));
                         if(pagesToSave.length > 0) await db.pages.bulkAdd(pagesToSave);
                         Toast.success(T('alert_save_success'));
@@ -4508,6 +4637,7 @@
                 document.getElementById('detDate').textContent = new Date(gallery.createdAt).toLocaleDateString('th-TH');
                 
                 Detail.updateFavoriteBtn();
+                Detail.updateWatchLaterBtn();
                 
                 // Build Action Buttons - preserve the old format but update the onclick handlers
                 // Note: Buttons are now managed by the HTML in detail view with proper event handlers
@@ -4652,10 +4782,29 @@
                     btn.classList.remove('text-nRed');
                 }
             },
+            updateWatchLaterBtn: () => {
+                const btn = document.getElementById('btnWatchLater');
+                if (Detail.currentGallery.isWatchLater) {
+                    btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+                    btn.classList.add('text-cyan-400');
+                    btn.classList.remove('text-gray-400');
+                    btn.title = T('added_to_watch_later');
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i>';
+                    btn.classList.remove('text-cyan-400');
+                    btn.classList.add('text-gray-400');
+                    btn.title = T('add_to_watch_later');
+                }
+            },
             toggleFavorite: async () => {
                 Detail.currentGallery.isFavorite = !Detail.currentGallery.isFavorite;
                 await db.galleries.update(Detail.currentGallery.id, { isFavorite: Detail.currentGallery.isFavorite });
                 Detail.updateFavoriteBtn();
+            },
+            toggleWatchLater: async () => {
+                Detail.currentGallery.isWatchLater = !Detail.currentGallery.isWatchLater;
+                await db.galleries.update(Detail.currentGallery.id, { isWatchLater: Detail.currentGallery.isWatchLater });
+                Detail.updateWatchLaterBtn();
             },
             readRandom: (galleryId) => {
                 if(App.pages && App.pages.length > 0) {
