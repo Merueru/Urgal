@@ -251,6 +251,17 @@
             display: block;
         }
 
+        /* Keep label spacing consistent when wrapped tag rows grow taller */
+        .text-gray-400.text-sm.font-semibold.w-28.inline-block,
+        #detArtists,
+        #detTags,
+        #detCharacters,
+        #grpArtists,
+        #grpTags,
+        #grpCharacters {
+            vertical-align: top;
+        }
+
         /* ===== MOBILE NAVBAR RESPONSIVE ===== */
         .navbar-container {
             display: flex;
@@ -385,10 +396,11 @@
             display: flex;
             gap: 0.5rem;
             margin-top: 0.5rem;
+            flex-wrap: wrap;
         }
         
         #mobileMenu .action-buttons button {
-            flex: 1;
+            flex: 1 1 calc(50% - 0.25rem);
             padding: 0.5rem;
             font-size: 0.85rem;
             border-radius: 4px;
@@ -402,6 +414,13 @@
         #mobileMenu .action-buttons button:hover {
             background: #4b5563;
             color: #f3f4f6;
+        }
+
+        /* Stack buttons vertically or adjust flex on smaller screens */
+        @media (max-width: 400px) {
+            #mobileMenu .action-buttons button {
+                flex: 1 1 calc(33.333% - 0.35rem);
+            }
         }
         
         #mobileSearchInput::placeholder {
@@ -554,7 +573,7 @@
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2 navbar-logo-group">
                     <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i></span>
                     <span class="hidden sm:inline text-xl text-nRed hover:scale-110 transition" >UGal</span>
-                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.4.2</p>
+                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.5.0</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
@@ -591,7 +610,7 @@
                     <!-- Export Dropdown Menu -->
                     <div class="relative group">
                         <button class="bg-gray-700 hover:bg-green-600 px-3 py-1.5 rounded-full text-white transition flex items-center gap-1" data-i18n-title="export_menu_title" title="ส่งออก">
-                            <i class="fa-solid fa-file-export"></i>
+                            <i class="fa-solid fa-upload"></i>
                             <i class="fa-solid fa-chevron-down text-xs"></i>
                         </button>
                         <!-- Dropdown Menu -->
@@ -606,7 +625,7 @@
                     </div>
                     
                     <button onclick="document.getElementById('importInput').click()" class="bg-gray-700 hover:bg-blue-500 px-3 py-1.5 rounded-full text-white transition" data-i18n-title="import_title" title="นำเข้าข้อมูล (Restore)">
-                        <i class="fa-solid fa-file-import"></i>
+                        <i class="fa-solid fa-download"></i>
                     </button>
                     <input type="file" id="importInput" class="hidden" accept=".zip,.json" onchange="DataManager.importData(event)">
                 </div>
@@ -659,10 +678,13 @@
                 <div class="menu-title">Backup</div>
                 <div class="action-buttons">
                     <button onclick="DataManager.exportAll()" class="transition" data-i18n-title="export_title" title="ส่งออก">
-                        <i class="fa-solid fa-file-export"></i> <span data-i18n="export_btn">ส่งออก</span>
+                        <i class="fa-solid fa-upload"></i> <span data-i18n="export_btn">ส่งออก</span>
+                    </button>
+                    <button onclick="MultiExportManager.startSelectMode(); MobileMenu.close()" class="transition" data-i18n="export_selected_option">
+                        <i class="fa-solid fa-hand-pointer"></i> <span data-i18n="export_selected_option">ส่งออกที่เลือก</span>
                     </button>
                     <button onclick="document.getElementById('importInput').click()" class="transition" data-i18n-title="import_title" title="นำเข้า">
-                        <i class="fa-solid fa-file-import"></i> <span data-i18n="import_btn">นำเข้า</span>
+                        <i class="fa-solid fa-download"></i> <span data-i18n="import_btn">นำเข้า</span>
                     </button>
                 </div>
             </div>
@@ -684,11 +706,14 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0 mb-6 border-b border-gray-700 pb-2">
                 <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                     <h2 id="gridTitle" class="text-lg sm:text-2xl font-bold">อัปเดตล่าสุด</h2>
-                    <button onclick="Grid.toggleEditMode()" id="btnGridEdit" class="text-gray-400 hover:text-white transition text-sm pb-1" data-i18n-title="grid_edit_delete_title" title="แก้ไข / ลบ"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="Grid.toggleEditMode()" id="btnGridEdit" class="text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-full p-2 transition text-sm" data-i18n-title="grid_edit_delete_title" title="แก้ไข / ลบ"><i class="fa-solid fa-pen"></i></button>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto">
                     <button id="btnUserModeToggle" onclick="Grid.toggleUserMode()" class="bg-gray-700 hover:bg-cyan-600 px-3 py-1 rounded text-sm transition flex items-center gap-1 hide" title="">
                         <i class="fa-solid fa-exchange"></i> <span class="hidden sm:inline text-xs"></span>
+                    </button>
+                    <button id="btnGroupViewToggle" onclick="Grid.toggleGroupView()" class="bg-gray-700 hover:bg-purple-600 px-3 py-1 rounded text-sm transition flex items-center gap-1" data-i18n-title="group_view_toggle_title" title="ดูแบบกลุ่ม">
+                        <i class="fa-solid fa-layer-group"></i> <span class="hidden sm:inline text-xs" id="groupViewBtnText" data-i18n="group_view_btn">ดูแบบกลุ่ม</span>
                     </button>
                     <button id="shuffleBtn" onclick="Grid.shuffleAgain()" class="bg-gray-700 hover:bg-nRed px-3 py-1 rounded text-sm transition flex items-center gap-1 hide" data-i18n-title="shuffle_title" title="สุ่มเรียงลำดับใหม่">
                         <i class="fa-solid fa-shuffle"></i> <span class="hidden sm:inline text-xs" data-i18n="shuffle_btn">สุ่มใหม่</span>
@@ -709,13 +734,13 @@
                     <span id="gridCount" class="text-gray-400 text-sm">0 รายการ</span>
                     
                     <!-- Multi-Export Controls (Hidden by default) -->
-                    <div id="multiExportControls" class="hide flex items-center gap-2">
-                        <span id="exportSelectedCount" class="text-gray-400 text-sm font-semibold">เลือก 0 เรื่อง</span>
-                        <button onclick="MultiExportManager.exportSelected()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm transition text-white font-semibold flex items-center gap-1">
-                            <i class="fa-solid fa-download"></i> ส่งออก
+                    <div id="multiExportControls" class="hide flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                        <span id="exportSelectedCount" class="text-gray-400 text-sm font-semibold px-2 py-1 sm:py-0 bg-gray-700 sm:bg-transparent rounded sm:rounded-none">เลือก 0 เรื่อง</span>
+                        <button onclick="MultiExportManager.exportSelected()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs sm:text-sm transition text-white font-semibold flex items-center justify-center gap-1 flex-1 sm:flex-none">
+                            <i class="fa-solid fa-download"></i> <span>ส่งออก</span>
                         </button>
-                        <button onclick="MultiExportManager.cancelSelectMode()" class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm transition text-white flex items-center gap-1">
-                            <i class="fa-solid fa-xmark"></i> ยกเลิก
+                        <button onclick="MultiExportManager.cancelSelectMode()" class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-xs sm:text-sm transition text-white flex items-center justify-center gap-1 flex-1 sm:flex-none">
+                            <i class="fa-solid fa-xmark"></i> <span>ยกเลิก</span>
                         </button>
                     </div>
                 </div>
@@ -731,7 +756,10 @@
         <!-- ================= LIST VIEW (Tags, Artists) ================= -->
         <div id="view-list" class="view hide">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-gray-700 pb-4">
-                <h2 id="listTitle" class="text-2xl font-bold">รายการ</h2>
+                <div class="flex items-center gap-2">
+                    <h2 id="listTitle" class="text-2xl font-bold">รายการ</h2>
+                    <button onclick="List.toggleEditMode()" id="btnListEdit" class="text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-full p-2 transition text-sm" data-i18n-title="list_edit_delete_title" title="แก้ไข / ลบแท็ก"><i class="fa-solid fa-pen"></i></button>
+                </div>
                 <div class="w-full md:w-48 relative">
                     <input type="text" id="listSearchInput" data-i18n-placeholder="list_search_placeholder" placeholder="ค้นหารายการ..." class="w-full bg-darkBg text-white px-4 py-2 rounded-full border border-gray-600 focus:border-nRed focus:outline-none text-sm transition-all" onkeyup="List.handleSearch(this.value)">
                     <i class="fa-solid fa-search absolute right-3 top-2.5 text-gray-400"></i>
@@ -794,6 +822,13 @@
                                 <div id="seriesSuggestionsList" class="divide-y divide-gray-700"></div>
                             </div>
                         </div>
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-300 mb-1" data-i18n="groups_label">กลุ่ม (Groups) <span class="text-xs text-gray-500">- คั่นด้วยลูกน้ำ (,)</span></label>
+                            <input type="text" id="upGroups" data-i18n-placeholder="groups_placeholder" class="w-full bg-darkBg border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-nRed" placeholder="Story Arc 1, Story Arc 2" autocomplete="off">
+                            <div id="groupSuggestionsContainer" class="absolute top-full left-0 right-0 mt-1 bg-darkCard border border-gray-600 rounded shadow-lg max-h-48 overflow-y-auto z-50 hide">
+                                <div id="groupSuggestionsList" class="divide-y divide-gray-700"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -834,7 +869,7 @@
         <div id="view-detail" class="view hide max-w-6xl mx-auto">
             <div class="flex flex-col md:flex-row gap-8 bg-darkCard p-6 rounded-lg mb-6">
                 <div class="w-full md:w-1/3 max-w-sm mx-auto">
-                    <img id="detCover" src="" class="w-full rounded shadow-lg hover:scale-105 transition" onclick="UI.navigate('reader', { galleryId: App.currentGalleryId, index: Detail.currentGallery?.lastReadPage || 0 })" style="cursor: pointer;" data-i18n-title="read_from_cover">
+                    <img id="detCover" src="" class="w-full rounded shadow-lg hover:scale-105 transition" onclick="Detail.getFirstReadableGallery().then(g => UI.navigate('reader', {galleryId: g.galleryId, index: g.index}))" style="cursor: pointer;" data-i18n-title="read_from_cover">
                 </div>
                 <div class="w-full md:w-2/3">
                     <div class="flex justify-between items-start">
@@ -844,33 +879,38 @@
                         </button>
                     </div>
                     
-                    <div class="mb-4">
-                        <span class="text-gray-400 text-sm font-semibold w-28 inline-block" data-i18n="artists">Artists:</span>
-                        <div id="detArtists" class="inline-flex flex-wrap gap-2"></div>
+                    <div class="mb-4 flex flex-wrap items-start gap-3">
+                        <span class="text-gray-400 text-sm font-semibold w-28 flex-shrink-0" data-i18n="artists">Artists:</span>
+                        <div id="detArtists" class="flex-1 flex flex-wrap gap-2 min-w-0"></div>
                     </div>
-                    <div class="mb-4">
-                        <span class="text-gray-400 text-sm font-semibold w-28 inline-block" data-i18n="tags">Tags:</span>
-                        <div id="detTags" class="inline-flex flex-wrap gap-2"></div>
+                    <div class="mb-4 flex flex-wrap items-start gap-3">
+                        <span class="text-gray-400 text-sm font-semibold w-28 flex-shrink-0" data-i18n="tags">Tags:</span>
+                        <div id="detTags" class="flex-1 flex flex-wrap gap-2 min-w-0"></div>
                     </div>
-                    <div class="mb-4">
-                        <span class="text-gray-400 text-sm font-semibold w-28 inline-block" data-i18n="characters">Characters:</span>
-                        <div id="detCharacters" class="inline-flex flex-wrap gap-2"></div>
+                    <div class="mb-4 flex flex-wrap items-start gap-3">
+                        <span class="text-gray-400 text-sm font-semibold w-28 flex-shrink-0" data-i18n="characters">Characters:</span>
+                        <div id="detCharacters" class="flex-1 flex flex-wrap gap-2 min-w-0"></div>
                     </div>
-                    <div class="mb-6">
-                        <span class="text-gray-400 text-sm font-semibold w-28 inline-block" data-i18n="series">Series:</span>
-                        <div id="detSeries" class="inline-flex flex-wrap gap-2"></div>
+                    <div class="mb-4 flex flex-wrap items-start gap-3">
+                        <span class="text-gray-400 text-sm font-semibold w-28 flex-shrink-0" data-i18n="series">Series:</span>
+                        <div id="detSeries" class="flex-1 flex flex-wrap gap-2 min-w-0"></div>
+                    </div>
+
+                    <div class="mb-4 flex flex-wrap items-start gap-3">
+                        <span class="text-gray-400 text-sm font-semibold w-28 flex-shrink-0" data-i18n="groups">Groups:</span>
+                        <div id="detGroups" class="flex-1 flex flex-wrap gap-2 min-w-0"></div>
                     </div>
                     
                     <div class="flex items-center gap-4 text-gray-400 text-sm mb-6">
                         <span><i class="fa-solid fa-file-lines"></i> <span id="detPageCount">0</span> pages</span>
                         <span><i class="fa-solid fa-clock"></i> <span id="detDate"></span></span>
-                        <button id="btnWatchLater" onclick="Detail.toggleWatchLater()" class="text-gray-400 hover:text-cyan-400 transition flex items-center gap-1" data-i18n-title="add_to_watch_later" title="เพิ่มไปดูภายหลัง">
+                        <button id="btnWatchLater" onclick="Detail.toggleWatchLater()" class="text-gray-400 hover:text-cyan-400 transition flex items-center gap-1 border border-gray-500 hover:border-cyan-400 rounded-full px-3 py-2" data-i18n-title="add_to_watch_later" title="เพิ่มไปดูภายหลัง">
                             <i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
 
                     <div class="flex flex-wrap gap-3" id="detActionButtons">
-                        <button id="btnReadNow" onclick="UI.navigate('reader', { galleryId: App.currentGalleryId, index: Detail.currentGallery?.lastReadPage || 0 })" class="bg-gradient-to-r from-nRed to-red-600 hover:from-red-600 hover:to-red-700 px-8 py-3 rounded-lg font-bold text-lg shadow-lg flex items-center gap-2 transition text-white" data-i18n-title="read_now" title="">
+                        <button id="btnReadNow" onclick="Detail.getFirstReadableGallery().then(g => UI.navigate('reader', {galleryId: g.galleryId, index: g.index}))" class="bg-gradient-to-r from-nRed to-red-600 hover:from-red-600 hover:to-red-700 px-8 py-3 rounded-lg font-bold text-lg shadow-lg flex items-center gap-2 transition text-white" data-i18n-title="read_now" title="">
                             <i class="fa-solid fa-book-open-reader"></i> Read Now
                         </button>
                         <button id="btnClearBookmark" onclick="DataManager.clearBookmark(App.currentGalleryId)" class="hidden bg-gradient-to-r from-gray-600 to-gray-700 hover:from-red-700 hover:to-red-800 px-4 py-3 rounded-lg text-white transition shadow-lg flex items-center justify-center" data-i18n-title="clear_bookmark_title" title="Clear Bookmark">
@@ -903,13 +943,190 @@
                             <i class="fa-solid fa-trash"></i> <span data-i18n="delete_trans_sets">Delete Sets</span>
                         </button>
                     </div>
+
+                    <!-- Episode Navigation (compact mini buttons) -->
+                    <div id="detEpisodeNav" class="flex flex-col sm:flex-row items-center gap-2 mt-4 pt-4 border-t border-gray-700 hide">
+                        <button id="btnSelectEpisodeInline" onclick="Detail.openEpisodePicker()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm text-white transition shadow-lg flex items-center gap-2">
+                            <i class="fa-solid fa-list-ol"></i> <span data-i18n="select_episode">Select Episode</span>
+                        </button>
+                        <select id="detEpisodeSelector" onchange="Detail.selectEpisodeInGroup()" class="bg-darkBg text-white border border-gray-600 rounded text-xs px-2 py-2 outline-none focus:border-nRed flex-1 min-w-[160px] truncate">
+                            <!-- Populated by Detail controller -->
+                        </select>
+                        <select id="detGroupSelector" onchange="Detail.updateEpisodeNav()" class="bg-darkBg text-white border border-gray-600 rounded text-xs px-2 py-2 outline-none focus:border-nRed flex-1 min-w-[160px] truncate">
+                            <!-- Populated by Detail controller -->
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <div class="bg-darkCard p-6 rounded-lg">
-                <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">พรีวิว (Pages)</h3>
+                <div class="flex items-center justify-between mb-4 border-b border-gray-700 pb-2">
+                    <h3 class="text-xl font-bold">พรีวิว (Pages)</h3>
+                    <!-- Mini Episode Nav (if has groups) -->
+                    <div id="miniEpisodeNav" class="hide flex items-center gap-2">
+                        <button id="miniBtnPrev" onclick="Detail.prevEpisodeInGroup()" class="p-2 hover:text-cyan-400 text-cyan-400" data-i18n-title="prev_episode_title">
+                            <i class="fa-solid fa-backward"></i>
+                        </button>
+                        <span class="text-xs text-cyan-300"><span id="miniEpisodeNum">1</span> / <span id="miniTotalEpisodes">0</span></span>
+                        <button id="miniBtnNext" onclick="Detail.nextEpisodeInGroup()" class="p-2 hover:text-cyan-400 text-cyan-400" data-i18n-title="next_episode_title">
+                            <i class="fa-solid fa-forward"></i>
+                        </button>
+                    </div>
+                </div>
                 <div id="detPagesGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3"></div>
                 <div id="detail-pages-pagination" class="flex justify-center gap-2 mt-8 flex-wrap"></div>
+            </div>
+        </div>
+
+        <!-- ================= EPISODE SELECTOR MODAL ================= -->
+        <div id="episodePickerModal" class="fixed inset-0 bg-black/80 z-50 hide flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-darkCard p-6 rounded-2xl shadow-2xl max-w-2xl w-full border border-gray-700">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold" data-i18n="select_episode">Select Episode</h2>
+                        <p class="text-sm text-gray-400" data-i18n="search_episodes">Search episodes...</p>
+                    </div>
+                    <button onclick="Detail.closeEpisodePicker()" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                </div>
+                <input id="episodePickerFilter" type="search" oninput="Detail.filterEpisodePicker()" placeholder="Search episode number or title..." data-i18n-placeholder="search_episodes" class="w-full bg-darkBg text-white border border-gray-600 rounded px-4 py-3 outline-none focus:border-nRed" />
+                <div id="episodePickerList" class="mt-4 grid gap-2 max-h-[60vh] overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <!-- ================= GROUP DETAIL VIEW ================= -->
+        <div id="view-group" class="view hide max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-8 bg-darkCard p-6 rounded-lg mb-6">
+                <div class="w-full md:w-1/3 max-w-sm mx-auto">
+                    <img id="grpCover" src="" class="w-full rounded shadow-lg" style="cursor: pointer;">
+                </div>
+                <div class="w-full md:w-2/3">
+                    <div class="flex justify-between items-start mb-4">
+                        <h1 id="grpTitle" class="text-3xl font-bold line-clamp-3">Group Title Here</h1>
+                        <button id="btnGrpFavorite" onclick="GroupDetail.toggleFavorite()" class="text-2xl text-gray-500 hover:text-nRed transition flex-shrink-0" data-i18n-title="add_to_fav_list" title="">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4 flex flex-wrap items-start gap-3">
+                        <span class="text-gray-400 text-sm font-semibold w-28 flex-shrink-0" data-i18n="artists">Artists:</span>
+                        <div id="grpArtists" class="flex-1 flex flex-wrap gap-2 min-w-0"></div>
+                    </div>
+                    <div class="mb-4 flex flex-wrap items-start gap-3">
+                        <span class="text-gray-400 text-sm font-semibold w-28 flex-shrink-0" data-i18n="tags">Tags:</span>
+                        <div id="grpTags" class="flex-1 flex flex-wrap gap-2 min-w-0"></div>
+                    </div>
+                    <div class="mb-4 flex flex-wrap items-start gap-3">
+                        <span class="text-gray-400 text-sm font-semibold w-28 flex-shrink-0" data-i18n="characters">Characters:</span>
+                        <div id="grpCharacters" class="flex-1 flex flex-wrap gap-2 min-w-0"></div>
+                    </div>
+                    <div class="mb-6 flex flex-wrap items-start gap-3">
+                        <span class="text-gray-400 text-sm font-semibold w-28 flex-shrink-0" data-i18n="series">Series:</span>
+                        <div id="grpSeries" class="flex-1 flex flex-wrap gap-2 min-w-0"></div>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 text-gray-400 text-sm mb-6 flex-wrap">
+                        <span><i class="fa-solid fa-layer-group"></i> <span id="grpEpisodeCount">0</span> <span data-i18n="items_count">ตอน</span></span>
+                        <button id="btnGrpWatchLater" onclick="GroupDetail.toggleWatchLater()" class="text-gray-400 hover:text-cyan-400 transition flex items-center gap-1 border border-gray-500 hover:border-cyan-400 rounded-full px-3 py-2" data-i18n-title="add_to_watch_later" title="">
+                            <i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 mb-6">
+                        <button id="btnGrpReadNow" onclick="GroupDetail.readNow()" class="bg-gradient-to-r from-nRed to-red-600 hover:from-red-600 hover:to-red-700 px-6 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transition text-white" data-i18n-title="read_now" title="">
+                            <i class="fa-solid fa-book-open-reader"></i> <span data-i18n="read_now">อ่านเลย</span>
+                        </button>
+                        <button id="btnGrpEdit" onclick="GroupDetail.editGroup()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-6 py-2 rounded-lg font-bold text-sm shadow-lg transition text-white" data-i18n="edit_btn" data-i18n-title="edit_title" title="">
+                            <i class="fa-solid fa-wrench"></i> <span data-i18n="edit_btn">แก้ไข</span>
+                        </button>
+                        <button onclick="GroupDetail.exportGroup()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-6 py-2 rounded-lg font-bold text-sm shadow-lg transition text-white" data-i18n-title="export_group" title="ส่งออก">
+                            <i class="fa-solid fa-file-export"></i> <span data-i18n="export_btn">ส่งออก</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-darkCard p-6 rounded-lg">
+                <div class="flex items-center justify-between gap-4 mb-4 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-xl font-bold border-b border-gray-700 pb-2" data-i18n="items_count">Episodes</h3>
+                        <button id="btnGrpListEdit" onclick="GroupDetail.toggleListEditMode()" class="bg-gray-800 text-gray-200 hover:bg-gray-700 px-3 py-1 rounded-lg text-xs border border-gray-700 transition" data-i18n="group_list_edit_btn">Edit List</button>
+                    </div>
+                    <input type="search" id="grpEpisodeSearch" onkeyup="GroupDetail.filterEpisodes()" placeholder="Search episodes..." data-i18n-placeholder="search_episodes" class="bg-darkBg text-white border border-gray-600 rounded px-3 py-2 text-xs outline-none focus:border-nRed"/>
+                </div>
+                <div id="grpEpisodesGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3"></div>
+                <div id="group-episodes-pagination" class="flex justify-center gap-2 mt-8 flex-wrap"></div>
+            </div>
+        </div>
+
+        <!-- ================= GROUP EDIT MODAL ================= -->
+        <div id="groupEditModal" class="fixed inset-0 bg-black/80 z-50 hide flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-darkCard p-6 rounded-xl shadow-2xl max-w-4xl w-full border border-gray-700 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold" data-i18n="group_edit_title">Edit Group</h2>
+                        <p class="text-sm text-gray-400" data-i18n="group_edit_description">Add episodes from other stories and rename the group.</p>
+                    </div>
+                    <button onclick="GroupDetail.closeEditModal()" class="text-gray-400 hover:text-white text-xl flex-shrink-0">&times;</button>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6 mb-6">
+                    <!-- Cover Image Sidebar -->
+                    <div class="flex flex-col items-center gap-3 md:w-40 flex-shrink-0">
+                        <label class="text-sm text-gray-300 font-semibold w-full text-center">Group Cover</label>
+                        <div 
+                            id="groupEditCoverContainer" 
+                            class="w-full aspect-a4 bg-gray-900 border-2 border-dashed border-gray-600 rounded-lg overflow-hidden cursor-pointer hover:border-nRed transition flex items-center justify-center group relative"
+                            onmouseover="this.classList.add('border-nRed')"
+                            onmouseout="this.classList.remove('border-nRed')"
+                            ondrop="GroupDetail.handleCoverDrop(event)"
+                            ondragover="GroupDetail.handleCoverDragOver(event)"
+                            ondragleave="GroupDetail.handleCoverDragLeave(event)"
+                            onclick="document.getElementById('groupEditCoverInput').click()"
+                        >
+                            <img 
+                                id="groupEditCoverImage" 
+                                class="w-full h-full object-cover" 
+                                style="display: none;"
+                            />
+                            <div id="groupEditCoverPlaceholder" class="flex flex-col items-center justify-center gap-2 text-center px-2">
+                                <i class="fa-solid fa-image text-gray-500 text-3xl"></i>
+                                <span class="text-xs text-gray-500">Click or drag cover</span>
+                            </div>
+                        </div>
+                        <input 
+                            id="groupEditCoverInput" 
+                            type="file" 
+                            accept="image/*" 
+                            class="hidden" 
+                            onchange="GroupDetail.handleCoverSelect(event)"
+                        />
+                        <button 
+                            id="groupEditCoverClearBtn"
+                            onclick="GroupDetail.clearCover()" 
+                            class="text-xs px-3 py-1 rounded bg-gray-700 hover:bg-red-600 text-gray-300 hover:text-white transition hidden"
+                        >Clear Cover</button>
+                    </div>
+
+                    <!-- Form Fields -->
+                    <div class="flex-1">
+                        <div class="grid gap-4">
+                            <div>
+                                <label class="text-sm text-gray-300" data-i18n="group_name">Group name</label>
+                                <input id="groupEditNameInput" class="w-full bg-darkBg text-white border border-gray-600 rounded px-3 py-2 outline-none" />
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-300" data-i18n="add_episodes_from_other">Add episodes from other stories</label>
+                                <input id="groupEditSearch" type="search" onkeyup="GroupDetail.filterEditCandidates()" placeholder="Search by title, tags, or artist..." data-i18n-placeholder="search_episodes" class="w-full bg-darkBg text-white border border-gray-600 rounded px-3 py-2 outline-none" />
+                            </div>
+                        </div>
+                        <div id="groupEditCandidates" class="max-h-64 overflow-y-auto space-y-2 mt-4 border border-gray-700 rounded p-2 bg-gray-900"></div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button onclick="GroupDetail.closeEditModal()" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white" data-i18n="cancel_btn">Cancel</button>
+                    <button onclick="GroupDetail.confirmEditGroup()" class="px-4 py-2 rounded bg-nRed hover:bg-red-600 text-white" data-i18n="confirm_btn">Confirm</button>
+                </div>
             </div>
         </div>
 
@@ -926,6 +1143,13 @@
                     <button onclick="Reader.nextPage()" class="p-2 hover:text-nRed"><i class="fa-solid fa-chevron-right"></i></button>
                     <div class="w-px h-4 bg-gray-600 mx-2"></div>
                     <button onclick="Reader.randomPage()" class="p-2 hover:text-nRed" data-i18n-title="random_page_title" title="สุ่มหน้า"><i class="fa-solid fa-dice"></i></button>
+                    <!-- Episode Navigation (shown only when in a group) -->
+                    <div class="hide w-px h-4 bg-gray-600 mx-2" id="episodeDivider"></div>
+                    <div id="readerEpisodeControls" class="hide flex items-center gap-2">
+                        <button onclick="Reader.prevEpisode()" class="p-2 hover:text-cyan-400" data-i18n-title="prev_episode_title" title="ตอนก่อนหน้า"><i class="fa-solid fa-backward"></i></button>
+                        <span class="text-xs text-cyan-300"><span id="currentEpisodeNum">1</span> / <span id="totalEpisodeNum">0</span></span>
+                        <button onclick="Reader.nextEpisode()" class="p-2 hover:text-cyan-400" data-i18n-title="next_episode_title" title="ตอนถัดไป"><i class="fa-solid fa-forward"></i></button>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-3">
@@ -1095,6 +1319,26 @@
                 </div>
                 <div class="flex justify-end gap-2 border-t border-gray-700 pt-4">
                     <button onclick="document.getElementById('settingsModal').classList.add('hide')" class="bg-gradient-to-r from-nRed to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg font-medium transition shadow-md" data-i18n="close_btn_settings_modal">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= EDIT TAG MODAL ================= -->
+        <div id="editTagModal" class="fixed inset-0 bg-black/80 z-50 hide flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-darkCard p-8 rounded-xl shadow-2xl max-w-md w-full border border-gray-700">
+                <div class="flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-tag text-nRed text-xl"></i>
+                    <h3 class="text-xl font-bold" data-i18n="edit_tag_title">แก้ไขแท็ก</h3>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" data-i18n="tag_name_label">ชื่อแท็ก</label>
+                        <input type="text" id="editTagInput" class="w-full bg-darkBg text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-nRed focus:outline-none" placeholder="ใส่ชื่อแท็กใหม่">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-6 border-t border-gray-700 pt-4">
+                    <button onclick="document.getElementById('editTagModal').classList.add('hide')" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition" data-i18n="cancel_btn">ยกเลิก</button>
+                    <button onclick="List.confirmEditTag()" class="bg-nRed hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition" data-i18n="confirm_btn">ยืนยัน</button>
                 </div>
             </div>
         </div>
@@ -1303,13 +1547,18 @@
                 characters: "ตัวละคร", all_characters: '<i class="fa-solid fa-masks-theater"></i> ตัวละครทั้งหมด', no_characters: "ไม่มีตัวละคร",
                 series_label: "ซีรี่ย์ (Series) <span class='text-xs text-gray-500'>- คั่นด้วยลูกน้ำ (,)</span>", series_placeholder: "series_name",
                 series: "ซีรี่ย์", all_series: '<i class="fa-solid fa-book"></i> ซีรี่ย์ทั้งหมด', no_series: "ไม่มีซีรี่ย์",
+                groups_label: "กลุ่ม (Groups) <span class='text-xs text-gray-500'>- คั่นด้วยลูกน้ำ (,)</span>", groups_placeholder: "Story Arc, Volume",
+                groups: "กลุ่ม", all_groups: '<i class="fa-solid fa-layer-group"></i> กลุ่มทั้งหมด', no_groups: "ไม่มีกลุ่ม",
+                group_view_toggle_title: "สลับดูแบบกลุ่ม", group_view_btn: "ดูแบบกลุ่ม", group_view_btn_single: "ดูแบบเดี่ยว",
                 pages_label: "หน้าทั้งหมด (Pages) - ลากวางได้หลายรูป", add_image_btn: "เพิ่มรูปภาพ",
-                pages_placeholder: "ลากรูปภาพมาวางที่นี่ หรือกดเพิ่มรูปภาพ", cancel_btn: "ยกเลิก", save_btn: "บันทึกและเผยแพร่",
-                no_tags: "ไม่มีแท็ก", no_artists: "ไม่ระบุ", pages_count: "หน้า",
+                pages_placeholder: "ลากรูปภาพมาวางที่นี่ หรือกดเพิ่มรูปภาพ", cancel_btn: "ยกเลิก", confirm_btn: "ยืนยัน", save_btn: "บันทึกและเผยแพร่",
+                no_tags: "ไม่มีแท็ก", no_artists: "ไม่ระบุ", pages_count: "หน้า", episode_count: "ตอน",
                 read_now: "อ่านเลย", read_continue: "อ่านต่อ (หน้า {page})", random_read_title: "สุ่มหน้าอ่าน",
                 clear_bookmark_title: "เคลียร์บุ๊กมาร์ก", delete_bookmark: "ลบที่คั่น", delete_trans_sets_desc: "เลือกชุดแปลที่ต้องการลบ :",
-                export_this_title: "ส่งออกเรื่องนี้", edit_title: "แก้ไข", delete_title: "ลบเรื่องนี้",
+                export_this_title: "ส่งออกเรื่องนี้", edit_title: "แก้ไข", edit_btn: "แก้ไข", delete_title: "ลบเรื่องนี้",
+                group_edit_title: "แก้ไขกลุ่ม", group_edit_description: "เพิ่มตอนจากเรื่องอื่น ๆ และแก้ไขชื่อกลุ่ม", group_name: "ชื่อกลุ่ม", add_episodes_from_other: "เพิ่มตอนจากเรื่องอื่น ๆ", search_episodes: "ค้นหาตอน...", select_episode: "เลือกตอน", add_selected_episodes: "เพิ่มตอนที่เลือก", group_name_required: "กรุณาป้อนชื่อกลุ่ม", group_list_edit_btn: "จัดการรายการ", group_list_edit_done: "เสร็จสิ้น", removed_from_group: "ลบออกจากกลุ่มเรียบร้อยแล้ว",
                 preview_header: "พรีวิว (Pages)", back_btn: "กลับ", page_label: "หน้า", random_page_title: "สุ่มหน้า",
+                prev_episode_title: "ตอนก่อนหน้า", next_episode_title: "ตอนถัดไป", first_episode: "ตอนแรก", last_episode: "ตอนสุดท้าย",
                 show_trans: "แสดงคำแปล", add_trans: "เพิ่มคำแปล", close_edit: "ปิดโหมดแก้",reader_back_button: " กลับ",
                 settings_title: "ขนาดภาพ", fit_window: "พอดีหน้าต่าง (Fit Window)", original_size: "ขนาดดั้งเดิม (Original)", zoom_percentage: "ซูม (%)",
                 edit_banner: "<b>โหมดแก้ไข:</b> คลิกรูปเพื่อเพิ่มกล่อง, คลิกขอบกล่องเพื่อลาก", unsaved_warning: "ยังไม่ได้บันทึก!",
@@ -1324,13 +1573,17 @@
                 addnewtranscollect: "+ ชุดใหม่",grid_edit_delete_title: "แก้ไข / ลบ",shape_rect: "สี่เหลี่ยม", delete_trans_sets_title: "ลบชุดคำแปล", delete_trans_sets: "ลบชุดคำแปล", delete_confirm_msg: "คุณแน่ใจหรือไม่ว่าต้องการลบชุดแปลที่เลือก?", delete_btn_text: "ลบ", create_continuation_title: "สร้างตอนต่อ",
                 sort_most_viewed: "อ่านบ่อยสุด", sort_least_viewed: "อ่านน้อยสุด",
                 storage_usage: "พื้นที่เก็บข้อมูล", storage_used: "ใช้ไป", storage_total: "เต็ม", storage_percent: "ใช้ไป", refresh_storage_btn: "อัปเดต", storage_info: "ข้อมูล IndexedDB",
-                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> ดูภายหลัง', watch_later_list: "ดูภายหลัง", add_to_watch_later: "เพิ่มไปดูภายหลัง", added_to_watch_later: "เพิ่มไปดูภายหลังแล้ว",
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> ดูภายหลัง', watch_later_list: "ดูภายหลัง", add_to_watch_later: "เพิ่มไปดูภายหลัง", added_to_watch_later: "เพิ่มไปดูภายหลังแล้ว", add_to_favorites: "เพิ่มรายการโปรด", added_to_favorites: "เพิ่มรายการโปรดแล้ว", removed_from_favorites: "ลบออกจากรายการโปรดแล้ว", removed_from_watch_later: "ลบออกจากดูภายหลังแล้ว",
                 replace_image_title: "แทนที่รูปนี้", replace_image: "แทนที่",
                 export_menu_title: "ส่งออก", export_all_option: "ส่งออกข้อมูลทั้งหมด", export_selected_option: "ส่งออกที่เลือก",
                 export_selected_count: "เลือก {count} เรื่อง", export_cancel_btn: "ยกเลิก", export_selected_none_error: "กรุณาเลือกเรื่องที่ต้องการส่งออก",
+                export_btn: "ส่งออก", export_success: "ส่งออกสำเร็จ", export_failed: "ส่งออกล้มเหลว", export_group: "ส่งออกกลุ่ม",
                 export_file_too_large: "ไฟล์มีขนาดใหญ่เกินไป ({size}MB). แนะนำให้ส่งออกแบบแยก",
                 export_multiple_confirm: "ต้องการส่งออก {{count}} เรื่อง? ไฟล์รวมมีขนาด ~{{size}}MB",
-                export_queue_started: "เริ่มสร้างคิวการดาวน์โหลด..."
+                export_queue_started: "เริ่มสร้างคิวการดาวน์โหลด...",
+                edit_tag_title: "แก้ไขแท็ก",
+                tag_name_label: "ชื่อแท็ก",
+                list_edit_delete_title: "แก้ไข / ลบแท็ก"
             },
             en: {
                 decrease_size_title: "Decrease text size", increase_size_title: "Increase text size", shape_rect_title: "Rectangle", bg_white_title: "White background", bg_black_title: "Black background", bg_clear_title: "Transparent background", color_black_title: "Black text", color_white_title: "White text",
@@ -1356,13 +1609,18 @@
                 characters: "Characters", all_characters: '<i class="fa-solid fa-masks-theater"></i> All Characters', no_characters: "No Characters",
                 series_label: "Series <span class='text-xs text-gray-500'>- comma separated</span>", series_placeholder: "series_name",
                 series: "Series", all_series: '<i class="fa-solid fa-book"></i> All Series', no_series: "No Series",
+                groups_label: "Groups <span class='text-xs text-gray-500'>- comma separated</span>", groups_placeholder: "Story Arc, Volume",
+                groups: "Groups", all_groups: '<i class="fa-solid fa-layer-group"></i> All Groups', no_groups: "No Groups",
+                group_view_toggle_title: "Toggle group view", group_view_btn: "Group View", group_view_btn_single: "Single View",
                 pages_label: "Pages - Drag & Drop multiple", add_image_btn: "Add Images",
-                pages_placeholder: "Drag images here or click Add Images", cancel_btn: "Cancel", save_btn: "Save & Publish",
-                no_tags: "No Tags", no_artists: "Unknown", pages_count: "pages",
+                pages_placeholder: "Drag images here or click Add Images", cancel_btn: "Cancel", confirm_btn: "Confirm", save_btn: "Save & Publish",
+                no_tags: "No Tags", no_artists: "Unknown", pages_count: "pages", episode_count: "episode",
                 read_now: "Read Now", read_continue: "Continue (Page {page})", random_read_title: "Random Page",
                 clear_bookmark_title: "Clear Bookmark", delete_bookmark: "Remove Bookmark", delete_trans_sets_desc: "Select translation sets to delete:",
-                export_this_title: "Export this", edit_title: "Edit", delete_title: "Delete",
+                export_this_title: "Export this", edit_title: "Edit", edit_btn: "Edit", delete_title: "Delete",
+                group_edit_title: "Edit Group", group_edit_description: "Add episodes from other stories and rename the group", group_name: "Group Name", add_episodes_from_other: "Add episodes from other stories", search_episodes: "Search episodes...", select_episode: "Select episode", add_selected_episodes: "Add Selected", group_name_required: "Group name is required", group_list_edit_btn: "Manage List", group_list_edit_done: "Done", removed_from_group: "Removed from group",
                 preview_header: "Preview (Pages)", back_btn: "Back", page_label: "Page", random_page_title: "Random Page",
+                prev_episode_title: "Previous Episode", next_episode_title: "Next Episode", first_episode: "First Episode", last_episode: "Last Episode",
                 show_trans: "Show Translations", add_trans: "Add Translation", close_edit: "Exit Edit Mode", reader_back_button: " Back",
                 settings_title: "Image Fit", fit_window: "Fit Window", original_size: "Original Size", zoom_percentage: "Zoom (%)",
                 edit_banner: "<b>Edit Mode:</b> Click image to add box, click edge to drag", unsaved_warning: "Unsaved Changes!",
@@ -1377,13 +1635,17 @@
                 addnewtranscollect: "+ New Set",grid_edit_delete_title: "Edit / Delete",shape_rect: "Rectangle", delete_trans_sets_title: "Delete Translation Sets", delete_trans_sets: "Delete Sets", delete_confirm_msg: "Are you sure you want to delete selected translation sets?", delete_btn_text: "Delete", create_continuation_title: "Create Continuation",
                 sort_most_viewed: "Most Viewed", sort_least_viewed: "Least Viewed",
                 storage_usage: "Storage Usage", storage_used: "Used", storage_total: "Total", storage_percent: "Used", refresh_storage_btn: "Refresh", storage_info: "IndexedDB Storage",
-                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> Watch Later', watch_later_list: "Watch Later", add_to_watch_later: "Add to Watch Later", added_to_watch_later: "Added to Watch Later",
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> Watch Later', watch_later_list: "Watch Later", add_to_watch_later: "Add to Watch Later", added_to_watch_later: "Added to Watch Later", add_to_favorites: "Add to Favorites", added_to_favorites: "Added to Favorites", removed_from_favorites: "Removed from Favorites", removed_from_watch_later: "Removed from Watch Later",
                 replace_image_title: "Replace this image", replace_image: "Replace",
                 export_menu_title: "Export", export_all_option: "Export All", export_selected_option: "Export Selected",
                 export_selected_count: "Selected {count} items", export_cancel_btn: "Cancel", export_selected_none_error: "Please select items to export",
+                export_btn: "Export", export_success: "Export successful", export_failed: "Export failed", export_group: "Export Group",
                 export_file_too_large: "File is too large ({size}MB). Recommended to export separately",
                 export_multiple_confirm: "Export {{count}} items? Total file size ~{{size}}MB",
-                export_queue_started: "Starting download queue..."
+                export_queue_started: "Starting download queue...",
+                edit_tag_title: "Edit Tag",
+                tag_name_label: "Tag Name",
+                list_edit_delete_title: "Edit / Delete Tags"
             },
             cn: {
                 decrease_size_title: "减小文字大小", increase_size_title: "增大文字大小", shape_rect_title: "矩形", bg_white_title: "白色背景", bg_black_title: "黑色背景", bg_clear_title: "透明背景", color_black_title: "黑色文字", color_white_title: "白色文字",
@@ -1409,13 +1671,18 @@
                 characters: "角色", all_characters: '<i class="fa-solid fa-masks-theater"></i> 所有角色', no_characters: "无角色",
                 series_label: "系列 <span class='text-xs text-gray-500'>- 用逗号 (,) 分隔</span>", series_placeholder: "系列名",
                 series: "系列", all_series: '<i class="fa-solid fa-book"></i> 所有系列', no_series: "无系列",
+                groups_label: "分组 <span class='text-xs text-gray-500'>- 用逗号 (,) 分隔</span>", groups_placeholder: "故事线, 卷",
+                groups: "分组", all_groups: '<i class="fa-solid fa-layer-group"></i> 所有分组', no_groups: "无分组",
+                group_view_toggle_title: "切换分组视图", group_view_btn: "分组视图", group_view_btn_single: "单个视图",
                 pages_label: "内容页 - 可多选拖拽", add_image_btn: "添加图片",
-                pages_placeholder: "将图片拖到这里或点击添加", cancel_btn: "取消", save_btn: "保存并发布",
-                no_tags: "暂无标签", no_artists: "未知作者", pages_count: "页",
+                pages_placeholder: "将图片拖到这里或点击添加", cancel_btn: "取消", confirm_btn: "确认", save_btn: "保存并发布",
+                no_tags: "暂无标签", no_artists: "未知作者", pages_count: "页", episode_count: "话",
                 read_now: "立即阅读", read_continue: "继续阅读 (第 {page} 页)", random_read_title: "随机阅读",
                 clear_bookmark_title: "清除书签", delete_bookmark: "删除书签", delete_trans_sets_desc: "选择要删除的翻译集:",
-                export_this_title: "导出此项", edit_title: "编辑", delete_title: "删除项目",
+                export_this_title: "导出此项", edit_title: "编辑", edit_btn: "编辑", delete_title: "删除项目",
+                group_edit_title: "编辑分组", group_edit_description: "从其他故事添加章节并重命名分组", group_name: "分组名称", add_episodes_from_other: "从其他故事添加章节", search_episodes: "搜索章节...", select_episode: "选择章节", add_selected_episodes: "添加所选", group_name_required: "请输入分组名称", group_list_edit_btn: "管理列表", group_list_edit_done: "完成", removed_from_group: "已从分组中移除",
                 preview_header: "预览图", back_btn: "返回", page_label: "页", random_page_title: "随机跳页",
+                prev_episode_title: "上一话", next_episode_title: "下一话", first_episode: "第一话", last_episode: "最后一话",
                 show_trans: "显示翻译", add_trans: "添加翻译", close_edit: "退出编辑", reader_back_button: " 返回",
                 settings_title: "显示设置", fit_window: "适应窗口", original_size: "原始大小", zoom_percentage: "缩放 (%)",
                 edit_banner: "<b>编辑模式:</b> 点击图片添加框，拖动边缘移动", unsaved_warning: "尚未保存！",
@@ -1430,13 +1697,17 @@
                 addnewtranscollect: "+ 新建翻译集",grid_edit_delete_title: "编辑 / 删除",shape_rect: "矩形", delete_trans_sets_title: "删除翻译集", delete_trans_sets: "删除翻译集", delete_confirm_msg: "确定要删除选择的翻译集吗？", delete_btn_text: "删除", create_continuation_title: "创建续篇",
                 sort_most_viewed: "最常查看", sort_least_viewed: "最少查看",
                 storage_usage: "数据存储", storage_used: "已用", storage_total: "总容量", storage_percent: "已用", refresh_storage_btn: "刷新", storage_info: "IndexedDB 存储",
-                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> 稍后查看', watch_later_list: "稍后查看", add_to_watch_later: "添加到稍后查看", added_to_watch_later: "已添加到稍后查看",
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> 稍后查看', watch_later_list: "稍后查看", add_to_watch_later: "添加到稍后查看", added_to_watch_later: "已添加到稍后查看", add_to_favorites: "添加到收藏", added_to_favorites: "已添加到收藏", removed_from_favorites: "已从收藏中移除", removed_from_watch_later: "已从稍后查看中移除",
                 replace_image_title: "替换此图片", replace_image: "替换",
                 export_menu_title: "导出", export_all_option: "导出全部", export_selected_option: "导出所选",
                 export_selected_count: "已选择 {count} 项", export_cancel_btn: "取消", export_selected_none_error: "请选择要导出的项目",
+                export_btn: "导出", export_success: "导出成功", export_failed: "导出失败", export_group: "导出组",
                 export_file_too_large: "文件过大 ({size}MB). 建议分别导出",
                 export_multiple_confirm: "导出 {{count}} 项? 总文件大小约 {{size}}MB",
-                export_queue_started: "开始下载队列..."
+                export_queue_started: "开始下载队列...",
+                edit_tag_title: "编辑标签",
+                tag_name_label: "标签名称",
+                list_edit_delete_title: "编辑 / 删除标签"
             },
             jp: {
                 decrease_size_title: "テキストサイズを縮小", increase_size_title: "テキストサイズを拡大", shape_rect_title: "矩形", bg_white_title: "白い背景", bg_black_title: "黒い背景", bg_clear_title: "透明な背景", color_black_title: "黒いテキスト", color_white_title: "白いテキスト",
@@ -1462,13 +1733,18 @@
                 characters: "キャラクター", all_characters: '<i class="fa-solid fa-masks-theater"></i> 全キャラクター', no_characters: "キャラなし",
                 series_label: "シリーズ <span class='text-xs text-gray-500'>- カンマ (,) 区切り</span>", series_placeholder: "シリーズ名",
                 series: "シリーズ", all_series: '<i class="fa-solid fa-book"></i> 全シリーズ', no_series: "シリーズなし",
+                groups_label: "グループ <span class='text-xs text-gray-500'>- カンマ (,) 区切り</span>", groups_placeholder: "ストーリーアーク, 巻",
+                groups: "グループ", all_groups: '<i class="fa-solid fa-layer-group"></i> 全グループ', no_groups: "グループなし",
+                group_view_toggle_title: "グループビュー切り替え", group_view_btn: "グループビュー", group_view_btn_single: "単一ビュー",
                 pages_label: "ページ - 複数ドラッグ＆ドロップ可", add_image_btn: "画像を追加",
-                pages_placeholder: "画像をここにドラッグするかクリックして追加", cancel_btn: "キャンセル", save_btn: "保存して公開",
-                no_tags: "タグなし", no_artists: "不明", pages_count: "枚",
+                pages_placeholder: "画像をここにドラッグするかクリックして追加", cancel_btn: "キャンセル", confirm_btn: "確認", save_btn: "保存して公開",
+                no_tags: "タグなし", no_artists: "不明", pages_count: "枚", episode_count: "話",
                 read_now: "今すぐ読む", read_continue: "続きから読む ({page} ページ)", random_read_title: "ランダム再生",
                 clear_bookmark_title: "ブックマーク解除", delete_bookmark: "削除", delete_trans_sets_desc: "削除するセットを選択してください:",
-                export_this_title: "これを書き出し", edit_title: "編集", delete_title: "削除する",
+                export_this_title: "これを書き出し", edit_title: "編集", edit_btn: "編集", delete_title: "削除する",
+                group_edit_title: "グループの編集", group_edit_description: "他の作品からエピソードを追加し、グループ名を変更します", group_name: "グループ名", add_episodes_from_other: "他の作品からエピソードを追加", search_episodes: "エピソードを検索...", select_episode: "エピソードを選択", add_selected_episodes: "選択を追加", group_name_required: "グループ名を入力してください", group_list_edit_btn: "リストを管理", group_list_edit_done: "完了", removed_from_group: "グループから削除しました",
                 preview_header: "プレビュー", back_btn: "戻る", page_label: "ページ", random_page_title: "ページをランダム表示",
+                prev_episode_title: "前の話", next_episode_title: "次の話", first_episode: "最初の話", last_episode: "最後の話",
                 show_trans: "翻訳を表示", add_trans: "翻訳を追加", close_edit: "編集終了", reader_back_button: " 戻る",
                 settings_title: "画像サイズ", fit_window: "ウィンドウに合わせる", original_size: "元のサイズ", zoom_percentage: "ズーム (%)",
                 edit_banner: "<b>編集モード:</b> 画像をクリックして枠を追加、枠をドラッグして移動", unsaved_warning: "未保存の変更があります！",
@@ -1483,13 +1759,17 @@
                 addnewtranscollect: "+ 新しいセット",grid_edit_delete_title: "編集 / 削除",shape_rect: "四角形", delete_trans_sets_title: "翻訳セットを削除", delete_trans_sets: "翻訳セットを削除",delete_confirm_msg: "本当に削除しますか？", delete_btn_text: "削除", create_continuation_title: "続編を作成",
                 sort_most_viewed: "最も多く読まれた", sort_least_viewed: "最も読まれていない",
                 storage_usage: "ストレージ使用量", storage_used: "使用", storage_total: "容量", storage_percent: "使用", refresh_storage_btn: "更新", storage_info: "IndexedDB ストレージ",
-                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> あとで見る', watch_later_list: "あとで見る", add_to_watch_later: "あとで見るに追加", added_to_watch_later: "あとで見るに追加しました",
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> あとで見る', watch_later_list: "あとで見る", add_to_watch_later: "あとで見るに追加", added_to_watch_later: "あとで見るに追加しました", add_to_favorites: "お気に入りに追加", added_to_favorites: "お気に入りに追加しました", removed_from_favorites: "お気に入りから削除しました", removed_from_watch_later: "あとで見るから削除しました",
                 replace_image_title: "この画像を置き換え", replace_image: "置き換え",
                 export_menu_title: "書き出し", export_all_option: "すべて書き出し", export_selected_option: "選択したものを書き出し",
                 export_selected_count: "{count} 件を選択", export_cancel_btn: "キャンセル", export_selected_none_error: "書き出すアイテムを選択してください",
+                export_btn: "エクスポート", export_success: "エクスポート成功", export_failed: "エクスポート失敗", export_group: "グループをエクスポート",
                 export_file_too_large: "ファイルが大きすぎます ({size}MB). 別々に書き出すことをお勧めします",
                 export_multiple_confirm: "{{count}} 件を書き出しますか? 合計ファイルサイズ約 {{size}}MB",
-                export_queue_started: "ダウンロードキューを開始中..."
+                export_queue_started: "ダウンロードキューを開始中...",
+                edit_tag_title: "タグを編集",
+                tag_name_label: "タグ名",
+                list_edit_delete_title: "編集 / 削除"
             }
         };
 
@@ -1503,11 +1783,13 @@
 
         // ================= DATABASE (Dexie.js) v3 =================
         const db = new Dexie("UGalDB");
-        db.version(89).stores({
+        db.version(92).stores({
             galleries: '++id, title, createdAt, isFavorite, isWatchLater, lastReadPage, lastAccessedAt, totalPages, viewCount',
             pages: '++id, galleryId, order',
             settings: 'key',
-            translationSets: '++id, galleryId, name'
+            translationSets: '++id, galleryId, name',
+            groups: '++id, galleryId, name',
+            groupMetadata: '++id, name, isFavorite, isWatchLater, lastReadEpisode'
         });
         
         // Migration for version 7 - add series field
@@ -1519,8 +1801,9 @@
                     batch.forEach(g => {
                         if (!g.characters) g.characters = [];
                         if (!g.series) g.series = [];
-                        if (!g.lastAccessedAt) g.lastAccessedAt = null; // Initialize new field
-                        if (!g.isWatchLater) g.isWatchLater = false; // Initialize watch later field
+                        if (!g.groups) g.groups = []; // Initialize groups array
+                        if (!g.lastAccessedAt) g.lastAccessedAt = null;
+                        if (!g.isWatchLater) g.isWatchLater = false;
                     });
                     db.galleries.bulkPut(batch);
                 }
@@ -1593,7 +1876,9 @@
                 availableTranslationSets: [],
                 scrollY: 0, // Track scroll position for single page mode
                 webtoonScrollY: 0, // Track scroll position for webtoon mode
-                zIndexCounter: 100
+                zIndexCounter: 100,
+                lastReadGroupName: null, // Track which group we're reading within
+                lastReadGroupIndex: 0 // Track which episode in the group
             }
         };
 
@@ -1620,6 +1905,7 @@
                     gridPage: Grid.currentPage,
                     randomOrder: Grid.randomOrder,
                     userMode: Grid.userMode,
+                    groupViewMode: Grid.groupViewMode,
                     detailPage: App.detail.currentPage,
                     currentTranslationSetId: App.reader.currentTranslationSetId,
                     readMode: App.reader.readMode,
@@ -1651,6 +1937,9 @@
                 }
                 if (savedState && savedState.userMode) {
                     Grid.userMode = savedState.userMode;
+                }
+                if (savedState && typeof savedState.groupViewMode === 'boolean') {
+                    Grid.groupViewMode = savedState.groupViewMode;
                 }
                 if (savedState && savedState.detailPage) {
                     App.detail.currentPage = savedState.detailPage;
@@ -1685,15 +1974,25 @@
                 // 3. Determine initial state (URL hash > localStorage > default)
                 let initialState = { view: 'home', params: null };
                 if (location.hash) {
-                    const [_, view, paramsStr] = location.hash.match(/^#([a-zA-Z_]+)(?:\/(.*))?$/) || [];
-                    if (view) {
-                        let params = paramsStr ? (isNaN(paramsStr) ? paramsStr : Number(paramsStr)) : null;
-                        // Special case for reader: params are galleryId,index
-                        if (view === 'reader' && paramsStr) {
-                            const [galleryId, index] = paramsStr.split(',').map(Number);
-                            params = { galleryId, index: index || 0 };
+                    const hash = location.hash.slice(1);
+                    
+                    // Handle reader view: reader/galleryId,index
+                    if (hash.startsWith('reader/')) {
+                        const [galleryId, index] = hash.slice(7).split(',').map(Number);
+                        initialState = { view: 'reader', params: { galleryId, index: index || 0 } };
+                    }
+                    // Handle group view: group/groupName
+                    else if (hash.startsWith('group/')) {
+                        const groupName = decodeURIComponent(hash.slice(6));
+                        initialState = { view: 'group', params: groupName };
+                    }
+                    // Handle other views: view/params
+                    else {
+                        const [_, view, paramsStr] = hash.match(/^([a-zA-Z_]+)(?:\/(.*))?$/) || [];
+                        if (view) {
+                            let params = paramsStr ? (isNaN(paramsStr) ? paramsStr : Number(paramsStr)) : null;
+                            initialState = { view, params };
                         }
-                        initialState = { view, params };
                     }
                 } else if (savedState) {
                     initialState = { view: savedState.view, params: savedState.navParams };
@@ -1795,6 +2094,14 @@
                     document.getElementById('view-detail').classList.remove('hide');
                     document.getElementById('navSearchZone').classList.add('hide');
                     await Detail.load(params);
+                } else if (viewName === 'group' && params) {
+                    document.getElementById('view-group').classList.remove('hide');
+                    document.getElementById('navSearchZone').classList.add('hide');
+                    if (GroupDetail && typeof GroupDetail.load === 'function') {
+                        await GroupDetail.load(params);
+                    }
+                } else if (viewName === 'group-edit') {
+                    // Modal opened, do nothing
                 } else if (viewName === 'reader' && params && params.galleryId) {
                     // This case is for direct navigation to a reader page (e.g., from history)
                     if (!App.pages || App.currentGalleryId !== params.galleryId) {
@@ -1822,6 +2129,10 @@
                     // Special URL for reader to include page index
                     return `#reader/${state.params.galleryId},${state.params.index || 0}`;
                 }
+                if (state.view === 'group' && state.params) {
+                    // Special URL for group to include group name (encoded)
+                    return `#group/${encodeURIComponent(state.params)}`;
+                }
                 return `#${state.view}${state.params ? '/' + state.params : ''}`;
             },
             createTagBadge: (text, type = 'tag') => {
@@ -1835,6 +2146,9 @@
                 } else if (type === 'series') {
                     color = 'bg-amber-600 hover:bg-amber-500';
                     linkType = 'seriesFilter';
+                } else if (type === 'group') {
+                    color = 'bg-emerald-600 hover:bg-emerald-500';
+                    linkType = 'group';
                 } else {
                     color = 'bg-tagBg hover:bg-gray-600';
                     linkType = 'tagFilter';
@@ -1874,7 +2188,7 @@
             coverUrl: '',
             isPlaying: false,
 
-            start: async function(galleryId, coverUrl, imgElement) {
+            start: async function(galleryId, coverUrl, imgElement, isGroup = false, groupName = null) {
                 // Clear any existing preview
                 this.stop();
 
@@ -1885,8 +2199,21 @@
 
                 // Set initial delay timer (1.5 seconds)
                 this.initialDelayTimer = setTimeout(async () => {
-                    // Fetch pages from database
-                    const pages = await db.pages.where('galleryId').equals(galleryId).sortBy('order');
+                    let pages = [];
+                    
+                    if (isGroup && groupName) {
+                        // For group view: fetch pages from all galleries in the group
+                        const groupData = Grid.groupAggregations[groupName];
+                        if (groupData && groupData.galleries.length > 0) {
+                            for (const gallery of groupData.galleries) {
+                                const galleryPages = await db.pages.where('galleryId').equals(gallery.id).sortBy('order');
+                                pages.push(...galleryPages);
+                            }
+                        }
+                    } else {
+                        // For regular gallery view: fetch pages from single gallery
+                        pages = await db.pages.where('galleryId').equals(galleryId).sortBy('order');
+                    }
                     
                     if (pages.length > 0) {
                         this.pages = pages;
@@ -1900,7 +2227,7 @@
                 if (!this.isPlaying || !this.activeCard) return;
 
                 // Select up to 5 random pages
-                const maxPages = Math.min(5, this.pages.length);
+                const maxPages = Math.min(8, this.pages.length); // Limit to 8 pages for preview
                 const selectedPages = [];
                 const usedIndices = new Set();
 
@@ -1928,7 +2255,7 @@
                         this.showPage(page.imageBlob);
                         
                         pageIndex++;
-                        this.cycleTimer = setTimeout(showNextPage, 1200); // 1.2 second per page
+                        this.cycleTimer = setTimeout(showNextPage, 1800); // 1.5 second per page
                     } else {
                         // After all pages shown, show cover and restart cycle
                         this.showCover();
@@ -1936,7 +2263,7 @@
                             if (this.isPlaying && this.activeCard) {
                                 this.playCycle();
                             }
-                        }, 1200); // 1.2 second delay before next cycle
+                        }, 2200); // 2.2 second delay to show cover before next cycle
                     }
                 };
 
@@ -2011,8 +2338,16 @@
             currentSort: 'newest',
             randomOrder: [], // Store shuffled IDs for persistence after reload
             userMode: 'favorites', // 'favorites' or 'watchLater'
+            groupViewMode: false, // Toggle between single view and group view
+            groupAggregations: {}, // Store {groupName: {coverBlob, galleries: []}}
+            groupMetadataCache: {},
+            isEditMode: false, // Track edit mode for gallery cards
             
             load: async (mode, param = null) => {
+                if (Grid.groupViewMode) {
+                    await Grid.loadGroupMetadataCache();
+                    await Grid.buildGroupAggregations();
+                }
                 App.gridMode = mode;
                 let galleries = await db.galleries.toArray(); // Get all for in-memory sorting
                 
@@ -2043,7 +2378,15 @@
 
                 Grid.allGalleries = galleries;
                 // Reset button state
-                if(document.getElementById('btnGridEdit')) document.getElementById('btnGridEdit').innerHTML = '<i class="fa-solid fa-pen"></i>';
+                Grid.isEditMode = false; // Reset edit mode flag
+                const btnGridEdit = document.getElementById('btnGridEdit');
+                if(btnGridEdit) {
+                    btnGridEdit.innerHTML = '<i class="fa-solid fa-pen"></i>';
+                    btnGridEdit.classList.remove('text-nRed');
+                    btnGridEdit.classList.add('text-gray-400');
+                    btnGridEdit.classList.remove('bg-gray-800');
+                    btnGridEdit.classList.add('bg-gray-700');
+                }
                 
                 // Show/hide shuffle button based on current sort
                 const shuffleBtn = document.getElementById('shuffleBtn');
@@ -2084,6 +2427,12 @@
                 
                 Grid.allGalleries = galleries;
                 
+                // If in group view mode, rebuild aggregations to sort groups properly
+                if (Grid.groupViewMode) {
+                    await Grid.loadGroupMetadataCache();
+                    Grid.buildGroupAggregations();
+                }
+                
                 // Show/hide shuffle button
                 const shuffleBtn = document.getElementById('shuffleBtn');
                 if (sortMode === 'shuffle') {
@@ -2114,33 +2463,107 @@
                     // Reorder galleries based on randomOrder indices
                     const reordered = Grid.randomOrder.map(i => Grid.allGalleries[i]).filter(g => g);
                     Grid.allGalleries = reordered;
+                    
+                    // Also shuffle groups in group view mode
+                    if (Grid.groupViewMode) {
+                        const groupKeys = Object.keys(Grid.groupAggregations);
+                        const savedGroupOrder = groupKeys.map((_, i) => i);
+                        for (let i = savedGroupOrder.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [savedGroupOrder[i], savedGroupOrder[j]] = [savedGroupOrder[j], savedGroupOrder[i]];
+                        }
+                        const shuffledAgg = {};
+                        savedGroupOrder.forEach(idx => {
+                            const key = groupKeys[idx];
+                            shuffledAgg[key] = Grid.groupAggregations[key];
+                        });
+                        Grid.groupAggregations = shuffledAgg;
+                    }
                     return;
                 }
                 
                 // Clear randomOrder when switching away from shuffle
                 Grid.randomOrder = [];
                 
-                Grid.allGalleries.sort((a, b) => {
-                    if (sort === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
-                    if (sort === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
-                    if (sort === 'az') return a.title.localeCompare(b.title);
-                    if (sort === 'za') return b.title.localeCompare(a.title);
-                    if (sort === 'most_pages') return (b.totalPages || 0) - (a.totalPages || 0);
-                    if (sort === 'least_pages') return (a.totalPages || 0) - (b.totalPages || 0);
-                    if (sort === 'most_viewed') return (b.viewCount || 0) - (a.viewCount || 0);
-                    if (sort === 'least_viewed') return (a.viewCount || 0) - (b.viewCount || 0);
-                    if (sort === 'last_read_newest') {
-                        const aDate = a.lastAccessedAt ? new Date(a.lastAccessedAt) : new Date(a.createdAt);
-                        const bDate = b.lastAccessedAt ? new Date(b.lastAccessedAt) : new Date(b.createdAt);
-                        return bDate - aDate;
-                    }
-                    if (sort === 'last_read_oldest') {
-                        const aDate = a.lastAccessedAt ? new Date(a.lastAccessedAt) : new Date(a.createdAt);
-                        const bDate = b.lastAccessedAt ? new Date(b.lastAccessedAt) : new Date(b.createdAt);
-                        return aDate - bDate;
-                    }
-                    return 0;
-                });
+                // If in group view, sort groups instead of galleries
+                if (Grid.groupViewMode) {
+                    const groupsArray = Object.values(Grid.groupAggregations);
+                    groupsArray.sort((a, b) => {
+                        if (sort === 'newest') {
+                            const aDate = a.galleries.length > 0 ? new Date(a.galleries[0].createdAt) : new Date(0);
+                            const bDate = b.galleries.length > 0 ? new Date(b.galleries[0].createdAt) : new Date(0);
+                            return bDate - aDate;
+                        }
+                        if (sort === 'oldest') {
+                            const aDate = a.galleries.length > 0 ? new Date(a.galleries[0].createdAt) : new Date(0);
+                            const bDate = b.galleries.length > 0 ? new Date(b.galleries[0].createdAt) : new Date(0);
+                            return aDate - bDate;
+                        }
+                        if (sort === 'az') return a.name.localeCompare(b.name);
+                        if (sort === 'za') return b.name.localeCompare(a.name);
+                        if (sort === 'most_pages') {
+                            const aPages = a.galleries.reduce((sum, g) => sum + (g.totalPages || 0), 0);
+                            const bPages = b.galleries.reduce((sum, g) => sum + (g.totalPages || 0), 0);
+                            return bPages - aPages;
+                        }
+                        if (sort === 'least_pages') {
+                            const aPages = a.galleries.reduce((sum, g) => sum + (g.totalPages || 0), 0);
+                            const bPages = b.galleries.reduce((sum, g) => sum + (g.totalPages || 0), 0);
+                            return aPages - bPages;
+                        }
+                        if (sort === 'most_viewed') {
+                            const aViews = a.galleries.reduce((sum, g) => sum + (g.viewCount || 0), 0);
+                            const bViews = b.galleries.reduce((sum, g) => sum + (g.viewCount || 0), 0);
+                            return bViews - aViews;
+                        }
+                        if (sort === 'least_viewed') {
+                            const aViews = a.galleries.reduce((sum, g) => sum + (g.viewCount || 0), 0);
+                            const bViews = b.galleries.reduce((sum, g) => sum + (g.viewCount || 0), 0);
+                            return aViews - bViews;
+                        }
+                        if (sort === 'last_read_newest') {
+                            const aDate = a.galleries.length > 0 ? (a.galleries[0].lastAccessedAt ? new Date(a.galleries[0].lastAccessedAt) : new Date(a.galleries[0].createdAt)) : new Date(0);
+                            const bDate = b.galleries.length > 0 ? (b.galleries[0].lastAccessedAt ? new Date(b.galleries[0].lastAccessedAt) : new Date(b.galleries[0].createdAt)) : new Date(0);
+                            return bDate - aDate;
+                        }
+                        if (sort === 'last_read_oldest') {
+                            const aDate = a.galleries.length > 0 ? (a.galleries[0].lastAccessedAt ? new Date(a.galleries[0].lastAccessedAt) : new Date(a.galleries[0].createdAt)) : new Date(0);
+                            const bDate = b.galleries.length > 0 ? (b.galleries[0].lastAccessedAt ? new Date(b.galleries[0].lastAccessedAt) : new Date(b.galleries[0].createdAt)) : new Date(0);
+                            return aDate - bDate;
+                        }
+                        return 0;
+                    });
+                    
+                    // Rebuild Grid.groupAggregations as an object in sorted order
+                    const sortedAgg = {};
+                    groupsArray.forEach(group => {
+                        sortedAgg[group.name] = group;
+                    });
+                    Grid.groupAggregations = sortedAgg;
+                } else {
+                    // Sort galleries as before (for single view)
+                    Grid.allGalleries.sort((a, b) => {
+                        if (sort === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
+                        if (sort === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
+                        if (sort === 'az') return a.title.localeCompare(b.title);
+                        if (sort === 'za') return b.title.localeCompare(a.title);
+                        if (sort === 'most_pages') return (b.totalPages || 0) - (a.totalPages || 0);
+                        if (sort === 'least_pages') return (a.totalPages || 0) - (b.totalPages || 0);
+                        if (sort === 'most_viewed') return (b.viewCount || 0) - (a.viewCount || 0);
+                        if (sort === 'least_viewed') return (a.viewCount || 0) - (b.viewCount || 0);
+                        if (sort === 'last_read_newest') {
+                            const aDate = a.lastAccessedAt ? new Date(a.lastAccessedAt) : new Date(a.createdAt);
+                            const bDate = b.lastAccessedAt ? new Date(b.lastAccessedAt) : new Date(b.createdAt);
+                            return bDate - aDate;
+                        }
+                        if (sort === 'last_read_oldest') {
+                            const aDate = a.lastAccessedAt ? new Date(a.lastAccessedAt) : new Date(a.createdAt);
+                            const bDate = b.lastAccessedAt ? new Date(b.lastAccessedAt) : new Date(b.createdAt);
+                            return aDate - bDate;
+                        }
+                        return 0;
+                    });
+                }
             },
 
             changePage: (page) => {
@@ -2192,23 +2615,158 @@
                 Grid.isEditMode = !Grid.isEditMode;
                 const btn = document.getElementById('btnGridEdit');
                 if(Grid.isEditMode){
-                    btn.classList.replace('text-gray-400', 'text-nRed');
+                    btn.classList.remove('text-gray-400');
+                    btn.classList.add('text-nRed');
+                    btn.classList.remove('bg-gray-700');
+                    btn.classList.add('bg-gray-800');
                     btn.innerHTML = '<i class="fa-solid fa-check"></i>'; // Save/Done icon
                 } else {
-                    btn.classList.replace('text-nRed', 'text-gray-400');
+                    btn.classList.remove('text-nRed');
+                    btn.classList.add('text-gray-400');
+                    btn.classList.remove('bg-gray-800');
+                    btn.classList.add('bg-gray-700');
                     btn.innerHTML = '<i class="fa-solid fa-pen"></i>';
                 }
                 Grid.renderCurrentList();
             },
 
-            toggleWatchLaterCard: async (id, e) => {
+            toggleGroupView: async () => {
+                Grid.groupViewMode = !Grid.groupViewMode;
+                Grid.currentPage = 1;
+                
+                const btn = document.getElementById('btnGroupViewToggle');
+                const btnText = document.getElementById('groupViewBtnText');
+                
+                if (Grid.groupViewMode) {
+                    // Switch to group view
+                    await Grid.loadGroupMetadataCache();
+                    Grid.buildGroupAggregations();
+                    btn.classList.remove('hover:bg-purple-600');
+                    btn.classList.add('hover:bg-emerald-600', 'bg-purple-700');
+                    if (btnText) btnText.setAttribute('data-i18n', 'group_view_btn_single');
+                    if (btnText) btnText.textContent = T('group_view_btn_single');
+                } else {
+                    // Switch back to single view
+                    btn.classList.add('hover:bg-purple-600');
+                    btn.classList.remove('hover:bg-emerald-600', 'bg-purple-700');
+                    if (btnText) btnText.setAttribute('data-i18n', 'group_view_btn');
+                    if (btnText) btnText.textContent = T('group_view_btn');
+                }
+                
+                // Reapply sorting to ensure correct order after view toggle
+                Grid.applySort();
+                Grid.renderCurrentList();
+                StateManager.save();
+            },
+
+            loadGroupMetadataCache: async () => {
+                const metadatas = await db.groupMetadata.toArray();
+                Grid.groupMetadataCache = {};
+                metadatas.forEach(meta => {
+                    Grid.groupMetadataCache[meta.name] = meta;
+                });
+            },
+
+            buildGroupAggregations: () => {
+                Grid.groupAggregations = {};
+                
+                const groupNames = new Set();
+                Grid.allGalleries.forEach(gallery => {
+                    if (!gallery.groups || gallery.groups.length === 0) return;
+                    gallery.groups.forEach(groupName => groupNames.add(groupName));
+                });
+                
+                for (const groupName of groupNames) {
+                    const metadata = Grid.groupMetadataCache[groupName] || {};
+                    Grid.groupAggregations[groupName] = {
+                        name: groupName,
+                        coverBlob: metadata.coverBlob || null,
+                        galleries: [],
+                        isFavorite: metadata.isFavorite || false,
+                        isWatchLater: metadata.isWatchLater || false,
+                        episodeName: null
+                    };
+                }
+                
+                Grid.allGalleries.forEach(gallery => {
+                    if (!gallery.groups || gallery.groups.length === 0) return;
+                    
+                    gallery.groups.forEach(groupName => {
+                        if (Grid.groupAggregations[groupName]) {
+                            // Only use gallery coverBlob if custom cover is not set
+                            if (!Grid.groupAggregations[groupName].coverBlob) {
+                                Grid.groupAggregations[groupName].coverBlob = gallery.coverBlob;
+                            }
+                            Grid.groupAggregations[groupName].galleries.push({
+                                ...gallery
+                            });
+                        }
+                    });
+                });
+
+                // Ensure consistent episode order within each group
+                Object.values(Grid.groupAggregations).forEach(group => {
+                    const metadata = Grid.groupMetadataCache[group.name] || {};
+                    if (Array.isArray(metadata.order) && metadata.order.length) {
+                        const orderMap = new Map(metadata.order.map((id, idx) => [id, idx]));
+                        group.galleries.sort((a, b) => {
+                            const aOrder = orderMap.has(a.id) ? orderMap.get(a.id) : Number.MAX_SAFE_INTEGER;
+                            const bOrder = orderMap.has(b.id) ? orderMap.get(b.id) : Number.MAX_SAFE_INTEGER;
+                            if (aOrder !== bOrder) return aOrder - bOrder;
+                            return a.id - b.id;
+                        });
+                    } else {
+                        group.galleries.sort((a, b) => a.id - b.id);
+                    }
+                    group.galleries = group.galleries.map((gallery, idx) => ({
+                        ...gallery,
+                        episodeNumber: idx + 1
+                    }));
+                });
+            },
+
+            toggleGroupFavorite: async (groupName, e) => {
+                e.stopPropagation();
+                let metadata = await db.groupMetadata.where('name').equals(groupName).first();
+                if (!metadata) {
+                    metadata = { name: groupName, isFavorite: false, isWatchLater: false };
+                    metadata.id = await db.groupMetadata.add(metadata);
+                }
+                metadata.isFavorite = !metadata.isFavorite;
+                await db.groupMetadata.update(metadata.id, { isFavorite: metadata.isFavorite });
+                Grid.groupMetadataCache[groupName] = metadata;
+                if (Grid.groupViewMode) {
+                    await Grid.buildGroupAggregations();
+                }
+                Grid.renderCurrentList();
+                Toast.success(metadata.isFavorite ? T('added_to_favorites') : T('add_to_favorites'));
+            },
+
+            toggleGroupWatchLater: async (groupName, e) => {
+                e.stopPropagation();
+                let metadata = await db.groupMetadata.where('name').equals(groupName).first();
+                if (!metadata) {
+                    metadata = { name: groupName, isFavorite: false, isWatchLater: false };
+                    metadata.id = await db.groupMetadata.add(metadata);
+                }
+                metadata.isWatchLater = !metadata.isWatchLater;
+                await db.groupMetadata.update(metadata.id, { isWatchLater: metadata.isWatchLater });
+                Grid.groupMetadataCache[groupName] = metadata;
+                if (Grid.groupViewMode) {
+                    await Grid.buildGroupAggregations();
+                }
+                Grid.renderCurrentList();
+                Toast.success(metadata.isWatchLater ? T('added_to_watch_later') : T('add_to_watch_later'));
+            },
+
+            toggleFavorite: async (id, e) => {
                 e.stopPropagation();
                 const gallery = Grid.allGalleries.find(g => g.id === id);
                 if (gallery) {
-                    gallery.isWatchLater = !gallery.isWatchLater;
-                    await db.galleries.update(id, { isWatchLater: gallery.isWatchLater });
+                    gallery.isFavorite = !gallery.isFavorite;
+                    await db.galleries.update(id, { isFavorite: gallery.isFavorite });
                     Grid.renderCurrentList();
-                    Toast.success(gallery.isWatchLater ? T('added_to_watch_later') : T('add_to_watch_later'));
+                    Toast.success(gallery.isFavorite ? T('added_to_favorites') : T('add_to_favorites'));
                 }
             },
 
@@ -2232,6 +2790,93 @@
                 UI.navigate('upload', id);
             },
 
+            readNowGroup: async (groupName, e) => {
+                e.stopPropagation();
+                // Find galleries in this group, sorted by ID
+                const groupGalleries = await db.galleries
+                    .where('groups').anyOf([groupName])
+                    .sortBy('id');
+                
+                if (groupGalleries.length === 0) {
+                    Toast.error(T('no_data'));
+                    return;
+                }
+
+                // Find the last read gallery in the group
+                let resumeGallery = null;
+                for (const gallery of groupGalleries) {
+                    if (gallery.lastReadPage !== undefined && gallery.lastReadPage !== null) {
+                        resumeGallery = gallery;
+                        break;
+                    }
+                }
+
+                // If no gallery has progress, use the first one
+                if (!resumeGallery) {
+                    resumeGallery = groupGalleries[0];
+                }
+
+                // Navigate to the resume gallery
+                UI.navigate('reader', { galleryId: resumeGallery.id, index: resumeGallery.lastReadPage || 0 });
+            },
+
+            editGroup: (groupName, e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                // Set current group name and open edit modal immediately (don't await)
+                GroupDetail.currentGroupName = groupName;
+                // Open modal immediately
+                const modal = document.getElementById('groupEditModal');
+                if (modal) {
+                    document.getElementById('groupEditNameInput').value = groupName || '';
+                    document.getElementById('groupEditSearch').value = '';
+                    modal.classList.remove('hide');
+                    // Load data async without blocking modal open
+                    (async () => {
+                        const metadata = await db.groupMetadata.where('name').equals(groupName).first();
+                        GroupDetail.currentEditCoverBlob = metadata && metadata.coverBlob ? metadata.coverBlob : null;
+                        GroupDetail.displayCoverImage(GroupDetail.currentEditCoverBlob);
+                        await GroupDetail.loadEditCandidates();
+                    })();
+                }
+            },
+
+            deleteGroup: async (groupName, e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                // Delete group (remove groupName from all galleries' groups array)
+                if (!confirm(T('confirm_delete'))) return;
+                
+                try {
+                    const allGalleries = await db.galleries.toArray();
+                    const galleriesToUpdate = allGalleries.filter(g => g.groups && g.groups.includes(groupName));
+                    
+                    for (const gallery of galleriesToUpdate) {
+                        const updatedGroups = (Array.isArray(gallery.groups) ? gallery.groups.slice() : []).filter(name => name !== groupName);
+                        await db.galleries.update(gallery.id, { groups: updatedGroups });
+                    }
+                    
+                    // Delete group metadata
+                    const metadata = await db.groupMetadata.where('name').equals(groupName).first();
+                    if (metadata) {
+                        await db.groupMetadata.delete(metadata.id);
+                    }
+                    
+                    // Update cache
+                    delete Grid.groupMetadataCache[groupName];
+                    if (Object.keys(Grid.groupAggregations).includes(groupName)) {
+                        delete Grid.groupAggregations[groupName];
+                    }
+                    
+                    // Reload grid
+                    Grid.load(App.gridMode, App.currentNavParams);
+                    Toast.success(T('alert_delete_success') || 'Group deleted successfully');
+                } catch (error) {
+                    console.error('Delete group failed:', error);
+                    Toast.error(T('alert_delete_failed') || 'Failed to delete group');
+                }
+            },
+
             renderCurrentList: () => {
                 const grid = document.getElementById('gallery-grid');
                 const pagination = document.getElementById('grid-pagination');
@@ -2240,6 +2885,21 @@
 
                 grid.innerHTML = '';
                 if(pagination) pagination.innerHTML = '';
+
+                // Restore group view button state based on saved mode
+                const btnGroupView = document.getElementById('btnGroupViewToggle');
+                const btnText = document.getElementById('groupViewBtnText');
+                if (btnGroupView && Grid.groupViewMode) {
+                    btnGroupView.classList.remove('hover:bg-purple-600');
+                    btnGroupView.classList.add('hover:bg-emerald-600', 'bg-purple-700');
+                    if (btnText) btnText.setAttribute('data-i18n', 'group_view_btn_single');
+                    if (btnText) btnText.textContent = T('group_view_btn_single');
+                } else if (btnGroupView) {
+                    btnGroupView.classList.add('hover:bg-purple-600');
+                    btnGroupView.classList.remove('hover:bg-emerald-600', 'bg-purple-700');
+                    if (btnText) btnText.setAttribute('data-i18n', 'group_view_btn');
+                    if (btnText) btnText.textContent = T('group_view_btn');
+                }
 
                 // Show/hide user mode toggle button
                 Grid.updateUserModeBtn();
@@ -2251,8 +2911,24 @@
                     btn.innerHTML = '<i class="fa-solid fa-check"></i>';
                 }
                 
-                let filtered = Grid.allGalleries;
-                if (App.searchQuery) {
+                // Determine source data (group mode or single gallery mode)
+                let sourceData = Grid.allGalleries;
+                let isGroupView = false;
+                
+                if (Grid.groupViewMode) {
+                    // Build group aggregations if not already done
+                    if (Object.keys(Grid.groupAggregations).length === 0) {
+                        Grid.buildGroupAggregations();
+                    }
+                    sourceData = Object.values(Grid.groupAggregations).map(agg => ({
+                        ...agg,
+                        isGroup: true
+                    }));
+                    isGroupView = true;
+                }
+
+                let filtered = sourceData;
+                if (App.searchQuery && !isGroupView) {
                     // Parse search query: support comma-separated items for AND filtering
                     const searchTerms = App.searchQuery.split(',').map(t => t.trim()).filter(t => t);
                     
@@ -2270,10 +2946,25 @@
                         
                         return titleMatch || allTagsMatch;
                     });
+                } else if (App.searchQuery && isGroupView) {
+                    // Search in group names when in group view
+                    const searchTerms = App.searchQuery.split(',').map(t => t.trim()).filter(t => t);
+                    filtered = filtered.filter(group => 
+                        searchTerms.some(term => group.name.toLowerCase().includes(term))
+                    );
+                }
+
+                // Apply user mode filter (favorites/watch later)
+                if (App.gridMode === 'user') {
+                    if (Grid.userMode === 'favorites') {
+                        filtered = filtered.filter(item => item.isFavorite);
+                    } else {
+                        filtered = filtered.filter(item => item.isWatchLater);
+                    }
                 }
 
                 document.getElementById('gridTitle').innerHTML = Grid.currentTitle;
-                document.getElementById('gridCount').textContent = `${filtered.length} ${T('items_count')}`;
+                document.getElementById('gridCount').textContent = `${filtered.length} ${isGroupView ? T('groups') : T('items_count')}`;
                 
                 // Store IDs for Random feature
                 App.currentGridIds = filtered.map(g => g.id);
@@ -2292,32 +2983,42 @@
                     const end = start + Grid.itemsPerPage;
                     const itemsToShow = filtered.slice(start, end);
 
-                    itemsToShow.forEach(g => {
-                        const coverUrl = g.coverBlob ? URL.createObjectURL(g.coverBlob) : '';
-                        // Bookmark Logic
-                        const hasProgress = (g.lastReadPage !== undefined && g.lastReadPage !== null && g.totalPages);
-                        const progressText = hasProgress ? T('read_progress', {current: g.lastReadPage + 1, total: g.totalPages}) : '';
-                        const isFinished = hasProgress && (g.lastReadPage + 1 >= g.totalPages);
-                        const isSelected = MultiExportManager.selectedIds.has(g.id);
-                        const cardClickHandler = MultiExportManager.isSelectMode 
-                            ? `MultiExportManager.toggleSelectGallery(${g.id})` 
-                            : `UI.navigate('detail', ${g.id})`;
+                    itemsToShow.forEach(item => {
+                        const coverUrl = item.coverBlob ? URL.createObjectURL(item.coverBlob) : '';
+                        const isGroup = item.isGroup || false;
+                        const itemId = isGroup ? `group-${item.name}` : item.id;
+                        const itemTitle = item.name || item.title;
+                        const episodeCount = isGroup ? item.galleries.length : 0;
+                        
+                        // Bookmark Logic (only for single galleries)
+                        const hasProgress = !isGroup && (item.lastReadPage !== undefined && item.lastReadPage !== null && item.totalPages);
+                        const progressText = hasProgress ? T('read_progress', {current: item.lastReadPage + 1, total: item.totalPages}) : '';
+                        const isFinished = hasProgress && (item.lastReadPage + 1 >= item.totalPages);
+                        const isSelected = !isGroup && MultiExportManager.selectedIds.has(item.id);
+                        const cardClickHandler = isGroup 
+                            ? `UI.navigate('group', '${item.name.replace(/'/g, "\\'")}')` 
+                            : (MultiExportManager.isSelectMode 
+                                ? `MultiExportManager.toggleSelectGallery(${item.id})` 
+                                : `UI.navigate('detail', ${item.id})`);
 
                         grid.innerHTML += `
-                            <div class="gallery-card bg-darkCard rounded overflow-hidden shadow cursor-pointer relative group ${isSelected ? 'selected-for-export' : ''}" onclick="${cardClickHandler}" data-gallery-id="${g.id}" data-cover-url="${coverUrl}" ${!MultiExportManager.isSelectMode ? `onmouseover="HoverPreview.start(parseInt(this.dataset.galleryId), this.dataset.coverUrl, this)" onmouseout="HoverPreview.stop()"` : ''}>
+                            <div class="gallery-card bg-darkCard rounded overflow-hidden shadow cursor-pointer relative group ${isSelected ? 'selected-for-export' : ''}" onclick="${cardClickHandler}" data-gallery-id="${itemId}" data-cover-url="${coverUrl}" data-is-group="${isGroup}" data-group-name="${isGroup ? item.name : ''}" ${!MultiExportManager.isSelectMode ? `onmouseover="HoverPreview.start(${isGroup ? 'null' : `parseInt(this.dataset.galleryId)`}, this.dataset.coverUrl, this, ${isGroup}, ${isGroup ? `'${item.name.replace(/'/g, "\\'")}'` : 'null'})" onmouseout="HoverPreview.stop()"` : ''}>
                                 <div class="aspect-a4 overflow-hidden relative">
-                                    <img src="${coverUrl}" class="cover-img w-full h-full object-cover" title="${g.title}">
-                                    ${MultiExportManager.isSelectMode ? `<div class="export-checkbox ${isSelected ? 'checked' : 'unchecked'}" title="Select for export"><i class="fa-solid fa-check"></i></div>` : ''}
-                                    ${Grid.isEditMode ? `<button onclick="Grid.editItem(${g.id}, event)" class="absolute top-0 left-0 bg-blue-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-blue-700 transition shadow-md rounded-br-lg" data-i18n-title="edit_title"><i class="fa-solid fa-pen"></i></button>` : ''}
-                                    ${Grid.isEditMode ? `<button onclick="Grid.deleteItem(${g.id}, event)" class="absolute top-0 right-0 bg-red-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-red-700 transition shadow-md rounded-bl-lg"><i class="fa-solid fa-xmark"></i></button>` : ''}
-                                    ${Grid.isEditMode ? `<button onclick="Grid.createContinuation(${g.id}, event)" class="absolute bottom-0 right-0 bg-green-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-green-700 transition shadow-md rounded-tl-lg" data-i18n-title="create_continuation_title"><i class="fa-solid fa-plus"></i></button>` : ''}
+                                    <img src="${coverUrl}" class="cover-img w-full h-full object-cover" title="${itemTitle}">
+                                    ${MultiExportManager.isSelectMode && !isGroup ? `<div class="export-checkbox ${isSelected ? 'checked' : 'unchecked'}" title="Select for export"><i class="fa-solid fa-check"></i></div>` : ''}
+                                    ${Grid.isEditMode && !isGroup ? `<button onclick="Grid.editItem(${item.id}, event)" class="absolute top-0 left-0 bg-blue-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-blue-700 transition shadow-md rounded-br-lg" data-i18n-title="edit_title"><i class="fa-solid fa-pen"></i></button>` : ''}
+                                    ${Grid.isEditMode && !isGroup ? `<button onclick="Grid.deleteItem(${item.id}, event)" class="absolute top-0 right-0 bg-red-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-red-700 transition shadow-md rounded-bl-lg"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                                    ${Grid.isEditMode && !isGroup ? `<button onclick="Grid.createContinuation(${item.id}, event)" class="absolute bottom-0 right-0 bg-green-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-green-700 transition shadow-md rounded-tl-lg" data-i18n-title="create_continuation_title"><i class="fa-solid fa-plus"></i></button>` : ''}
+                                    ${isGroup && Grid.isEditMode ? `<button onclick="Grid.editGroup('${item.name.replace(/'/g, "\\'")}', event)" class="absolute top-0 left-0 bg-blue-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-blue-700 transition shadow-md rounded-br-lg" data-i18n-title="edit_title"><i class="fa-solid fa-pen"></i></button>` : ''}
+                                    ${isGroup && Grid.isEditMode ? `<button onclick="Grid.deleteGroup('${item.name.replace(/'/g, "\\'")}', event)" class="absolute top-0 right-0 bg-red-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-red-700 transition shadow-md rounded-bl-lg"><i class="fa-solid fa-xmark"></i></button>` : ''}
                                     <div class="absolute top-2 right-2 flex flex-col gap-1 items-end">
-                                        ${g.isFavorite ? '<div class="text-nRed text-lg shadow-black drop-shadow-md"><i class="fa-solid fa-heart"></i></div>' : ''}
-                                        ${g.isWatchLater && !MultiExportManager.isSelectMode ? '<div class="text-cyan-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:opacity-80 transition" onclick="Grid.toggleWatchLaterCard(' + g.id + ', event)" title="' + T('added_to_watch_later') + '"><i class="fa-solid fa-eye"></i></div>' : '<div class="text-gray-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:text-cyan-400 transition opacity-40 hover:opacity-100" onclick="Grid.toggleWatchLaterCard(' + g.id + ', event)" title="' + T('add_to_watch_later') + '"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i></div>'}
+                                        ${isGroup ? (item.isFavorite ? '<div class="text-nRed text-lg shadow-black drop-shadow-md cursor-pointer hover:opacity-80 transition" onclick="Grid.toggleGroupFavorite(\'' + item.name.replace(/'/g, "\\'") + '\', event)" title="' + T('added_to_favorites') + '"><i class="fa-solid fa-heart"></i></div>' : '<div class="text-gray-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:text-nRed transition opacity-40 hover:opacity-100" onclick="Grid.toggleGroupFavorite(\'' + item.name.replace(/'/g, "\\'") + '\', event)" title="' + T('add_to_favorites') + '"><i class="fa-solid fa-heart"></i></div>') : (item.isFavorite ? '<div class="text-nRed text-lg shadow-black drop-shadow-md cursor-pointer hover:opacity-80 transition" onclick="Grid.toggleFavorite(' + item.id + ', event)" title="' + T('added_to_favorites') + '"><i class="fa-solid fa-heart"></i></div>' : '<div class="text-gray-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:text-nRed transition opacity-40 hover:opacity-100" onclick="Grid.toggleFavorite(' + item.id + ', event)" title="' + T('add_to_favorites') + '"><i class="fa-solid fa-heart"></i></div>')}
+                                        ${isGroup ? (item.isWatchLater ? '<div class="text-cyan-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:opacity-80 transition" onclick="Grid.toggleGroupWatchLater(\'' + item.name.replace(/'/g, "\\'") + '\', event)" title="' + T('added_to_watch_later') + '"><i class="fa-solid fa-eye"></i></div>' : '<div class="text-gray-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:text-cyan-400 transition opacity-40 hover:opacity-100" onclick="Grid.toggleGroupWatchLater(\'' + item.name.replace(/'/g, "\\'") + '\', event)" title="' + T('add_to_watch_later') + '"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i></div>') : (!item.isWatchLater ? '<div class="text-gray-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:text-cyan-400 transition opacity-40 hover:opacity-100" onclick="Grid.toggleWatchLaterCard(' + item.id + ', event)" title="' + T('add_to_watch_later') + '"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i></div>' : '<div class="text-cyan-400 text-lg shadow-black drop-shadow-md cursor-pointer hover:opacity-80 transition" onclick="Grid.toggleWatchLaterCard(' + item.id + ', event)" title="' + T('added_to_watch_later') + '"><i class="fa-solid fa-eye"></i></div>')}
                                         ${(hasProgress && !isFinished) ? '<div class="text-yellow-400 text-lg shadow-black drop-shadow-md"><i class="fa-solid fa-bookmark"></i></div>' : ''}
                                     </div>
-                                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2 pt-6" title="${g.title}">
-                                        <div class="text-white text-xs font-bold line-clamp-3">${g.title}</div>
+                                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2 pt-6" title="${itemTitle}">
+                                        <div class="text-white text-xs font-bold line-clamp-3">${itemTitle}</div>
+                                        ${isGroup ? `<div class="text-cyan-300 text-[10px] font-bold mt-1"><i class="fa-solid fa-layer-group"></i> ${episodeCount} ${T('episode_count')}</div>` : ''}
                                         ${(hasProgress && !isFinished) ? `<div class="text-yellow-400 text-[10px] font-bold mt-1"><i class="fa-solid fa-book-open"></i> ${progressText}</div>` : ''}
                                     </div>
                                 </div>
@@ -2370,10 +3071,13 @@
             currentMode: null,
             allItems: [],
             searchQuery: '',
+            isEditMode: false,
+            currentEditingTag: null,
             
             load: async (mode) => {
                 List.currentMode = mode;
                 List.searchQuery = '';
+                List.isEditMode = false; // reset edit mode
                 const searchInput = document.getElementById('listSearchInput');
                 if (searchInput) searchInput.value = '';
                 
@@ -2411,6 +3115,87 @@
                 List.render();
             },
             
+            toggleEditMode: () => {
+                List.isEditMode = !List.isEditMode;
+                List.render();
+            },
+            
+            editTag: (name) => {
+                List.currentEditingTag = name;
+                document.getElementById('editTagInput').value = name;
+                document.getElementById('editTagModal').classList.remove('hide');
+            },
+            
+            confirmEditTag: async () => {
+                const newName = document.getElementById('editTagInput').value.trim();
+                const oldName = List.currentEditingTag;
+                
+                if (!newName) {
+                    Toast.error('ชื่อแท็กไม่สามารถว่างได้');
+                    return;
+                }
+                
+                if (newName === oldName) {
+                    document.getElementById('editTagModal').classList.add('hide');
+                    return;
+                }
+                
+                // Check if new name already exists
+                const exists = List.allItems.some(([name]) => name === newName);
+                if (exists) {
+                    Toast.error('ชื่อแท็กนี้มีอยู่แล้ว');
+                    return;
+                }
+                
+                // Update all galleries
+                const galleries = await db.galleries.toArray();
+                let updatedCount = 0;
+                
+                for (let g of galleries) {
+                    let items = [];
+                    if (List.currentMode === 'tags') items = g.tags;
+                    else if (List.currentMode === 'artists') items = g.artists;
+                    else if (List.currentMode === 'characters') items = g.characters || [];
+                    else if (List.currentMode === 'series') items = g.series || [];
+                    
+                    const index = items.indexOf(oldName);
+                    if (index > -1) {
+                        items[index] = newName;
+                        await db.galleries.put(g);
+                        updatedCount++;
+                    }
+                }
+                
+                document.getElementById('editTagModal').classList.add('hide');
+                Toast.success(`แก้ไขแท็ก "${oldName}" เป็น "${newName}" แล้ว (${updatedCount} แกลเลอรี่)`);
+                List.load(List.currentMode); // reload
+            },
+            
+            deleteTag: async (name) => {
+                if (confirm(`ลบแท็ก "${name}" ใช่หรือไม่? แกลเลอรี่ที่มีแท็กนี้จะถูกลบแท็กออก แต่แกลเลอรี่จะยังอยู่`)) {
+                    const galleries = await db.galleries.toArray();
+                    let updatedCount = 0;
+                    
+                    for (let g of galleries) {
+                        let items = [];
+                        if (List.currentMode === 'tags') items = g.tags;
+                        else if (List.currentMode === 'artists') items = g.artists;
+                        else if (List.currentMode === 'characters') items = g.characters || [];
+                        else if (List.currentMode === 'series') items = g.series || [];
+                        
+                        const index = items.indexOf(name);
+                        if (index > -1) {
+                            items.splice(index, 1);
+                            await db.galleries.put(g);
+                            updatedCount++;
+                        }
+                    }
+                    
+                    Toast.success(`ลบแท็ก "${name}" แล้ว (${updatedCount} แกลเลอรี่)`);
+                    List.load(List.currentMode); // reload
+                }
+            },
+            
             render: () => {
                 const container = document.getElementById('list-container');
                 container.innerHTML = '';
@@ -2441,11 +3226,25 @@
                 }
 
                 filtered.forEach(([name, count]) => {
-                    container.innerHTML += `
-                        <button onclick="UI.navigate('${linkType}', '${name}')" class="${color} text-white px-3 py-1.5 rounded-full text-sm transition flex items-center gap-2">
-                            ${name} <span class="bg-black/30 px-1.5 rounded-full text-xs">${count}</span>
-                        </button>
-                    `;
+                    if (List.isEditMode) {
+                        // Edit mode: show div with edit/delete buttons
+                        container.innerHTML += `
+                            <div class="relative ${color} text-white px-3 py-1.5 rounded-full text-sm transition flex items-center gap-2">
+                                <button onclick="List.editTag('${name.replace(/'/g, "\\'")}')" class="absolute -top-1 -left-1 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-gray-200 transition" title="แก้ไข">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                ${name} 
+                                <button onclick="List.deleteTag('${name.replace(/'/g, "\\'")}')" class="bg-red-600 hover:bg-red-700 px-1.5 rounded-full text-xs text-white" title="ลบแท็ก">X</button>
+                            </div>
+                        `;
+                    } else {
+                        // Normal mode: clickable button
+                        container.innerHTML += `
+                            <button onclick="UI.navigate('${linkType}', '${name.replace(/'/g, "\\'")}')" class="${color} text-white px-3 py-1.5 rounded-full text-sm transition flex items-center gap-2">
+                                ${name} <span class="bg-black/30 px-1.5 rounded-full text-xs">${count}</span>
+                            </button>
+                        `;
+                    }
                 });
             }
         };
@@ -3129,6 +3928,246 @@
             hideSuggestions: () => {
                 document.getElementById('titleSuggestionsContainer').classList.add('hide');
                 TitleSuggestions.selectedIndex = -1;
+            }
+        };
+
+        // ================= GROUP SUGGESTIONS MANAGER =================
+        const GroupSuggestions = {
+            allGroups: [], // Array of {groupName, lastUsed} sorted by most recent
+            currentSuggestions: [],
+            selectedIndex: -1,
+            currentInputValue: '',
+
+            init: async () => {
+                await GroupSuggestions.loadAllGroups();
+                GroupSuggestions.attachEventListeners();
+            },
+
+            loadAllGroups: async () => {
+                try {
+                    const galleries = await db.galleries.toArray();
+                    const groupMap = {}; // {groupName: lastUsedDate}
+                    
+                    // Collect all groups with their last used dates
+                    galleries.forEach(g => {
+                        if (g.groups && Array.isArray(g.groups)) {
+                            g.groups.forEach(group => {
+                                if (group.trim()) {
+                                    if (!groupMap[group] || new Date(g.createdAt) > new Date(groupMap[group])) {
+                                        groupMap[group] = g.createdAt || new Date().toISOString();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Convert to array and sort by most recent, limit to 100
+                    GroupSuggestions.allGroups = Object.entries(groupMap)
+                        .map(([groupName, date]) => ({ groupName, lastUsed: new Date(date) }))
+                        .sort((a, b) => b.lastUsed - a.lastUsed)
+                        .slice(0, 100);
+                } catch (e) {
+                    console.error('Error loading groups:', e);
+                }
+            },
+
+            attachEventListeners: () => {
+                const input = document.getElementById('upGroups');
+                if (!input) return;
+
+                input.addEventListener('focus', () => GroupSuggestions.showContextSuggestions());
+                input.addEventListener('input', (e) => GroupSuggestions.handleInput(e));
+                input.addEventListener('keydown', (e) => GroupSuggestions.handleKeydown(e));
+                input.addEventListener('focusout', (e) => {
+                    const container = document.getElementById('groupSuggestionsContainer');
+                    if (!container || !container.contains(e.relatedTarget)) {
+                        setTimeout(() => GroupSuggestions.hideSuggestions(), 50);
+                    }
+                });
+            },
+
+            handleInput: (e) => {
+                const input = e.target;
+                const fullText = input.value;
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                const currentGroup = fullText.substring(lastCommaIndex + 1).trim();
+                
+                GroupSuggestions.currentInputValue = currentGroup;
+                GroupSuggestions.selectedIndex = -1;
+                
+                if (currentGroup.length === 0) {
+                    GroupSuggestions.hideSuggestions();
+                    return;
+                }
+                
+                // Filter suggestions - top 10 matching current group
+                GroupSuggestions.currentSuggestions = GroupSuggestions.allGroups
+                    .filter(({groupName}) => groupName.toLowerCase().includes(currentGroup.toLowerCase()))
+                    .map(item => ({ groupName: item.groupName }))
+                    .slice(0, 10);
+
+                const existingGroups = UploadContext.get().groups;
+                GroupSuggestions.currentSuggestions = GroupSuggestions.currentSuggestions
+                    .filter(({groupName}) => !existingGroups.includes(groupName));
+
+                if (GroupSuggestions.currentSuggestions.length > 0) {
+                    GroupSuggestions.renderSuggestions();
+                } else {
+                    GroupSuggestions.hideSuggestions();
+                }
+            },
+
+            getContextSuggestions: async () => {
+                const context = UploadContext.get();
+                const relatedGalleries = await ContextualSuggestions.getRelatedGalleries(context);
+                const groupMap = {};
+
+                relatedGalleries.forEach(g => {
+                    if (g.groups && Array.isArray(g.groups)) {
+                        g.groups.forEach(group => {
+                            if (!group || !group.trim()) return;
+                            const normalized = group.trim();
+                            const lastUsed = new Date(g.createdAt || new Date()).getTime();
+                            if (!groupMap[normalized] || lastUsed > groupMap[normalized]) {
+                                groupMap[normalized] = lastUsed;
+                            }
+                        });
+                    }
+                });
+
+                const existingGroups = context.groups || [];
+
+                return Object.entries(groupMap)
+                    .map(([groupName, lastUsed]) => ({ groupName, lastUsed }))
+                    .sort((a, b) => b.lastUsed - a.lastUsed)
+                    .map(item => item.groupName)
+                    .filter(groupName => !existingGroups.includes(groupName))
+                    .slice(0, 5);
+            },
+
+            showContextSuggestions: async () => {
+                const input = document.getElementById('upGroups');
+                const currentText = input.value;
+                const lastCommaIndex = currentText.lastIndexOf(',');
+                const currentGroup = currentText.substring(lastCommaIndex + 1).trim();
+                
+                if (currentGroup.length > 0) {
+                    GroupSuggestions.handleInput({target: input});
+                    return;
+                }
+                
+                const contextSuggestions = await GroupSuggestions.getContextSuggestions();
+                if (contextSuggestions.length > 0) {
+                    GroupSuggestions.currentSuggestions = contextSuggestions.map(groupName => ({ groupName }));
+                    GroupSuggestions.selectedIndex = -1;
+                    GroupSuggestions.renderSuggestions();
+                }
+            },
+
+            handleKeydown: (e) => {
+                const container = document.getElementById('groupSuggestionsContainer');
+                const isVisible = !container.classList.contains('hide');
+
+                if (!isVisible) {
+                    if (e.key === 'Enter' && !e.ctrlKey) {
+                        e.preventDefault();
+                        const input = document.getElementById('upGroups');
+                        const currentValue = input.value.trim();
+                        if (currentValue && !currentValue.endsWith(',')) {
+                            input.value = currentValue + ', ';
+                        } else if (!currentValue.endsWith(', ')) {
+                            input.value = currentValue + ', ';
+                        }
+                        input.focus();
+                        input.setSelectionRange(input.value.length, input.value.length);
+                    }
+                    return;
+                }
+
+                switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        GroupSuggestions.selectedIndex = Math.min(
+                            GroupSuggestions.selectedIndex + 1,
+                            GroupSuggestions.currentSuggestions.length - 1
+                        );
+                        GroupSuggestions.renderSuggestions();
+                        break;
+
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        GroupSuggestions.selectedIndex = Math.max(GroupSuggestions.selectedIndex - 1, -1);
+                        GroupSuggestions.renderSuggestions();
+                        break;
+
+                    case 'Tab':
+                    case 'Enter':
+                        e.preventDefault();
+                        if (GroupSuggestions.selectedIndex >= 0) {
+                            const selected = GroupSuggestions.currentSuggestions[GroupSuggestions.selectedIndex];
+                            GroupSuggestions.selectGroup(selected.groupName);
+                        } else {
+                            // Add comma when Enter is pressed without selection
+                            const input = document.getElementById('upGroups');
+                            const currentValue = input.value.trim();
+                            if (currentValue && !currentValue.endsWith(',')) {
+                                input.value = currentValue + ', ';
+                            } else if (!currentValue.endsWith(', ')) {
+                                input.value = currentValue + ', ';
+                            }
+                            GroupSuggestions.hideSuggestions();
+                            input.focus();
+                            input.setSelectionRange(input.value.length, input.value.length);
+                        }
+                        break;
+                    
+                    case 'Escape':
+                        GroupSuggestions.hideSuggestions();
+                        break;
+                }
+            },
+
+            selectGroup: (groupName) => {
+                const input = document.getElementById('upGroups');
+                const fullText = input.value;
+                const lastCommaIndex = fullText.lastIndexOf(',');
+                
+                // Build new text with selected group
+                const beforeGroup = lastCommaIndex >= 0 ? fullText.substring(0, lastCommaIndex + 1) : '';
+                const newValue = (beforeGroup + ' ' + groupName + ', ').replace(/^\s*,\s*/, '').replace(/^\s+/, '');
+                
+                input.value = newValue;
+                input.focus();
+                // Move cursor to end
+                input.setSelectionRange(input.value.length, input.value.length);
+                // Refresh suggestions for the new input state
+                GroupSuggestions.handleInput({target: input});
+            },
+
+            renderSuggestions: () => {
+                const list = document.getElementById('groupSuggestionsList');
+                list.innerHTML = '';
+                
+                GroupSuggestions.currentSuggestions.forEach(({groupName}, index) => {
+                    const isSelected = index === GroupSuggestions.selectedIndex;
+                    const item = document.createElement('div');
+                    item.className = `px-3 py-2 cursor-pointer transition ${
+                        isSelected ? 'bg-nRed text-white' : 'hover:bg-gray-700 text-gray-300'
+                    }`;
+                    item.textContent = groupName;
+                    item.onmousedown = (e) => {
+                        e.preventDefault();
+                        GroupSuggestions.selectGroup(groupName);
+                    };
+                    list.appendChild(item);
+                });
+                
+                document.getElementById('groupSuggestionsContainer').classList.remove('hide');
+            },
+
+            hideSuggestions: () => {
+                document.getElementById('groupSuggestionsContainer').classList.add('hide');
+                GroupSuggestions.selectedIndex = -1;
             }
         };
 
@@ -4099,6 +5138,7 @@
                 document.getElementById('upArtists').value = '';
                 document.getElementById('upCharacters').value = '';
                 document.getElementById('upSeries').value = '';
+                document.getElementById('upGroups').value = '';
                 UploadManager.coverFile = null;
                 document.getElementById('coverPreview').src = '';
                 document.getElementById('coverPreview').classList.add('hide');
@@ -4120,6 +5160,7 @@
                 ArtistSuggestions.hideSuggestions();
                 CharacterSuggestions.hideSuggestions();
                 SeriesSuggestions.hideSuggestions();
+                GroupSuggestions.hideSuggestions();
             },
 
             loadForEdit: async (id) => {
@@ -4134,6 +5175,7 @@
                 document.getElementById('upArtists').value = g.artists.join(', ');
                 document.getElementById('upCharacters').value = (g.characters ? g.characters.join(', ') : '');
                 document.getElementById('upSeries').value = (g.series ? g.series.join(', ') : '');
+                document.getElementById('upGroups').value = (g.groups ? g.groups.join(', ') : '');
 
                 if (g.coverBlob) {
                     UploadManager.coverFile = g.coverBlob;
@@ -4169,6 +5211,7 @@
                 document.getElementById('upArtists').value = g.artists.join(', ');
                 document.getElementById('upCharacters').value = (g.characters ? g.characters.join(', ') : '');
                 document.getElementById('upSeries').value = (g.series ? g.series.join(', ') : '');
+                document.getElementById('upGroups').value = (g.groups ? g.groups.join(', ') : '');
 
                 // Don't load cover or pages for continuation
                 UploadManager.coverFile = null;
@@ -4178,11 +5221,12 @@
                 UploadManager.pageFiles = [];
                 UploadManager.renderPagesGrid();
                 
-                // Reload suggestions to ensure latest tags, artists, characters, and series are available
+                // Reload suggestions to ensure latest tags, artists, characters, series, and groups are available
                 await TagSuggestions.loadAllTags();
                 await ArtistSuggestions.loadAllArtists();
                 await CharacterSuggestions.loadAllCharacters();
                 await SeriesSuggestions.loadAllSeries();
+                await GroupSuggestions.loadAllGroups();
             },
 
             handleCoverSelect: (e) => {
@@ -4402,6 +5446,7 @@
                 const artists = document.getElementById('upArtists').value.split(',').map(t => t.trim()).filter(t => t);
                 const characters = document.getElementById('upCharacters').value.split(',').map(c => c.trim()).filter(c => c);
                 const series = document.getElementById('upSeries').value.split(',').map(s => s.trim()).filter(s => s);
+                const groups = document.getElementById('upGroups').value.split(',').map(g => g.trim()).filter(g => g);
                 
                 if (!UploadManager.coverFile && UploadManager.pageFiles.length === 0) return Toast.error(T('alert_no_cover'));
                 const coverBlob = UploadManager.coverFile || UploadManager.pageFiles[0].file;
@@ -4411,7 +5456,7 @@
                     if (UploadManager.editingId) {
                         // Update existing
                         galleryId = UploadManager.editingId;
-                        await db.galleries.update(galleryId, { title, tags, artists, characters, series, coverBlob, totalPages: UploadManager.pageFiles.length });
+                        await db.galleries.update(galleryId, { title, tags, artists, characters, series, groups, coverBlob, totalPages: UploadManager.pageFiles.length });
                         
                         // Replace pages (delete old, insert current state)
                         await db.pages.where('galleryId').equals(galleryId).delete();
@@ -4428,19 +5473,20 @@
                         await FileSystemManager.syncToLocal(galleryId);
                     } else {
                         // Create new
-                        galleryId = await db.galleries.add({ title, tags, artists, characters, series, coverBlob, createdAt: new Date().toISOString(), isFavorite: false, isWatchLater: false, totalPages: UploadManager.pageFiles.length });
+                        galleryId = await db.galleries.add({ title, tags, artists, characters, series, groups, coverBlob, createdAt: new Date().toISOString(), isFavorite: false, isWatchLater: false, totalPages: UploadManager.pageFiles.length });
                         const pagesToSave = UploadManager.pageFiles.map((p, index) => ({ galleryId, order: index, imageBlob: p.file, translations: [], translationSets: [] }));
                         if(pagesToSave.length > 0) await db.pages.bulkAdd(pagesToSave);
                         Toast.success(T('alert_save_success'));
                         await FileSystemManager.syncToLocal(galleryId);
                     }
 
-                    // Reload suggestions with newly added/updated titles, tags, artists, characters, and series
+                    // Reload suggestions with newly added/updated titles, tags, artists, characters, series, and groups
                     await TitleSuggestions.loadAllTitles();
                     await TagSuggestions.loadAllTags();
                     await ArtistSuggestions.loadAllArtists();
                     await CharacterSuggestions.loadAllCharacters();
                     await SeriesSuggestions.loadAllSeries();
+                    await GroupSuggestions.loadAllGroups();
                     
                     UI.navigate('detail', galleryId);
                 } catch (e) { Toast.error(T('alert_save_error') + e.message); }
@@ -5127,6 +6173,11 @@
                 document.getElementById('detArtists').innerHTML = gallery.artists.length ? gallery.artists.map(t => UI.createTagBadge(t, 'artist')).join('') : `<span class="text-gray-500 text-sm">${T('no_artists')}</span>`;
                 document.getElementById('detCharacters').innerHTML = (gallery.characters && gallery.characters.length) ? gallery.characters.map(c => UI.createTagBadge(c, 'character')).join('') : `<span class="text-gray-500 text-sm">${T('no_characters')}</span>`;
                 document.getElementById('detSeries').innerHTML = (gallery.series && gallery.series.length) ? gallery.series.map(s => UI.createTagBadge(s, 'series')).join('') : `<span class="text-gray-500 text-sm">${T('no_series')}</span>`;
+                
+                // Load and display groups
+                const groups = gallery.groups && gallery.groups.length ? gallery.groups : [];
+                document.getElementById('detGroups').innerHTML = groups.length ? groups.map(g => UI.createTagBadge(g, 'group')).join('') : `<span class="text-gray-500 text-sm">${T('no_groups')}</span>`;
+                
                 document.getElementById('detDate').textContent = new Date(gallery.createdAt).toLocaleDateString('th-TH');
                 
                 Detail.updateFavoriteBtn();
@@ -5153,6 +6204,7 @@
 
                 Detail.renderPagesWithPagination();
                 Detail.updateReadButton();
+                Detail.initEpisodeNav();
             },
             renderPagesWithPagination: () => {
                 const grid = document.getElementById('detPagesGrid');
@@ -5280,11 +6332,13 @@
                 if (Detail.currentGallery.isWatchLater) {
                     btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
                     btn.classList.add('text-cyan-400');
+                    btn.classList.add('bg-cyan-500/20');
                     btn.classList.remove('text-gray-400');
                     btn.title = T('added_to_watch_later');
                 } else {
                     btn.innerHTML = '<i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i>';
                     btn.classList.remove('text-cyan-400');
+                    btn.classList.remove('bg-cyan-500/20');
                     btn.classList.add('text-gray-400');
                     btn.title = T('add_to_watch_later');
                 }
@@ -5312,11 +6366,14 @@
                 if (!Detail.currentGallery || !readBtn) return;
 
                 const last = Detail.currentGallery.lastReadPage;
+                const isInGroup = Detail.currentGallery.groups && Detail.currentGallery.groups.length > 0;
+                
                 if (last !== undefined && last !== null && last > 0) {
                     const pageText = T('read_continue', { page: last + 1 });
                     readBtn.innerHTML = `<i class="fa-solid fa-book-open-reader"></i> ${pageText}`;
                     readBtn.title = pageText;
                 } else {
+                    // Group or single gallery with no progress - just show "Read Now"
                     const nowText = T('read_now');
                     readBtn.innerHTML = `<i class="fa-solid fa-book-open-reader"></i> ${nowText}`;
                     readBtn.title = nowText;
@@ -5333,11 +6390,1013 @@
                     clearBtn.classList.add('hidden');
                 }
             },
+            
+            getFirstReadableGallery: async () => {
+                // Returns {galleryId, index} for where to start reading THIS gallery
+                // (always returns this gallery, not the first in group)
+                if (!Detail.currentGallery) return { galleryId: App.currentGalleryId, index: 0 };
+                
+                return {
+                    galleryId: Detail.currentGallery.id,
+                    index: Detail.currentGallery.lastReadPage || 0
+                };
+            },
+            
             clearBookmark: async () => {
                 if(confirm(T('confirm_delete_bookmark'))) {
                     await db.galleries.update(Detail.currentGallery.id, { lastReadPage: null, lastAccessedAt: null });
                     Detail.currentGallery.lastReadPage = null; // Update local state
                     Detail.updateReadButton(); // Update UI
+                }
+            },
+
+            // Episode Navigation in Groups
+            currentGroupForEpisodes: null,
+            groupEpisodesList: [], // Galleries in the current group for episode nav
+            currentEpisodeIndexInGroup: 0,
+
+            initEpisodeNav: async () => {
+                const navSection = document.getElementById('detEpisodeNav');
+                const miniNav = document.getElementById('miniEpisodeNav');
+                const groupSelector = document.getElementById('detGroupSelector');
+                const episodeSelector = document.getElementById('detEpisodeSelector');
+                const pickerButton = document.getElementById('btnSelectEpisode');
+
+                if (!Detail.currentGallery?.groups?.length) {
+                    navSection.classList.add('hide');
+                    miniNav.classList.add('hide');
+                    if (pickerButton) pickerButton.classList.add('hidden');
+                    return;
+                }
+
+                miniNav.classList.remove('hide');
+                navSection.classList.remove('hide');
+                if (pickerButton) pickerButton.classList.remove('hidden');
+
+                // Set default group to the first one from gallery
+                Detail.currentGroupForEpisodes = Detail.currentGallery.groups[0];
+
+                if (Detail.currentGallery.groups.length === 1) {
+                    groupSelector.classList.add('hidden');
+                } else {
+                    groupSelector.classList.remove('hidden');
+                    groupSelector.innerHTML = Detail.currentGallery.groups.map(g => 
+                        `<option value="${g}" ${g === Detail.currentGroupForEpisodes ? 'selected' : ''}>${g}</option>`
+                    ).join('');
+                    groupSelector.value = Detail.currentGroupForEpisodes;
+                }
+
+                if (episodeSelector) {
+                    episodeSelector.innerHTML = '<option value="0">Loading episodes...</option>';
+                }
+
+                await Detail.updateEpisodeNav();
+            },
+
+            updateEpisodeNav: async () => {
+                const groupSelector = document.getElementById('detGroupSelector');
+                const episodeSelector = document.getElementById('detEpisodeSelector');
+
+                // Get selected group - prefer dropdown value, fall back to current group, fall back to first group
+                let selectedGroup = groupSelector?.value;
+                if (!selectedGroup) {
+                    selectedGroup = Detail.currentGroupForEpisodes;
+                }
+                if (!selectedGroup && Detail.currentGallery.groups.length > 0) {
+                    selectedGroup = Detail.currentGallery.groups[0];
+                }
+
+                if (!selectedGroup) {
+                    console.warn('No group selected for episode nav');
+                    return;
+                }
+
+                Detail.currentGroupForEpisodes = selectedGroup;
+
+                const allGalleries = await db.galleries.toArray();
+                let groupGalleries = allGalleries.filter(g => g.groups && Array.isArray(g.groups) && g.groups.includes(selectedGroup));
+
+                if (groupGalleries.length === 0) {
+                    const retryGalleries = await db.galleries.toArray();
+                    groupGalleries = retryGalleries.filter(g => g.groups && g.groups.includes(selectedGroup));
+                }
+
+                const metadata = Grid.groupMetadataCache[selectedGroup] || await db.groupMetadata.where('name').equals(selectedGroup).first();
+                if (metadata && Array.isArray(metadata.order) && metadata.order.length) {
+                    const orderMap = new Map(metadata.order.map((id, idx) => [id, idx]));
+                    groupGalleries.sort((a, b) => (orderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (orderMap.get(b.id) ?? Number.MAX_SAFE_INTEGER));
+                } else {
+                    groupGalleries.sort((a, b) => a.id - b.id);
+                }
+
+                Detail.groupEpisodesList = groupGalleries;
+
+                if (episodeSelector) {
+                    episodeSelector.innerHTML = groupGalleries.map((gallery, idx) => {
+                        const title = gallery.title ? gallery.title.trim().replace(/</g, '&lt;') : `Episode ${idx + 1}`;
+                        return `<option value="${idx}" ${idx === Detail.currentEpisodeIndexInGroup ? 'selected' : ''}>${idx + 1}. ${title}</option>`;
+                    }).join('');
+                }
+
+                if (groupGalleries.length === 0) {
+                    document.getElementById('miniEpisodeNum').textContent = '0';
+                    document.getElementById('miniTotalEpisodes').textContent = '0';
+                    document.getElementById('miniBtnPrev').disabled = true;
+                    document.getElementById('miniBtnNext').disabled = true;
+                    console.warn('No galleries found in group:', selectedGroup);
+                    return;
+                }
+
+                const foundIdx = groupGalleries.findIndex(g => g.id === Detail.currentGallery.id);
+                Detail.currentEpisodeIndexInGroup = foundIdx >= 0 ? foundIdx : 0;
+                const episodeNum = Detail.currentEpisodeIndexInGroup + 1;
+                const totalEpisodes = groupGalleries.length;
+                document.getElementById('miniEpisodeNum').textContent = episodeNum;
+                document.getElementById('miniTotalEpisodes').textContent = totalEpisodes;
+                document.getElementById('miniBtnPrev').disabled = Detail.currentEpisodeIndexInGroup === 0;
+                document.getElementById('miniBtnNext').disabled = Detail.currentEpisodeIndexInGroup === totalEpisodes - 1;
+                if (episodeSelector) {
+                    episodeSelector.value = Detail.currentEpisodeIndexInGroup.toString();
+                }
+            },
+
+            openEpisodePicker: async () => {
+                await Detail.updateEpisodeNav();
+                Detail.renderEpisodePicker();
+                document.getElementById('episodePickerFilter').value = '';
+                document.getElementById('episodePickerModal').classList.remove('hide');
+            },
+
+            closeEpisodePicker: () => {
+                document.getElementById('episodePickerModal').classList.add('hide');
+            },
+
+            renderEpisodePicker: () => {
+                const list = document.getElementById('episodePickerList');
+                if (!list) return;
+
+                list.innerHTML = Detail.groupEpisodesList.map((gallery, idx) => {
+                    const title = gallery.title ? gallery.title.trim().replace(/</g, '&lt;') : `Episode ${idx + 1}`;
+                    const activeClass = idx === Detail.currentEpisodeIndexInGroup ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-200 hover:bg-gray-700';
+                    return `
+                        <button type="button" class="w-full text-left rounded-lg px-4 py-3 ${activeClass} transition" data-episode-index="${idx}" onclick="Detail.gotoEpisodeIndex(${idx})">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="font-semibold">${idx + 1}. ${title}</span>
+                                ${idx === Detail.currentEpisodeIndexInGroup ? '<span class="text-xs text-gray-200">Current</span>' : ''}
+                            </div>
+                        </button>
+                    `;
+                }).join('');
+
+                Detail.filterEpisodePicker();
+            },
+
+            filterEpisodePicker: () => {
+                const filterValue = document.getElementById('episodePickerFilter')?.value.trim().toLowerCase();
+                const buttons = document.querySelectorAll('#episodePickerList button');
+                buttons.forEach(button => {
+                    const text = button.textContent.toLowerCase();
+                    button.style.display = (!filterValue || text.includes(filterValue)) ? 'block' : 'none';
+                });
+            },
+
+            gotoEpisodeIndex: async (idx) => {
+                const gallery = Detail.groupEpisodesList[idx];
+                if (gallery) {
+                    Detail.closeEpisodePicker();
+                    UI.navigate('detail', gallery.id);
+                }
+            },
+
+            selectEpisodeInGroup: async (index) => {
+                let selectedIndex = typeof index === 'number' ? index : parseInt(document.getElementById('detEpisodeSelector')?.value, 10);
+                if (Number.isNaN(selectedIndex) || selectedIndex < 0) return;
+                const gallery = Detail.groupEpisodesList[selectedIndex];
+                if (gallery) {
+                    UI.navigate('detail', gallery.id);
+                }
+            },
+
+            prevEpisodeInGroup: async () => {
+                if (Detail.currentEpisodeIndexInGroup > 0) {
+                    const prevGallery = Detail.groupEpisodesList[Detail.currentEpisodeIndexInGroup - 1];
+                    UI.navigate('detail', prevGallery.id);
+                } else {
+                    Toast.info(T('first_episode'));
+                }
+            },
+
+            nextEpisodeInGroup: async () => {
+                if (Detail.currentEpisodeIndexInGroup < Detail.groupEpisodesList.length - 1) {
+                    const nextGallery = Detail.groupEpisodesList[Detail.currentEpisodeIndexInGroup + 1];
+                    UI.navigate('detail', nextGallery.id);
+                } else {
+                    Toast.info(T('last_episode'));
+                }
+            }
+        };
+
+        // ================= GROUP DETAIL CONTROLLER =================
+        const GroupDetail = {
+            currentGroupName: null,
+            currentGalleries: [],
+            itemsPerPage: 24,
+            currentPage: 1,
+            previewUrls: [],
+            searchQuery: '',
+            listEditMode: false,
+            draggedIndex: null,
+
+            load: async (groupName) => {
+                GroupDetail.currentGroupName = groupName;
+                GroupDetail.listEditMode = false;
+                const listEditButton = document.getElementById('btnGrpListEdit');
+                if (listEditButton) {
+                    listEditButton.textContent = T('group_list_edit_btn');
+                }
+                
+                // Build combined list of all galleries in this group
+                const allGalleries = await db.galleries.toArray();
+                GroupDetail.currentGalleries = allGalleries.filter(g => 
+                    g.groups && g.groups.some(gn => gn === groupName)
+                );
+
+                const metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                if (metadata && Array.isArray(metadata.order) && metadata.order.length) {
+                    const orderMap = new Map(metadata.order.map((id, idx) => [id, idx]));
+                    GroupDetail.currentGalleries.sort((a, b) => {
+                        const aOrder = orderMap.has(a.id) ? orderMap.get(a.id) : Number.MAX_SAFE_INTEGER;
+                        const bOrder = orderMap.has(b.id) ? orderMap.get(b.id) : Number.MAX_SAFE_INTEGER;
+                        if (aOrder !== bOrder) return aOrder - bOrder;
+                        return a.id - b.id;
+                    });
+                } else {
+                    GroupDetail.currentGalleries.sort((a, b) => a.id - b.id);
+                }
+
+                if (GroupDetail.currentGalleries.length === 0) {
+                    return UI.navigate('home');
+                }
+
+                // Load cover from group metadata if available, otherwise from first gallery
+                const firstGallery = GroupDetail.currentGalleries[0];
+                if (metadata && metadata.coverBlob) {
+                    document.getElementById('grpCover').src = URL.createObjectURL(metadata.coverBlob);
+                } else {
+                    document.getElementById('grpCover').src = URL.createObjectURL(firstGallery.coverBlob);
+                }
+                document.getElementById('grpTitle').textContent = groupName;
+                document.getElementById('grpEpisodeCount').textContent = GroupDetail.currentGalleries.length;
+
+                // Collect all unique tags, artists, characters, series from all galleries
+                const allTags = new Set();
+                const allArtists = new Set();
+                const allCharacters = new Set();
+                const allSeries = new Set();
+
+                GroupDetail.currentGalleries.forEach(g => {
+                    if (g.tags) g.tags.forEach(t => allTags.add(t));
+                    if (g.artists) g.artists.forEach(a => allArtists.add(a));
+                    if (g.characters) g.characters.forEach(c => allCharacters.add(c));
+                    if (g.series) g.series.forEach(s => allSeries.add(s));
+                });
+
+                document.getElementById('grpTags').innerHTML = allTags.size ? Array.from(allTags).map(t => UI.createTagBadge(t, 'tag')).join('') : `<span class="text-gray-500 text-sm">${T('no_tags')}</span>`;
+                document.getElementById('grpArtists').innerHTML = allArtists.size ? Array.from(allArtists).map(a => UI.createTagBadge(a, 'artist')).join('') : `<span class="text-gray-500 text-sm">${T('no_artists')}</span>`;
+                document.getElementById('grpCharacters').innerHTML = allCharacters.size ? Array.from(allCharacters).map(c => UI.createTagBadge(c, 'character')).join('') : `<span class="text-gray-500 text-sm">${T('no_characters')}</span>`;
+                document.getElementById('grpSeries').innerHTML = allSeries.size ? Array.from(allSeries).map(s => UI.createTagBadge(s, 'series')).join('') : `<span class="text-gray-500 text-sm">${T('no_series')}</span>`;
+
+                const groupMetadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                GroupDetail.currentEpisodeIndex = groupMetadata && groupMetadata.lastReadEpisode !== undefined ? Math.min(groupMetadata.lastReadEpisode, GroupDetail.currentGalleries.length - 1) : 0;
+
+                await GroupDetail.updateFavoriteBtn();
+                await GroupDetail.updateWatchLaterBtn();
+                GroupDetail.renderEpisodesWithPagination();
+                GroupDetail.initEpisodeTracking();
+            },
+
+            renderEpisodesWithPagination: () => {
+                const grid = document.getElementById('grpEpisodesGrid');
+                const pagination = document.getElementById('group-episodes-pagination');
+                
+                grid.innerHTML = '';
+                if(pagination) pagination.innerHTML = '';
+
+                if (!GroupDetail.currentGalleries || GroupDetail.currentGalleries.length === 0) return;
+
+                GroupDetail.previewUrls.forEach(url => URL.revokeObjectURL(url));
+                GroupDetail.previewUrls = [];
+
+                // Filter galleries based on search query
+                let filteredGalleries = GroupDetail.currentGalleries;
+                if (GroupDetail.searchQuery) {
+                    filteredGalleries = GroupDetail.currentGalleries.filter((g, index) => {
+                        const episodeNum = index + 1;
+                        const searchLower = GroupDetail.searchQuery.toLowerCase();
+                        return episodeNum.toString().includes(searchLower) || g.title.toLowerCase().includes(searchLower);
+                    });
+                }
+
+                // Pagination Logic
+                const totalPages = Math.ceil(filteredGalleries.length / GroupDetail.itemsPerPage);
+                if (GroupDetail.currentPage > totalPages) GroupDetail.currentPage = 1;
+
+                const start = (GroupDetail.currentPage - 1) * GroupDetail.itemsPerPage;
+                const end = start + GroupDetail.itemsPerPage;
+                const itemsToShow = filteredGalleries.slice(start, end);
+
+                itemsToShow.forEach((gallery, index) => {
+                    // Get actual episode number from original array (for correct numbering)
+                    const actualIndexInOriginal = GroupDetail.currentGalleries.indexOf(gallery);
+                    const episodeNum = actualIndexInOriginal + 1;
+                    const isEditMode = GroupDetail.listEditMode;
+                    
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'aspect-a4 bg-gray-800 rounded overflow-hidden cursor-pointer hover:ring-2 hover:ring-nRed transition relative group';
+                    previewDiv.onclick = () => {
+                        if (!isEditMode) {
+                            UI.navigate('detail', gallery.id);
+                        }
+                    };
+                    previewDiv.title = gallery.title;
+
+                    if (isEditMode) {
+                        previewDiv.draggable = true;
+                        previewDiv.classList.add('border-2', 'border-cyan-500');
+                        previewDiv.addEventListener('dragstart', (e) => GroupDetail.handleEpisodeDragStart(e, actualIndexInOriginal));
+                        previewDiv.addEventListener('dragover', GroupDetail.handleEpisodeDragOver);
+                        previewDiv.addEventListener('drop', (e) => GroupDetail.handleEpisodeDrop(e, actualIndexInOriginal));
+                        previewDiv.addEventListener('dragend', GroupDetail.clearDragTarget);
+                    }
+
+                    const img = document.createElement('img');
+                    img.className = 'w-full h-full object-cover';
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                    img.src = URL.createObjectURL(gallery.coverBlob);
+                    GroupDetail.previewUrls.push(img.src);
+
+                    // Episode number badge
+                    const badge = document.createElement('div');
+                    badge.className = 'absolute bottom-1 left-1 bg-nRed/90 text-white text-xs font-bold px-2 py-1 rounded';
+                    badge.textContent = `${T('episode_count')} ${episodeNum}`;
+
+                    previewDiv.appendChild(img);
+                    previewDiv.appendChild(badge);
+
+                    if (isEditMode) {
+                        const dragHandle = document.createElement('div');
+                        dragHandle.className = 'absolute top-2 left-2 text-xs text-white bg-black/70 rounded-full px-2 py-1 cursor-grab';
+                        dragHandle.textContent = '⋮⋮';
+                        previewDiv.appendChild(dragHandle);
+
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'absolute top-2 right-2 text-white bg-red-600 rounded-full w-7 h-7 flex items-center justify-center opacity-90 hover:opacity-100';
+                        removeBtn.innerHTML = '<i class="fa-solid fa-trash-can text-xs"></i>';
+                        removeBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            GroupDetail.removeFromGroup(gallery.id);
+                        };
+                        previewDiv.appendChild(removeBtn);
+                    }
+
+                    grid.appendChild(previewDiv);
+                });
+
+                // Render Pagination Controls
+                if (totalPages > 1 && pagination) {
+                    let html = '';
+                    // Prev Button
+                    html += `<button onclick="GroupDetail.changePage(${Math.max(1, GroupDetail.currentPage - 1)})" class="w-8 h-8 rounded bg-gray-700 hover:bg-gray-600 flex items-center justify-center disabled:opacity-50 text-white" ${GroupDetail.currentPage === 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button>`;
+
+                    const generateBtn = (i) => {
+                        const active = i === GroupDetail.currentPage ? 'bg-nRed text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600';
+                        return `<button onclick="GroupDetail.changePage(${i})" class="w-8 h-8 rounded ${active} font-bold text-sm">${i}</button>`;
+                    };
+
+                    if (totalPages <= 12) {
+                        for (let i = 1; i <= totalPages; i++) html += generateBtn(i);
+                    } else {
+                        if (GroupDetail.currentPage <= 10) {
+                            for (let i = 1; i <= 12; i++) html += generateBtn(i);
+                            html += `<span class="px-1 text-gray-500 self-center">...</span>`;
+                            html += generateBtn(totalPages);
+                        } else if (GroupDetail.currentPage >= totalPages - 9) {
+                            html += generateBtn(1);
+                            html += `<span class="px-1 text-gray-500 self-center">...</span>`;
+                            for (let i = totalPages - 11; i <= totalPages; i++) html += generateBtn(i);
+                        } else {
+                            html += generateBtn(1);
+                            html += `<span class="px-1 text-gray-500 self-center">...</span>`;
+                            for (let i = GroupDetail.currentPage - 5; i <= GroupDetail.currentPage + 5; i++) html += generateBtn(i);
+                            html += `<span class="px-1 text-gray-500 self-center">...</span>`;
+                            html += generateBtn(totalPages);
+                        }
+                    }
+
+                    // Next Button
+                    html += `<button onclick="GroupDetail.changePage(${Math.min(totalPages, GroupDetail.currentPage + 1)})" class="w-8 h-8 rounded bg-gray-700 hover:bg-gray-600 flex items-center justify-center disabled:opacity-50 text-white" ${GroupDetail.currentPage === totalPages ? 'disabled' : ''}><i class="fa-solid fa-chevron-right"></i></button>`;
+                    
+                    pagination.innerHTML = html;
+                }
+            },
+
+            changePage: (newPage) => {
+                const currentScroll = window.scrollY;
+                GroupDetail.currentPage = newPage;
+                GroupDetail.renderEpisodesWithPagination();
+                window.scrollTo(0, currentScroll);
+                StateManager.save();
+            },
+
+            updateFavoriteBtn: async () => {
+                const metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                const isFavorite = metadata ? metadata.isFavorite : false;
+                const btn = document.getElementById('btnGrpFavorite');
+                if (isFavorite) {
+                    btn.innerHTML = '<i class="fa-solid fa-heart text-nRed"></i>';
+                    btn.classList.add('text-nRed');
+                    btn.classList.add('border-nRed');
+                    btn.classList.remove('text-gray-400');
+                } else {
+                    btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+                    btn.classList.remove('text-nRed');
+                    btn.classList.remove('border-nRed');
+                    btn.classList.add('text-gray-400');
+                }
+            },
+
+            updateWatchLaterBtn: async () => {
+                const metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                const isWatchLater = metadata ? metadata.isWatchLater : false;
+                const btn = document.getElementById('btnGrpWatchLater');
+                if (isWatchLater) {
+                    btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+                    btn.classList.add('text-cyan-400');
+                    btn.classList.add('border-cyan-400');
+                    btn.classList.remove('text-gray-400');
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i>';
+                    btn.classList.remove('text-cyan-400');
+                    btn.classList.remove('border-cyan-400');
+                    btn.classList.add('text-gray-400');
+                }
+            },
+
+            toggleFavorite: async () => {
+                let metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                if (!metadata) {
+                    metadata = { name: GroupDetail.currentGroupName, isFavorite: false, isWatchLater: false };
+                    metadata.id = await db.groupMetadata.add(metadata);
+                }
+                metadata.isFavorite = !metadata.isFavorite;
+                await db.groupMetadata.update(metadata.id, { isFavorite: metadata.isFavorite });
+                Grid.groupMetadataCache[GroupDetail.currentGroupName] = metadata;
+                await GroupDetail.updateFavoriteBtn();
+                Toast.success(metadata.isFavorite ? T('added_to_favorites') : T('removed_from_favorites'));
+                if (Grid.groupViewMode) {
+                    await Grid.buildGroupAggregations();
+                }
+            },
+
+            toggleWatchLater: async () => {
+                let metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                if (!metadata) {
+                    metadata = { name: GroupDetail.currentGroupName, isFavorite: false, isWatchLater: false };
+                    metadata.id = await db.groupMetadata.add(metadata);
+                }
+                metadata.isWatchLater = !metadata.isWatchLater;
+                await db.groupMetadata.update(metadata.id, { isWatchLater: metadata.isWatchLater });
+                Grid.groupMetadataCache[GroupDetail.currentGroupName] = metadata;
+                await GroupDetail.updateWatchLaterBtn();
+                Toast.success(metadata.isWatchLater ? T('added_to_watch_later') : T('removed_from_watch_later'));
+                if (Grid.groupViewMode) {
+                    await Grid.buildGroupAggregations();
+                }
+            },
+
+            currentEpisodeIndex: 0,
+
+            initEpisodeTracking: async () => {
+                // Initialize episode tracking for group view
+                if (!GroupDetail.currentGalleries || GroupDetail.currentGalleries.length === 0) {
+                    return;
+                }
+
+            },
+
+            prevEpisode: async () => {
+                if (GroupDetail.currentEpisodeIndex > 0) {
+                    GroupDetail.currentEpisodeIndex--;
+                    const targetGallery = GroupDetail.currentGalleries[GroupDetail.currentEpisodeIndex];
+                    document.getElementById('groupCurrentEpisodeNum').textContent = GroupDetail.currentEpisodeIndex + 1;
+                    await GroupDetail.saveLastReadEpisode();
+                    UI.navigate('detail', targetGallery.id);
+                } else {
+                    Toast.show(T('first_episode') || 'First Episode');
+                }
+            },
+
+            nextEpisode: async () => {
+                if (GroupDetail.currentEpisodeIndex < GroupDetail.currentGalleries.length - 1) {
+                    GroupDetail.currentEpisodeIndex++;
+                    const targetGallery = GroupDetail.currentGalleries[GroupDetail.currentEpisodeIndex];
+                    document.getElementById('groupCurrentEpisodeNum').textContent = GroupDetail.currentEpisodeIndex + 1;
+                    await GroupDetail.saveLastReadEpisode();
+                    UI.navigate('detail', targetGallery.id);
+                } else {
+                    Toast.show(T('last_episode') || 'Last Episode');
+                }
+            },
+
+            filterEpisodes: () => {
+                const searchInput = document.getElementById('grpEpisodeSearch');
+                GroupDetail.searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+                GroupDetail.currentPage = 1;
+                GroupDetail.renderEpisodesWithPagination();
+            },
+
+            saveLastReadEpisode: async () => {
+                let metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                if (!metadata) {
+                    metadata = { name: GroupDetail.currentGroupName, isFavorite: false, isWatchLater: false, lastReadEpisode: 0 };
+                    metadata.id = await db.groupMetadata.add(metadata);
+                }
+                metadata.lastReadEpisode = GroupDetail.currentEpisodeIndex;
+                await db.groupMetadata.update(metadata.id, { lastReadEpisode: metadata.lastReadEpisode });
+                Grid.groupMetadataCache[GroupDetail.currentGroupName] = metadata;
+            },
+
+            toggleListEditMode: () => {
+                GroupDetail.listEditMode = !GroupDetail.listEditMode;
+                const btn = document.getElementById('btnGrpListEdit');
+                if (btn) {
+                    btn.textContent = GroupDetail.listEditMode ? T('group_list_edit_done') : T('group_list_edit_btn');
+                }
+                GroupDetail.renderEpisodesWithPagination();
+                GroupDetail.initEpisodeTracking();
+            },
+
+            handleEpisodeDragStart: (e, index) => {
+                e.dataTransfer.effectAllowed = 'move';
+                try {
+                    e.dataTransfer.setData('text/plain', '');
+                } catch (error) {
+                    // some browsers require setData for drag events
+                }
+                GroupDetail.draggedIndex = index;
+            },
+
+            handleEpisodeDragOver: (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            },
+
+            handleEpisodeDrop: async (e, targetIndex) => {
+                e.preventDefault();
+                if (GroupDetail.draggedIndex === null || GroupDetail.draggedIndex === undefined || GroupDetail.draggedIndex === targetIndex) return;
+                const movedGallery = GroupDetail.currentGalleries.splice(GroupDetail.draggedIndex, 1)[0];
+                const insertIndex = targetIndex > GroupDetail.draggedIndex ? targetIndex - 1 : targetIndex;
+                GroupDetail.currentGalleries.splice(insertIndex, 0, movedGallery);
+
+                if (GroupDetail.currentEpisodeIndex === GroupDetail.draggedIndex) {
+                    GroupDetail.currentEpisodeIndex = targetIndex;
+                } else if (GroupDetail.currentEpisodeIndex > GroupDetail.draggedIndex && GroupDetail.currentEpisodeIndex <= targetIndex) {
+                    GroupDetail.currentEpisodeIndex--;
+                } else if (GroupDetail.currentEpisodeIndex < GroupDetail.draggedIndex && GroupDetail.currentEpisodeIndex >= targetIndex) {
+                    GroupDetail.currentEpisodeIndex++;
+                }
+
+                GroupDetail.clearDragTarget();
+                await GroupDetail.saveGroupOrder();
+                GroupDetail.renderEpisodesWithPagination();
+                GroupDetail.initEpisodeTracking();
+            },
+
+            clearDragTarget: () => {
+                GroupDetail.draggedIndex = null;
+            },
+
+            saveGroupOrder: async () => {
+                let metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                if (!metadata) {
+                    metadata = { name: GroupDetail.currentGroupName, isFavorite: false, isWatchLater: false, lastReadEpisode: 0, order: [] };
+                    metadata.id = await db.groupMetadata.add(metadata);
+                }
+                metadata.order = GroupDetail.currentGalleries.map(g => g.id);
+                await db.groupMetadata.update(metadata.id, { order: metadata.order });
+                Grid.groupMetadataCache[GroupDetail.currentGroupName] = metadata;
+            },
+
+            removeFromGroup: async (galleryId) => {
+                const removedIndex = GroupDetail.currentGalleries.findIndex(g => g.id === galleryId);
+                if (removedIndex === -1) return;
+
+                const gallery = await db.galleries.get(galleryId);
+                if (!gallery) return;
+
+                const updatedGroups = (Array.isArray(gallery.groups) ? gallery.groups.slice() : []).filter(name => name !== GroupDetail.currentGroupName);
+                await db.galleries.update(galleryId, { groups: updatedGroups });
+
+                if (removedIndex < GroupDetail.currentEpisodeIndex) {
+                    GroupDetail.currentEpisodeIndex = Math.max(0, GroupDetail.currentEpisodeIndex - 1);
+                }
+                GroupDetail.currentGalleries = GroupDetail.currentGalleries.filter(g => g.id !== galleryId);
+                GroupDetail.currentEpisodeIndex = Math.min(GroupDetail.currentEpisodeIndex, GroupDetail.currentGalleries.length - 1);
+
+                if (GroupDetail.currentGalleries.length === 0) {
+                    return UI.navigate('home');
+                }
+
+                await GroupDetail.saveGroupOrder();
+                GroupDetail.renderEpisodesWithPagination();
+                GroupDetail.initEpisodeTracking();
+                Toast.success(T('removed_from_group'));
+            },
+
+            readNow: async () => {
+                let resumeGallery = null;
+                const metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                if (metadata && metadata.lastReadEpisode !== undefined && metadata.lastReadEpisode >= 0 && metadata.lastReadEpisode < GroupDetail.currentGalleries.length) {
+                    resumeGallery = GroupDetail.currentGalleries[metadata.lastReadEpisode];
+                }
+                if (!resumeGallery) {
+                    for (const gallery of GroupDetail.currentGalleries) {
+                        if (gallery.lastReadPage !== undefined && gallery.lastReadPage !== null) {
+                            resumeGallery = gallery;
+                            break;
+                        }
+                    }
+                }
+                if (!resumeGallery) {
+                    resumeGallery = GroupDetail.currentGalleries[0];
+                }
+                UI.navigate('reader', { galleryId: resumeGallery.id, index: resumeGallery.lastReadPage || 0 });
+            },
+
+            editGroup: async () => {
+                const modal = document.getElementById('groupEditModal');
+                if (!modal) return;
+                document.getElementById('groupEditNameInput').value = GroupDetail.currentGroupName || '';
+                document.getElementById('groupEditSearch').value = '';
+                
+                // Load existing cover if available
+                const metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                GroupDetail.currentEditCoverBlob = metadata && metadata.coverBlob ? metadata.coverBlob : null;
+                GroupDetail.displayCoverImage(GroupDetail.currentEditCoverBlob);
+                
+                await GroupDetail.loadEditCandidates();
+                modal.classList.remove('hide');
+            },
+
+            closeEditModal: () => {
+                const modal = document.getElementById('groupEditModal');
+                if (modal) modal.classList.add('hide');
+                GroupDetail.currentEditCoverBlob = null;
+            },
+
+            currentEditCoverBlob: null,
+
+            displayCoverImage: (blob) => {
+                const img = document.getElementById('groupEditCoverImage');
+                const placeholder = document.getElementById('groupEditCoverPlaceholder');
+                const clearBtn = document.getElementById('groupEditCoverClearBtn');
+                
+                if (blob) {
+                    const url = URL.createObjectURL(blob);
+                    img.src = url;
+                    img.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    img.src = '';
+                    img.style.display = 'none';
+                    placeholder.style.display = 'flex';
+                    clearBtn.classList.add('hidden');
+                }
+            },
+
+            handleCoverSelect: async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                
+                try {
+                    const blob = await file.slice().arrayBuffer().then(buf => new Blob([buf], { type: file.type }));
+                    GroupDetail.currentEditCoverBlob = blob;
+                    GroupDetail.displayCoverImage(blob);
+                    Toast.success('Cover image selected');
+                } catch (error) {
+                    Toast.error('Failed to load cover image');
+                    console.error(error);
+                }
+            },
+
+            handleCoverDragOver: (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const container = document.getElementById('groupEditCoverContainer');
+                container?.classList.add('border-nRed', 'bg-gray-800');
+            },
+
+            handleCoverDragLeave: (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const container = document.getElementById('groupEditCoverContainer');
+                container?.classList.remove('border-nRed', 'bg-gray-800');
+            },
+
+            handleCoverDrop: async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const container = document.getElementById('groupEditCoverContainer');
+                container?.classList.remove('border-nRed', 'bg-gray-800');
+                
+                const files = event.dataTransfer?.files;
+                if (!files || files.length === 0) return;
+                
+                const file = Array.from(files).find(f => f.type.startsWith('image/'));
+                if (!file) {
+                    Toast.error('Please drop an image file');
+                    return;
+                }
+                
+                try {
+                    const blob = new Blob([await file.arrayBuffer()], { type: file.type });
+                    GroupDetail.currentEditCoverBlob = blob;
+                    GroupDetail.displayCoverImage(blob);
+                    Toast.success('Cover image uploaded');
+                } catch (error) {
+                    Toast.error('Failed to process cover image');
+                    console.error(error);
+                }
+            },
+
+            clearCover: () => {
+                GroupDetail.currentEditCoverBlob = null;
+                GroupDetail.displayCoverImage(null);
+                document.getElementById('groupEditCoverInput').value = '';
+                Toast.info('Cover will revert to first gallery');
+            },
+
+            editCandidates: [],
+            editFilterQuery: '',
+
+            loadEditCandidates: async () => {
+                const allGalleries = await db.galleries.toArray();
+                GroupDetail.editCandidates = allGalleries
+                    .filter(g => !g.groups || !g.groups.includes(GroupDetail.currentGroupName))
+                    .map(g => ({
+                        id: g.id,
+                        title: g.title,
+                        tags: g.tags || [],
+                        series: g.series || [],
+                        artists: g.artists || [],
+                        selected: false
+                    }));
+                GroupDetail.editFilterQuery = '';
+                GroupDetail.renderEditCandidates();
+            },
+
+            filterEditCandidates: () => {
+                const query = document.getElementById('groupEditSearch')?.value.toLowerCase().trim() || '';
+                GroupDetail.editFilterQuery = query;
+                GroupDetail.renderEditCandidates();
+            },
+
+            renderEditCandidates: () => {
+                const container = document.getElementById('groupEditCandidates');
+                if (!container) return;
+                const query = GroupDetail.editFilterQuery;
+                const filtered = GroupDetail.editCandidates.filter(c => {
+                    if (!query) return true;
+                    return c.title.toLowerCase().includes(query)
+                        || c.tags.some(tag => tag.toLowerCase().includes(query))
+                        || c.artists.some(artist => artist.toLowerCase().includes(query))
+                        || c.series.some(series => series.toLowerCase().includes(query));
+                });
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div class="text-sm text-gray-400">${T('no_data')}</div>`;
+                    return;
+                }
+                container.innerHTML = filtered.map(candidate => {
+                    const isChecked = candidate.selected ? 'checked' : '';
+                    return `
+                        <label class="flex items-start gap-3 px-3 py-2 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-800">
+                            <input type="checkbox" ${isChecked} onchange="GroupDetail.toggleEditCandidate(${candidate.id})" class="mt-1 text-nRed bg-gray-900 border-gray-600 rounded focus:ring-nRed" />
+                            <div class="flex-1">
+                                <div class="font-semibold text-white">${candidate.title}</div>
+                                <div class="text-xs text-gray-400">${candidate.tags.join(', ') || '-'} ${candidate.artists.length ? '| ' + candidate.artists.join(', ') : ''}</div>
+                            </div>
+                        </label>`;
+                }).join('');
+            },
+
+            toggleEditCandidate: (id) => {
+                const candidate = GroupDetail.editCandidates.find(c => c.id === id);
+                if (candidate) {
+                    candidate.selected = !candidate.selected;
+                    GroupDetail.renderEditCandidates();
+                }
+            },
+
+            confirmEditGroup: async () => {
+                const groupNameInput = document.getElementById('groupEditNameInput');
+                const newGroupName = groupNameInput?.value.trim();
+                if (!newGroupName) {
+                    Toast.error(T('group_name_required') || 'Group name is required');
+                    return;
+                }
+
+                const oldGroupName = GroupDetail.currentGroupName;
+                const renameGroup = newGroupName !== oldGroupName;
+                let metadata = await db.groupMetadata.where('name').equals(oldGroupName).first();
+                if (renameGroup && metadata) {
+                    await db.groupMetadata.update(metadata.id, { name: newGroupName });
+                    metadata.name = newGroupName;
+                    Grid.groupMetadataCache[newGroupName] = metadata;
+                    delete Grid.groupMetadataCache[oldGroupName];
+                }
+                if (!metadata) {
+                    metadata = { name: newGroupName, isFavorite: false, isWatchLater: false, lastReadEpisode: 0 };
+                    metadata.id = await db.groupMetadata.add(metadata);
+                    Grid.groupMetadataCache[newGroupName] = metadata;
+                }
+
+                // Save or remove cover image
+                if (GroupDetail.currentEditCoverBlob) {
+                    metadata.coverBlob = GroupDetail.currentEditCoverBlob;
+                    await db.groupMetadata.update(metadata.id, { coverBlob: metadata.coverBlob });
+                } else {
+                    // If no cover is selected, remove the custom cover (fallback to first gallery)
+                    await db.groupMetadata.update(metadata.id, { coverBlob: null });
+                }
+
+                const allGalleries = await db.galleries.toArray();
+                const allGroupMembers = allGalleries.filter(gallery => Array.isArray(gallery.groups) && gallery.groups.includes(oldGroupName));
+                for (const gallery of allGroupMembers) {
+                    const updatedGroups = Array.isArray(gallery.groups) ? gallery.groups.slice() : [];
+                    const updatedTags = Array.isArray(gallery.tags) ? gallery.tags.filter(tag => tag !== oldGroupName && tag !== newGroupName) : [];
+                    const index = updatedGroups.indexOf(oldGroupName);
+                    if (index !== -1) {
+                        if (!renameGroup || !updatedGroups.includes(newGroupName)) {
+                            updatedGroups[index] = newGroupName;
+                        }
+                    }
+                    await db.galleries.update(gallery.id, { groups: updatedGroups, tags: updatedTags });
+                }
+
+                const selectedIds = GroupDetail.editCandidates.filter(c => c.selected).map(c => c.id);
+                for (const galleryId of selectedIds) {
+                    const gallery = await db.galleries.get(galleryId);
+                    if (!gallery) continue;
+                    const updatedGroups = Array.isArray(gallery.groups) ? gallery.groups.slice() : [];
+                    const updatedTags = Array.isArray(gallery.tags) ? gallery.tags.filter(tag => tag !== oldGroupName && tag !== newGroupName) : [];
+                    if (!updatedGroups.includes(newGroupName)) {
+                        updatedGroups.push(newGroupName);
+                    }
+                    await db.galleries.update(galleryId, { groups: updatedGroups, tags: updatedTags });
+                }
+
+                GroupDetail.currentGroupName = newGroupName;
+                GroupDetail.closeEditModal();
+                await GroupDetail.load(newGroupName);
+                if (Grid.groupViewMode) {
+                    await Grid.loadGroupMetadataCache();
+                    Grid.buildGroupAggregations();
+                    // Reapply sorting to ensure correct order after group edit
+                    Grid.applySort();
+                    Grid.renderCurrentList();
+                }
+                Toast.success(T('alert_edit_success'));
+            },
+
+            exportGroup: async () => {
+                if (GroupDetail.currentGalleries.length === 0) {
+                    Toast.error(T('no_data'));
+                    return;
+                }
+
+                const progressToast = Toast.progress(T('export_queue_started'));
+
+                try {
+                    // Step 1: Pre-calculate total size and validate
+                    progressToast.update(2);
+                    let estimatedSize = 0;
+                    const galleryErrors = [];
+                    
+                    for (const gallery of GroupDetail.currentGalleries) {
+                        // Check cover blob size
+                        if (gallery.coverBlob && gallery.coverBlob.size) {
+                            estimatedSize += gallery.coverBlob.size;
+                        } else if (!gallery.coverBlob) {
+                            galleryErrors.push(`${gallery.title}: ไม่มีรูปปก`);
+                        }
+                        
+                        // Check pages blob size
+                        const pages = await db.pages.where('galleryId').equals(gallery.id).toArray();
+                        if (pages.length === 0) {
+                            galleryErrors.push(`${gallery.title}: ไม่มีหน้า (pages)`);
+                        }
+                        for (const page of pages) {
+                            if (page.imageBlob && page.imageBlob.size) {
+                                estimatedSize += page.imageBlob.size;
+                            }
+                        }
+                    }
+                    
+                    // Check for errors
+                    if (galleryErrors.length > 0) {
+                        progressToast.error();
+                        Toast.warn(`⚠️ พบข้อมูลไม่สมบูรณ์:\n${galleryErrors.join('\n')}\n\nโปรดตรวจสอบเรื่องหรือลองอัปโหลดใหม่`, 10000);
+                        return;
+                    }
+                    
+                    // Add 10% margin for JSON manifest and ZIP overhead
+                    estimatedSize *= 1.1;
+                    const MAX_SIZE = 1024 * 1024 * 1024; // 1 GB limit
+                    
+                    if (estimatedSize > MAX_SIZE) {
+                        progressToast.error();
+                        const sizeInMB = (estimatedSize / 1024 / 1024).toFixed(1);
+                        const maxInMB = (MAX_SIZE / 1024 / 1024).toFixed(0);
+                        Toast.error(`⚠️ ขนาดไฟล์กลุ่มนี้ ${sizeInMB}MB เกินขีดจำกัด ${maxInMB}MB\n\n👉 วิธีแก้: ไปลบบางเรื่องออกจากกลุ่มนี้ หรือส่งออกเรื่องเดี่ยว ๆ แทน`, 8000);
+                        return;
+                    }
+
+                    // Step 2: Build ZIP with progress updates (same format as single gallery export)
+                    progressToast.update(5);
+                    const zip = new JSZip();
+                    let processed = 5;
+
+                    for (let index = 0; index < GroupDetail.currentGalleries.length; index++) {
+                        const gallery = GroupDetail.currentGalleries[index];
+                        const galleryFolder = zip.folder(`galleries/${gallery.id}`);
+
+                        // Add cover as base64 (same as single gallery export)
+                        if (gallery.coverBlob && gallery.coverBlob.size > 0) {
+                            const coverBase64 = await DataManager.blobToBase64(gallery.coverBlob);
+                            const coverDataUrl = coverBase64.split(',')[1]; // Remove data:image/... prefix
+                            galleryFolder.file('cover.base64', coverDataUrl);
+                        }
+
+                        // Add pages as base64 (same as single gallery export)
+                        const pages = await db.pages.where('galleryId').equals(gallery.id).toArray();
+                        pages.sort((a, b) => a.order - b.order);
+                        for (let p = 0; p < pages.length; p++) {
+                            const page = pages[p];
+                            if (page.imageBlob && page.imageBlob.size > 0) {
+                                const pageBase64 = await DataManager.blobToBase64(page.imageBlob);
+                                const pageDataUrl = pageBase64.split(',')[1]; // Remove data:image/... prefix
+                                galleryFolder.file(`page_${String(page.order + 1).padStart(3, '0')}.base64`, pageDataUrl);
+                            }
+                        }
+
+                        processed += (90 / GroupDetail.currentGalleries.length);
+                        progressToast.update(Math.min(90, processed));
+                    }
+
+                    // Create group metadata
+                    const metadata = {
+                        type: 'group',
+                        groupName: GroupDetail.currentGroupName,
+                        exportDate: new Date().toISOString(),
+                        galleryCount: GroupDetail.currentGalleries.length,
+                        galleries: GroupDetail.currentGalleries.map(g => ({
+                            id: g.id,
+                            title: g.title,
+                            tags: g.tags || [],
+                            artists: g.artists || [],
+                            characters: g.characters || [],
+                            series: g.series || [],
+                            createdAt: g.createdAt,
+                            totalPages: g.totalPages
+                        }))
+                    };
+                    
+                    zip.file('metadata.json', JSON.stringify(metadata, null, 2));
+
+                    progressToast.update(95);
+
+                    // Generate ZIP
+                    const zipBlob = await zip.generateAsync({ type: 'blob' });
+                    
+                    progressToast.update(98);
+
+                    // Download
+                    const url = URL.createObjectURL(zipBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `UGal-group-${GroupDetail.currentGroupName.replace(/[^a-zA-Z0-9]/g, '_')}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    progressToast.complete(T('export_success'));
+                } catch (error) {
+                    console.error('Export failed:', error);
+                    progressToast.error();
+                    Toast.error(T('export_failed') + ': ' + error.message);
                 }
             }
         };
@@ -5348,6 +7407,64 @@
             hideBarTimeout: null,
             webtoonObserver: null,
             resizeTarget: null, isResizing: false,
+            // Episode tracking (when reading within a group)
+            currentGroupName: null,
+            currentGroupGalleries: [],
+            currentEpisodeIndex: 0,
+
+            initEpisodeTracking: async () => {
+                // Detect if current gallery is part of any group
+                const gallery = await db.galleries.get(App.currentGalleryId);
+                if (!gallery || !gallery.groups || gallery.groups.length === 0) {
+                    // Not in a group, hide episode controls
+                    document.getElementById('readerEpisodeControls').classList.add('hide');
+                    document.getElementById('episodeDivider').classList.add('hide');
+                    Reader.currentGroupName = null;
+                    Reader.currentGroupGalleries = [];
+                    return;
+                }
+                
+                // Use the first group for episode navigation
+                Reader.currentGroupName = gallery.groups[0];
+                
+                // Load all galleries in this group and sort by ID
+                const allGalleries = await db.galleries.toArray();
+                Reader.currentGroupGalleries = allGalleries
+                    .filter(g => g.groups && g.groups.includes(Reader.currentGroupName))
+                    .sort((a, b) => a.id - b.id);
+                
+                // Find current position in group
+                Reader.currentEpisodeIndex = Reader.currentGroupGalleries.findIndex(g => g.id === App.currentGalleryId);
+                
+                if (Reader.currentGroupGalleries.length > 1) {
+                    // Show episode controls only if group has more than 1 gallery
+                    document.getElementById('readerEpisodeControls').classList.remove('hide');
+                    document.getElementById('episodeDivider').classList.remove('hide');
+                    document.getElementById('currentEpisodeNum').textContent = Reader.currentEpisodeIndex + 1;
+                    document.getElementById('totalEpisodeNum').textContent = Reader.currentGroupGalleries.length;
+                } else {
+                    document.getElementById('readerEpisodeControls').classList.add('hide');
+                    document.getElementById('episodeDivider').classList.add('hide');
+                }
+            },
+
+            prevEpisode: async () => {
+                if (Reader.currentEpisodeIndex > 0) {
+                    const prevGallery = Reader.currentGroupGalleries[Reader.currentEpisodeIndex - 1];
+                    UI.navigate('reader', { galleryId: prevGallery.id, index: prevGallery.lastReadPage || 0 });
+                } else {
+                    Toast.info(T('first_episode'));
+                }
+            },
+
+            nextEpisode: async () => {
+                if (Reader.currentEpisodeIndex < Reader.currentGroupGalleries.length - 1) {
+                    const nextGallery = Reader.currentGroupGalleries[Reader.currentEpisodeIndex + 1];
+                    UI.navigate('reader', { galleryId: nextGallery.id, index: nextGallery.lastReadPage || 0 });
+                } else {
+                    Toast.info(T('last_episode'));
+                }
+            },
 
             startReading: (index = 0, fromHistory = false) => {
                 if (App.pages.length === 0) {
@@ -5356,6 +7473,26 @@
                     return;
                 }
                 App.reader.currentIndex = index;
+                
+                // Track group context if reading within a group
+                (async () => {
+                    const currentGallery = await db.galleries.get(App.currentGalleryId);
+                    if (currentGallery && currentGallery.groups && currentGallery.groups.length > 0) {
+                        // First group is considered the primary group for episode tracking
+                        const primaryGroup = currentGallery.groups[0];
+                        const allInGroup = await db.galleries.toArray();
+                        const groupGalleries = allInGroup
+                            .filter(g => g.groups && g.groups.includes(primaryGroup))
+                            .sort((a, b) => a.id - b.id);
+                        
+                        const episodeIndex = groupGalleries.findIndex(g => g.id === App.currentGalleryId);
+                        if (episodeIndex >= 0) {
+                            App.reader.lastReadGroupName = primaryGroup;
+                            App.reader.lastReadGroupIndex = episodeIndex;
+                        }
+                    }
+                })();
+                
                 if (!fromHistory) {
                     App.reader.isEditMode = false;
                     App.reader.hasUnsavedChanges = false;
@@ -5375,6 +7512,7 @@
                 TranslationManager.loadTranslationSets();
                 
                 Reader.setupAutoHideBar();
+                Reader.initEpisodeTracking();
                 
                 // Track view count (increment by 1 per session)
                 (async () => {
@@ -6831,6 +8969,7 @@
             ArtistSuggestions.init();
             CharacterSuggestions.init();
             SeriesSuggestions.init();
+            GroupSuggestions.init();
             StateManager.load();
             FileSystemManager.init();
             StorageManager.init();
