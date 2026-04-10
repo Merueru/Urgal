@@ -573,7 +573,7 @@
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2 navbar-logo-group">
                     <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i></span>
                     <span class="hidden sm:inline text-xl text-nRed hover:scale-110 transition" >UGal</span>
-                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.5.0</p>
+                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.5.1</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
@@ -1032,14 +1032,26 @@
                     </div>
 
                     <div class="flex flex-wrap gap-3 mb-6">
-                        <button id="btnGrpReadNow" onclick="GroupDetail.readNow()" class="bg-gradient-to-r from-nRed to-red-600 hover:from-red-600 hover:to-red-700 px-6 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transition text-white" data-i18n-title="read_now" title="">
+                        <button id="btnGrpReadNow" class="bg-gradient-to-r from-nRed to-red-600 hover:from-red-600 hover:to-red-700 px-6 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transition text-white" data-i18n-title="read_now" title="">
                             <i class="fa-solid fa-book-open-reader"></i> <span data-i18n="read_now">อ่านเลย</span>
                         </button>
+                        <button id="btnGrpClearBookmark" onclick="GroupDetail.clearContinueReading()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 px-6 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transition text-white hide" data-i18n-title="clear_bookmark_group_title" title="">
+                            <i class="fa-solid fa-bookmark"></i> <span data-i18n="clear_bookmark_group">ลบประวัติอ่านต่อ</span>
+                        </button>
+                        <button onclick="GroupDetail.randomEpisode()" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-6 py-2 rounded-lg font-bold text-sm shadow-lg transition text-white" data-i18n-title="random_grp_btn" title="">
+                            <i class="fa-solid fa-dice"></i> <span data-i18n="random_grp_btn">สุ่ม</span>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
                         <button id="btnGrpEdit" onclick="GroupDetail.editGroup()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-6 py-2 rounded-lg font-bold text-sm shadow-lg transition text-white" data-i18n="edit_btn" data-i18n-title="edit_title" title="">
                             <i class="fa-solid fa-wrench"></i> <span data-i18n="edit_btn">แก้ไข</span>
                         </button>
                         <button onclick="GroupDetail.exportGroup()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-6 py-2 rounded-lg font-bold text-sm shadow-lg transition text-white" data-i18n-title="export_group" title="ส่งออก">
                             <i class="fa-solid fa-file-export"></i> <span data-i18n="export_btn">ส่งออก</span>
+                        </button>
+                        <button onclick="GroupDetail.deleteGroup()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-6 py-2 rounded-lg font-bold text-sm shadow-lg transition text-white" data-i18n-title="delete_grp_btn" title="">
+                            <i class="fa-solid fa-trash"></i> <span data-i18n="delete_grp_btn">ลบกลุ่ม</span>
                         </button>
                     </div>
                 </div>
@@ -1554,6 +1566,7 @@
                 pages_placeholder: "ลากรูปภาพมาวางที่นี่ หรือกดเพิ่มรูปภาพ", cancel_btn: "ยกเลิก", confirm_btn: "ยืนยัน", save_btn: "บันทึกและเผยแพร่",
                 no_tags: "ไม่มีแท็ก", no_artists: "ไม่ระบุ", pages_count: "หน้า", episode_count: "ตอน",
                 read_now: "อ่านเลย", read_continue: "อ่านต่อ (หน้า {page})", random_read_title: "สุ่มหน้าอ่าน",
+                read_continue_group: "อ่านต่อ ตอน {episode} หน้า {page}", clear_bookmark_group_title: "เคลียร์ประวัติอ่านต่อ", clear_bookmark_group: "ลบประวัติอ่านต่อ",
                 clear_bookmark_title: "เคลียร์บุ๊กมาร์ก", delete_bookmark: "ลบที่คั่น", delete_trans_sets_desc: "เลือกชุดแปลที่ต้องการลบ :",
                 export_this_title: "ส่งออกเรื่องนี้", edit_title: "แก้ไข", edit_btn: "แก้ไข", delete_title: "ลบเรื่องนี้",
                 group_edit_title: "แก้ไขกลุ่ม", group_edit_description: "เพิ่มตอนจากเรื่องอื่น ๆ และแก้ไขชื่อกลุ่ม", group_name: "ชื่อกลุ่ม", add_episodes_from_other: "เพิ่มตอนจากเรื่องอื่น ๆ", search_episodes: "ค้นหาตอน...", select_episode: "เลือกตอน", add_selected_episodes: "เพิ่มตอนที่เลือก", group_name_required: "กรุณาป้อนชื่อกลุ่ม", group_list_edit_btn: "จัดการรายการ", group_list_edit_done: "เสร็จสิ้น", removed_from_group: "ลบออกจากกลุ่มเรียบร้อยแล้ว",
@@ -1583,7 +1596,7 @@
                 export_queue_started: "เริ่มสร้างคิวการดาวน์โหลด...",
                 edit_tag_title: "แก้ไขแท็ก",
                 tag_name_label: "ชื่อแท็ก",
-                list_edit_delete_title: "แก้ไข / ลบแท็ก"
+                list_edit_delete_title: "แก้ไข / ลบแท็ก", random_grp_btn: "สุ่ม", delete_grp_btn: "ลบกลุ่ม", confirm_delete_group: "คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่ม?", group_deleted: "ลบกลุ่มแล้ว"
             },
             en: {
                 decrease_size_title: "Decrease text size", increase_size_title: "Increase text size", shape_rect_title: "Rectangle", bg_white_title: "White background", bg_black_title: "Black background", bg_clear_title: "Transparent background", color_black_title: "Black text", color_white_title: "White text",
@@ -1616,6 +1629,7 @@
                 pages_placeholder: "Drag images here or click Add Images", cancel_btn: "Cancel", confirm_btn: "Confirm", save_btn: "Save & Publish",
                 no_tags: "No Tags", no_artists: "Unknown", pages_count: "pages", episode_count: "episode",
                 read_now: "Read Now", read_continue: "Continue (Page {page})", random_read_title: "Random Page",
+                read_continue_group: "Continue Episode {episode} Page {page}", clear_bookmark_group_title: "Clear Reading History", clear_bookmark_group: "Remove Reading History",
                 clear_bookmark_title: "Clear Bookmark", delete_bookmark: "Remove Bookmark", delete_trans_sets_desc: "Select translation sets to delete:",
                 export_this_title: "Export this", edit_title: "Edit", edit_btn: "Edit", delete_title: "Delete",
                 group_edit_title: "Edit Group", group_edit_description: "Add episodes from other stories and rename the group", group_name: "Group Name", add_episodes_from_other: "Add episodes from other stories", search_episodes: "Search episodes...", select_episode: "Select episode", add_selected_episodes: "Add Selected", group_name_required: "Group name is required", group_list_edit_btn: "Manage List", group_list_edit_done: "Done", removed_from_group: "Removed from group",
@@ -1645,7 +1659,7 @@
                 export_queue_started: "Starting download queue...",
                 edit_tag_title: "Edit Tag",
                 tag_name_label: "Tag Name",
-                list_edit_delete_title: "Edit / Delete Tags"
+                list_edit_delete_title: "Edit / Delete Tags", random_grp_btn: "Random", delete_grp_btn: "Delete Group", confirm_delete_group: "Are you sure you want to delete this group?", group_deleted: "Group deleted"
             },
             cn: {
                 decrease_size_title: "减小文字大小", increase_size_title: "增大文字大小", shape_rect_title: "矩形", bg_white_title: "白色背景", bg_black_title: "黑色背景", bg_clear_title: "透明背景", color_black_title: "黑色文字", color_white_title: "白色文字",
@@ -1678,6 +1692,7 @@
                 pages_placeholder: "将图片拖到这里或点击添加", cancel_btn: "取消", confirm_btn: "确认", save_btn: "保存并发布",
                 no_tags: "暂无标签", no_artists: "未知作者", pages_count: "页", episode_count: "话",
                 read_now: "立即阅读", read_continue: "继续阅读 (第 {page} 页)", random_read_title: "随机阅读",
+                read_continue_group: "继续阅读 第 {episode} 话 第 {page} 页", clear_bookmark_group_title: "清除阅读历史", clear_bookmark_group: "删除阅读历史",
                 clear_bookmark_title: "清除书签", delete_bookmark: "删除书签", delete_trans_sets_desc: "选择要删除的翻译集:",
                 export_this_title: "导出此项", edit_title: "编辑", edit_btn: "编辑", delete_title: "删除项目",
                 group_edit_title: "编辑分组", group_edit_description: "从其他故事添加章节并重命名分组", group_name: "分组名称", add_episodes_from_other: "从其他故事添加章节", search_episodes: "搜索章节...", select_episode: "选择章节", add_selected_episodes: "添加所选", group_name_required: "请输入分组名称", group_list_edit_btn: "管理列表", group_list_edit_done: "完成", removed_from_group: "已从分组中移除",
@@ -1707,7 +1722,7 @@
                 export_queue_started: "开始下载队列...",
                 edit_tag_title: "编辑标签",
                 tag_name_label: "标签名称",
-                list_edit_delete_title: "编辑 / 删除标签"
+                list_edit_delete_title: "编辑 / 删除标签", random_grp_btn: "随机", delete_grp_btn: "删除分组", confirm_delete_group: "确定要删除此分组吗？", group_deleted: "分组已删除"
             },
             jp: {
                 decrease_size_title: "テキストサイズを縮小", increase_size_title: "テキストサイズを拡大", shape_rect_title: "矩形", bg_white_title: "白い背景", bg_black_title: "黒い背景", bg_clear_title: "透明な背景", color_black_title: "黒いテキスト", color_white_title: "白いテキスト",
@@ -1740,6 +1755,7 @@
                 pages_placeholder: "画像をここにドラッグするかクリックして追加", cancel_btn: "キャンセル", confirm_btn: "確認", save_btn: "保存して公開",
                 no_tags: "タグなし", no_artists: "不明", pages_count: "枚", episode_count: "話",
                 read_now: "今すぐ読む", read_continue: "続きから読む ({page} ページ)", random_read_title: "ランダム再生",
+                read_continue_group: "続きから読む {episode} 話目 {page} ページ", clear_bookmark_group_title: "読み取り履歴をクリア", clear_bookmark_group: "読み取り履歴を削除",
                 clear_bookmark_title: "ブックマーク解除", delete_bookmark: "削除", delete_trans_sets_desc: "削除するセットを選択してください:",
                 export_this_title: "これを書き出し", edit_title: "編集", edit_btn: "編集", delete_title: "削除する",
                 group_edit_title: "グループの編集", group_edit_description: "他の作品からエピソードを追加し、グループ名を変更します", group_name: "グループ名", add_episodes_from_other: "他の作品からエピソードを追加", search_episodes: "エピソードを検索...", select_episode: "エピソードを選択", add_selected_episodes: "選択を追加", group_name_required: "グループ名を入力してください", group_list_edit_btn: "リストを管理", group_list_edit_done: "完了", removed_from_group: "グループから削除しました",
@@ -1769,7 +1785,7 @@
                 export_queue_started: "ダウンロードキューを開始中...",
                 edit_tag_title: "タグを編集",
                 tag_name_label: "タグ名",
-                list_edit_delete_title: "編集 / 削除"
+                list_edit_delete_title: "編集 / 削除", random_grp_btn: "ランダム", delete_grp_btn: "グループを削除", confirm_delete_group: "このグループを削除してもよろしいですか?", group_deleted: "グループが削除されました"
             }
         };
 
@@ -6205,6 +6221,11 @@
                 Detail.renderPagesWithPagination();
                 Detail.updateReadButton();
                 Detail.initEpisodeNav();
+                
+                // If this gallery is part of a group, update group read button
+                if (Detail.currentGallery.groups && Detail.currentGallery.groups.length > 0 && GroupDetail && typeof GroupDetail.updateReadButton === 'function') {
+                    await GroupDetail.updateReadButton();
+                }
             },
             renderPagesWithPagination: () => {
                 const grid = document.getElementById('detPagesGrid');
@@ -6671,6 +6692,7 @@
 
                 await GroupDetail.updateFavoriteBtn();
                 await GroupDetail.updateWatchLaterBtn();
+                await GroupDetail.updateReadButton();
                 GroupDetail.renderEpisodesWithPagination();
                 GroupDetail.initEpisodeTracking();
             },
@@ -7032,6 +7054,79 @@
                     resumeGallery = GroupDetail.currentGalleries[0];
                 }
                 UI.navigate('reader', { galleryId: resumeGallery.id, index: resumeGallery.lastReadPage || 0 });
+            },
+
+            // Check if can show continue reading for group
+            getContinueReadingState: async () => {
+                const metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                
+                // Check if we have valid lastReadEpisode
+                let episodeIndex = -1;
+                let currentPage = -1;
+                
+                if (metadata && metadata.lastReadEpisode !== undefined && metadata.lastReadEpisode >= 0 && metadata.lastReadEpisode < GroupDetail.currentGalleries.length) {
+                    const gallery = GroupDetail.currentGalleries[metadata.lastReadEpisode];
+                    // Check if gallery has valid lastReadPage (not first page and not last page)
+                    if (gallery && gallery.lastReadPage !== undefined && gallery.lastReadPage !== null && gallery.totalPages) {
+                        const isFirstPage = gallery.lastReadPage === 0;
+                        const isLastPage = gallery.lastReadPage >= gallery.totalPages - 1;
+                        
+                        // Only show continue if it's not first page and not last page
+                        if (!isFirstPage && !isLastPage) {
+                            episodeIndex = metadata.lastReadEpisode;
+                            currentPage = gallery.lastReadPage;
+                        }
+                    }
+                }
+                
+                return {
+                    canShow: episodeIndex >= 0,
+                    episodeIndex: episodeIndex,
+                    episodeNum: episodeIndex >= 0 ? episodeIndex + 1 : -1,
+                    page: currentPage,
+                    gallery: episodeIndex >= 0 ? GroupDetail.currentGalleries[episodeIndex] : null
+                };
+            },
+
+            // Update read button UI based on continue reading state
+            updateReadButton: async () => {
+                const readBtn = document.getElementById('btnGrpReadNow');
+                const clearBtn = document.getElementById('btnGrpClearBookmark');
+                if (!readBtn) return;
+
+                const state = await GroupDetail.getContinueReadingState();
+                
+                if (state.canShow) {
+                    const continueText = T('read_continue_group', { episode: state.episodeNum, page: state.page + 1 });
+                    readBtn.innerHTML = `<i class="fa-solid fa-book-open-reader"></i> ${continueText}`;
+                    readBtn.title = continueText;
+                    readBtn.onclick = GroupDetail.continueReading;
+                    
+                    if (clearBtn) clearBtn.classList.remove('hide');
+                } else {
+                    const nowText = T('read_now');
+                    readBtn.innerHTML = `<i class="fa-solid fa-book-open-reader"></i> ${nowText}`;
+                    readBtn.title = nowText;
+                    readBtn.onclick = GroupDetail.readNow;
+                    
+                    if (clearBtn) clearBtn.classList.add('hide');
+                }
+            },
+
+            continueReading: async () => {
+                const state = await GroupDetail.getContinueReadingState();
+                if (state.canShow && state.gallery) {
+                    UI.navigate('reader', { galleryId: state.gallery.id, index: state.page || 0 });
+                }
+            },
+
+            clearContinueReading: async () => {
+                const metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                if (metadata) {
+                    await db.groupMetadata.update(metadata.id, { lastReadEpisode: undefined });
+                    await GroupDetail.updateReadButton();
+                    Toast.success(T('clear_bookmark_success'));
+                }
             },
 
             editGroup: async () => {
@@ -7398,6 +7493,51 @@
                     progressToast.error();
                     Toast.error(T('export_failed') + ': ' + error.message);
                 }
+            },
+
+            randomEpisode: async () => {
+                if (GroupDetail.currentGalleries.length === 0) {
+                    Toast.error(T('no_data'));
+                    return;
+                }
+                const randomIndex = Math.floor(Math.random() * GroupDetail.currentGalleries.length);
+                const randomGallery = GroupDetail.currentGalleries[randomIndex];
+                GroupDetail.currentEpisodeIndex = randomIndex;
+                await GroupDetail.saveLastReadEpisode();
+                UI.navigate('reader', { galleryId: randomGallery.id, index: 0 });
+            },
+
+            deleteGroup: async () => {
+                const confirmed = confirm(T('confirm_delete_group') || `คุณแน่ใจหรือว่าต้องการลบกลุ่ม "${GroupDetail.currentGroupName}" ?`);
+                if (!confirmed) return;
+
+                try {
+                    // Delete group metadata
+                    const metadata = await db.groupMetadata.where('name').equals(GroupDetail.currentGroupName).first();
+                    if (metadata) {
+                        await db.groupMetadata.delete(metadata.id);
+                    }
+
+                    // Remove group name from all galleries in this group
+                    for (const gallery of GroupDetail.currentGalleries) {
+                        const updatedGroups = (Array.isArray(gallery.groups) ? gallery.groups : []).filter(name => name !== GroupDetail.currentGroupName);
+                        await db.galleries.update(gallery.id, { groups: updatedGroups });
+                    }
+
+                    // Clear cache
+                    if (Grid.groupMetadataCache) {
+                        delete Grid.groupMetadataCache[GroupDetail.currentGroupName];
+                    }
+
+                    Toast.success(T('group_deleted') || `ลบกลุ่ม "${GroupDetail.currentGroupName}" เรียบร้อยแล้ว`);
+                    UI.navigate('home');
+                    if (Grid.groupViewMode) {
+                        await Grid.buildGroupAggregations();
+                    }
+                } catch (error) {
+                    console.error('Delete group failed:', error);
+                    Toast.error(T('delete_failed') || 'การลบกลุ่มล้มเหลว');
+                }
             }
         };
 
@@ -7543,6 +7683,23 @@
                     lastAccessedAt: new Date().toISOString(),
                     totalPages: App.pages.length 
                 });
+
+                // If reading from a group, update group metadata with last read episode
+                if (Reader.currentGroupName && Reader.currentEpisodeIndex >= 0) {
+                    db.groupMetadata.where('name').equals(Reader.currentGroupName).first().then(metadata => {
+                        if (metadata) {
+                            db.groupMetadata.update(metadata.id, { lastReadEpisode: Reader.currentEpisodeIndex });
+                        } else {
+                            db.groupMetadata.add({
+                                name: Reader.currentGroupName,
+                                lastReadEpisode: Reader.currentEpisodeIndex,
+                                isFavorite: false,
+                                isWatchLater: false
+                            });
+                        }
+                    });
+                }
+
                 StateManager.save();
 
                 // Update URL to remember current page on refresh
