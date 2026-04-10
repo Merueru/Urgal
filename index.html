@@ -422,6 +422,85 @@
         #storageDetailsSection:not(.hidden) {
             max-height: 500px;
         }
+
+        /* Drag-to-Reorder Styles for Upload Pages */
+        .upload-page-item {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .upload-page-item:active {
+            cursor: grabbing;
+        }
+
+        .upload-page-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .upload-page-item.drag-over {
+            border: 2px solid #ed2553 !important;
+            background-color: rgba(237, 37, 83, 0.15) !important;
+            transform: scale(1.05);
+        }
+
+        .upload-page-item.drag-over-left {
+            border-left: 3px solid #ed2553 !important;
+        }
+
+        .upload-page-item.drag-over-right {
+            border-right: 3px solid #ed2553 !important;
+        }
+
+        @keyframes dragGhost {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0.7;
+                transform: scale(0.9);
+            }
+        }
+
+        .drag-ghost {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0.8;
+            border: 2px solid #ed2553;
+            border-radius: 8px;
+            background: rgba(237, 37, 83, 0.2);
+            z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+            animation: dragGhost 0.3s ease infinite alternate;
+        }
+
+        /* ===== GALLERY HOVER PREVIEW ===== */
+        .gallery-card-preview-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 40;
+            background: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: inherit;
+            pointer-events: none; /* Allow clicks to pass through to underlying elements */
+        }
+
+        .gallery-card-preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: fadeInOut 0.3s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -436,7 +515,7 @@
                 <a href="#" onclick="UI.navigate('home')" class="text-xl font-bold flex items-center gap-2 navbar-logo-group">
                     <span class="text-nRed hover:scale-110 transition" data-i18n-title="home_title"><i class="fa-solid fa-book-open"></i></span>
                     <span class="hidden sm:inline text-xl text-nRed hover:scale-110 transition" >UGal</span>
-                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.4.0</p>
+                    <p class="hidden sm:block text-gray-400 text-sm" style="font-size: 12px;">V 0.4.1</p>
                 </a>
                 <div class="hidden md:flex gap-4 text-sm font-semibold text-gray-300">
                     <a href="#" onclick="UI.navigate('home')" class="hover:text-nRed transition" data-i18n-title="home_title" data-i18n="home_page">หน้าหลัก</a>
@@ -679,7 +758,7 @@
                 </div>
 
                 <div class="mt-8 flex justify-end gap-3">
-                    <button onclick="UI.navigate('home')" class="px-6 py-2 rounded bg-gray-700 hover:bg-gray-600 transition" data-i18n="cancel_btn">ยกเลิก</button>
+                    <button onclick="UploadManager.editingId ? UI.navigate('detail', UploadManager.editingId) : UI.navigate('home')" class="px-6 py-2 rounded bg-gray-700 hover:bg-gray-600 transition" data-i18n="cancel_btn">ยกเลิก</button>
                     <button onclick="UploadManager.saveGallery()" class="px-6 py-2 rounded bg-nRed hover:bg-nRedHover font-bold shadow-lg shadow-red-900/50 transition">
                         <i class="fa-solid fa-save"></i> <span data-i18n="save_btn">บันทึกและเผยแพร่</span>
                     </button>
@@ -721,7 +800,7 @@
                     <div class="flex items-center gap-4 text-gray-400 text-sm mb-6">
                         <span><i class="fa-solid fa-file-lines"></i> <span id="detPageCount">0</span> pages</span>
                         <span><i class="fa-solid fa-clock"></i> <span id="detDate"></span></span>
-                        <button id="btnWatchLater" onclick="Detail.toggleWatchLater()" class="text-gray-400 hover:text-cyan-400 transition" data-i18n-title="add_to_watch_later" title="เพิ่มไปดูภายหลัง">
+                        <button id="btnWatchLater" onclick="Detail.toggleWatchLater()" class="text-gray-400 hover:text-cyan-400 transition flex items-center gap-1" data-i18n-title="add_to_watch_later" title="เพิ่มไปดูภายหลัง">
                             <i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
@@ -1178,7 +1257,8 @@
                 addnewtranscollect: "+ ชุดใหม่",grid_edit_delete_title: "แก้ไข / ลบ",shape_rect: "สี่เหลี่ยม", delete_trans_sets_title: "ลบชุดคำแปล", delete_trans_sets: "ลบชุดคำแปล", delete_confirm_msg: "คุณแน่ใจหรือไม่ว่าต้องการลบชุดแปลที่เลือก?", delete_btn_text: "ลบ", create_continuation_title: "สร้างตอนต่อ",
                 sort_most_viewed: "อ่านบ่อยสุด", sort_least_viewed: "อ่านน้อยสุด",
                 storage_usage: "พื้นที่เก็บข้อมูล", storage_used: "ใช้ไป", storage_total: "เต็ม", storage_percent: "ใช้ไป", refresh_storage_btn: "อัปเดต", storage_info: "ข้อมูล IndexedDB",
-                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> ดูภายหลัง', watch_later_list: "ดูภายหลัง", add_to_watch_later: "เพิ่มไปดูภายหลัง", added_to_watch_later: "เพิ่มไปดูภายหลังแล้ว"
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> ดูภายหลัง', watch_later_list: "ดูภายหลัง", add_to_watch_later: "เพิ่มไปดูภายหลัง", added_to_watch_later: "เพิ่มไปดูภายหลังแล้ว",
+                replace_image_title: "แทนที่รูปนี้", replace_image: "แทนที่"
             },
             en: {
                 decrease_size_title: "Decrease text size", increase_size_title: "Increase text size", shape_rect_title: "Rectangle", bg_white_title: "White background", bg_black_title: "Black background", bg_clear_title: "Transparent background", color_black_title: "Black text", color_white_title: "White text",
@@ -1225,7 +1305,8 @@
                 addnewtranscollect: "+ New Set",grid_edit_delete_title: "Edit / Delete",shape_rect: "Rectangle", delete_trans_sets_title: "Delete Translation Sets", delete_trans_sets: "Delete Sets", delete_confirm_msg: "Are you sure you want to delete selected translation sets?", delete_btn_text: "Delete", create_continuation_title: "Create Continuation",
                 sort_most_viewed: "Most Viewed", sort_least_viewed: "Least Viewed",
                 storage_usage: "Storage Usage", storage_used: "Used", storage_total: "Total", storage_percent: "Used", refresh_storage_btn: "Refresh", storage_info: "IndexedDB Storage",
-                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> Watch Later', watch_later_list: "Watch Later", add_to_watch_later: "Add to Watch Later", added_to_watch_later: "Added to Watch Later"
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> Watch Later', watch_later_list: "Watch Later", add_to_watch_later: "Add to Watch Later", added_to_watch_later: "Added to Watch Later",
+                replace_image_title: "Replace this image", replace_image: "Replace"
             },
             cn: {
                 decrease_size_title: "减小文字大小", increase_size_title: "增大文字大小", shape_rect_title: "矩形", bg_white_title: "白色背景", bg_black_title: "黑色背景", bg_clear_title: "透明背景", color_black_title: "黑色文字", color_white_title: "白色文字",
@@ -1272,7 +1353,8 @@
                 addnewtranscollect: "+ 新建翻译集",grid_edit_delete_title: "编辑 / 删除",shape_rect: "矩形", delete_trans_sets_title: "删除翻译集", delete_trans_sets: "删除翻译集", delete_confirm_msg: "确定要删除选择的翻译集吗？", delete_btn_text: "删除", create_continuation_title: "创建续篇",
                 sort_most_viewed: "最常查看", sort_least_viewed: "最少查看",
                 storage_usage: "数据存储", storage_used: "已用", storage_total: "总容量", storage_percent: "已用", refresh_storage_btn: "刷新", storage_info: "IndexedDB 存储",
-                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> 稍后查看', watch_later_list: "稍后查看", add_to_watch_later: "添加到稍后查看", added_to_watch_later: "已添加到稍后查看"
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> 稍后查看', watch_later_list: "稍后查看", add_to_watch_later: "添加到稍后查看", added_to_watch_later: "已添加到稍后查看",
+                replace_image_title: "替换此图片", replace_image: "替换"
             },
             jp: {
                 decrease_size_title: "テキストサイズを縮小", increase_size_title: "テキストサイズを拡大", shape_rect_title: "矩形", bg_white_title: "白い背景", bg_black_title: "黒い背景", bg_clear_title: "透明な背景", color_black_title: "黒いテキスト", color_white_title: "白いテキスト",
@@ -1319,7 +1401,8 @@
                 addnewtranscollect: "+ 新しいセット",grid_edit_delete_title: "編集 / 削除",shape_rect: "四角形", delete_trans_sets_title: "翻訳セットを削除", delete_trans_sets: "翻訳セットを削除",delete_confirm_msg: "本当に削除しますか？", delete_btn_text: "削除", create_continuation_title: "続編を作成",
                 sort_most_viewed: "最も多く読まれた", sort_least_viewed: "最も読まれていない",
                 storage_usage: "ストレージ使用量", storage_used: "使用", storage_total: "容量", storage_percent: "使用", refresh_storage_btn: "更新", storage_info: "IndexedDB ストレージ",
-                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> あとで見る', watch_later_list: "あとで見る", add_to_watch_later: "あとで見るに追加", added_to_watch_later: "あとで見るに追加しました"
+                watch_later: '<i class="fa-solid fa-eye text-cyan-400"></i> あとで見る', watch_later_list: "あとで見る", add_to_watch_later: "あとで見るに追加", added_to_watch_later: "あとで見るに追加しました",
+                replace_image_title: "この画像を置き換え", replace_image: "置き換え"
             }
         };
 
@@ -1694,6 +1777,144 @@
             }
         };
 
+        // ================= HOVER PREVIEW SYSTEM =================
+        const HoverPreview = {
+            activeCard: null,
+            initialDelayTimer: null,
+            cycleTimer: null,
+            pages: [],
+            currentPageIndex: 0,
+            coverUrl: '',
+            isPlaying: false,
+
+            start: async function(galleryId, coverUrl, imgElement) {
+                // Clear any existing preview
+                this.stop();
+
+                this.activeCard = imgElement.querySelector('.aspect-a4'); // Get the aspect-a4 container inside gallery-card
+                this.coverUrl = coverUrl;
+                this.currentPageIndex = 0;
+                this.pages = [];
+
+                // Set initial delay timer (1.5 seconds)
+                this.initialDelayTimer = setTimeout(async () => {
+                    // Fetch pages from database
+                    const pages = await db.pages.where('galleryId').equals(galleryId).sortBy('order');
+                    
+                    if (pages.length > 0) {
+                        this.pages = pages;
+                        this.isPlaying = true;
+                        this.playCycle();
+                    }
+                }, 2200); // 2.2 second initial delay
+            },
+
+            playCycle: function() {
+                if (!this.isPlaying || !this.activeCard) return;
+
+                // Select up to 5 random pages
+                const maxPages = Math.min(5, this.pages.length);
+                const selectedPages = [];
+                const usedIndices = new Set();
+
+                while (selectedPages.length < maxPages) {
+                    const randomIndex = Math.floor(Math.random() * this.pages.length);
+                    if (!usedIndices.has(randomIndex)) {
+                        selectedPages.push(this.pages[randomIndex]);
+                        usedIndices.add(randomIndex);
+                    }
+                }
+
+                this.displayPages(selectedPages);
+            },
+
+            displayPages: function(selectedPages) {
+                if (!this.isPlaying || !this.activeCard) return;
+
+                let pageIndex = 0;
+                const showNextPage = () => {
+                    if (!this.isPlaying || !this.activeCard) return;
+
+                    if (pageIndex < selectedPages.length) {
+                        // Show current page (0.8 seconds)
+                        const page = selectedPages[pageIndex];
+                        this.showPage(page.imageBlob);
+                        
+                        pageIndex++;
+                        this.cycleTimer = setTimeout(showNextPage, 1200); // 1.2 second per page
+                    } else {
+                        // After all pages shown, show cover and restart cycle
+                        this.showCover();
+                        this.cycleTimer = setTimeout(() => {
+                            if (this.isPlaying && this.activeCard) {
+                                this.playCycle();
+                            }
+                        }, 1200); // 1.2 second delay before next cycle
+                    }
+                };
+
+                showNextPage();
+            },
+
+            showPage: function(imageBlob) {
+                if (!this.activeCard) return;
+
+                // Remove existing overlay if any
+                const existingOverlay = this.activeCard.querySelector('.gallery-card-preview-overlay');
+                if (existingOverlay) {
+                    existingOverlay.remove();
+                }
+
+                // Create overlay div
+                const overlay = document.createElement('div');
+                overlay.className = 'gallery-card-preview-overlay';
+
+                // Create and show image
+                const img = document.createElement('img');
+                img.className = 'gallery-card-preview-image';
+                img.src = URL.createObjectURL(imageBlob);
+
+                overlay.appendChild(img);
+                this.activeCard.appendChild(overlay);
+            },
+
+            showCover: function() {
+                if (!this.activeCard) return;
+
+                // Remove existing overlay
+                const existingOverlay = this.activeCard.querySelector('.gallery-card-preview-overlay');
+                if (existingOverlay) {
+                    existingOverlay.remove();
+                }
+            },
+
+            stop: function() {
+                this.isPlaying = false;
+
+                if (this.initialDelayTimer) {
+                    clearTimeout(this.initialDelayTimer);
+                    this.initialDelayTimer = null;
+                }
+
+                if (this.cycleTimer) {
+                    clearTimeout(this.cycleTimer);
+                    this.cycleTimer = null;
+                }
+
+                // Clean up overlay and restore cover
+                if (this.activeCard) {
+                    const overlay = this.activeCard.querySelector('.gallery-card-preview-overlay');
+                    if (overlay) {
+                        overlay.remove();
+                    }
+                }
+
+                this.activeCard = null;
+                this.pages = [];
+                this.currentPageIndex = 0;
+            }
+        };
+
         // ================= GRID CONTROLLER (Home, Filters, User) =================
         const Grid = {
             allGalleries: [],
@@ -1992,7 +2213,7 @@
                         const isFinished = hasProgress && (g.lastReadPage + 1 >= g.totalPages);
 
                         grid.innerHTML += `
-                            <div class="gallery-card bg-darkCard rounded overflow-hidden shadow cursor-pointer relative group" onclick="UI.navigate('detail', ${g.id})">
+                            <div class="gallery-card bg-darkCard rounded overflow-hidden shadow cursor-pointer relative group" onclick="UI.navigate('detail', ${g.id})" data-gallery-id="${g.id}" data-cover-url="${coverUrl}" onmouseover="HoverPreview.start(parseInt(this.dataset.galleryId), this.dataset.coverUrl, this)" onmouseout="HoverPreview.stop()">
                                 <div class="aspect-a4 overflow-hidden relative">
                                     <img src="${coverUrl}" class="cover-img w-full h-full object-cover" title="${g.title}">
                                     ${Grid.isEditMode ? `<button onclick="Grid.editItem(${g.id}, event)" class="absolute top-0 left-0 bg-blue-600 text-white w-8 h-8 flex items-center justify-center z-20 hover:bg-blue-700 transition shadow-md rounded-br-lg" data-i18n-title="edit_title"><i class="fa-solid fa-pen"></i></button>` : ''}
@@ -2134,6 +2355,146 @@
                         </button>
                     `;
                 });
+            }
+        };
+
+        // ================= IMAGE DRAG-TO-REORDER MANAGER =================
+        const ImageDragManager = {
+            draggedIndex: null,
+            dragGhost: null,
+            dragZoneElement: null,
+            autoScrollInterval: null,
+            autoScrollDirection: null,
+            
+            handleDragStart: (e, index) => {
+                ImageDragManager.draggedIndex = index;
+                e.target.classList.add('dragging');
+                
+                // สร้าง drag ghost (custom drag image)
+                const ghostDiv = e.target.cloneNode(true);
+                ghostDiv.classList.add('drag-ghost');
+                ghostDiv.style.width = '120px';
+                ghostDiv.style.height = '160px';
+                ghostDiv.id = 'drag-ghost-element';
+                document.body.appendChild(ghostDiv);
+                ImageDragManager.dragGhost = ghostDiv;
+                
+                // Set drag data transfer
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setDragImage(ghostDiv, 60, 80);
+                
+                // Store drag zone
+                ImageDragManager.dragZoneElement = e.target.parentElement;
+            },
+            
+            handleDragEnd: (e) => {
+                e.target.classList.remove('dragging');
+                
+                // ล้าง drag ghost
+                if (ImageDragManager.dragGhost) {
+                    ImageDragManager.dragGhost.remove();
+                    ImageDragManager.dragGhost = null;
+                }
+                
+                // หยุด auto-scroll
+                if (ImageDragManager.autoScrollInterval) {
+                    clearInterval(ImageDragManager.autoScrollInterval);
+                    ImageDragManager.autoScrollInterval = null;
+                }
+                
+                // ล้าง highlight จาก items ทั้งหมด
+                document.querySelectorAll('.upload-page-item').forEach(item => {
+                    item.classList.remove('drag-over', 'drag-over-left', 'drag-over-right');
+                });
+                
+                ImageDragManager.draggedIndex = null;
+            },
+            
+            handleDragOver: (e, index) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                
+                // Check if we need to auto-scroll for pagination
+                const grid = document.getElementById('dropZonePages');
+                if (grid) {
+                    const rect = grid.getBoundingClientRect();
+                    const x = e.clientX;
+                    const totalPages = Math.ceil(UploadManager.pageFiles.length / UploadManager.itemsPerPageUpload);
+                    
+                    // Scroll left region (left 80px) - go to previous page
+                    if (x - rect.left < 80 && UploadManager.currentUploadPage > 1) {
+                        if (!ImageDragManager.autoScrollInterval || ImageDragManager.autoScrollDirection !== 'left') {
+                            if (ImageDragManager.autoScrollInterval) clearInterval(ImageDragManager.autoScrollInterval);
+                            ImageDragManager.autoScrollDirection = 'left';
+                            ImageDragManager.autoScrollInterval = setInterval(() => {
+                                UploadManager.changeUploadPage(UploadManager.currentUploadPage - 1);
+                            }, 700);
+                        }
+                    }
+                    // Scroll right region (right 80px) - go to next page
+                    else if (rect.right - x < 80 && UploadManager.currentUploadPage < totalPages) {
+                        if (!ImageDragManager.autoScrollInterval || ImageDragManager.autoScrollDirection !== 'right') {
+                            if (ImageDragManager.autoScrollInterval) clearInterval(ImageDragManager.autoScrollInterval);
+                            ImageDragManager.autoScrollDirection = 'right';
+                            ImageDragManager.autoScrollInterval = setInterval(() => {
+                                UploadManager.changeUploadPage(UploadManager.currentUploadPage + 1);
+                            }, 700);
+                        }
+                    } else {
+                        // ปกติ ไม่ต้องเลื่อน
+                        if (ImageDragManager.autoScrollInterval) {
+                            clearInterval(ImageDragManager.autoScrollInterval);
+                            ImageDragManager.autoScrollInterval = null;
+                            ImageDragManager.autoScrollDirection = null;
+                        }
+                    }
+                }
+                
+                // Show highlight for drop target
+                if (index !== ImageDragManager.draggedIndex) {
+                    document.querySelectorAll('.upload-page-item').forEach(item => {
+                        item.classList.remove('drag-over', 'drag-over-left', 'drag-over-right');
+                    });
+                    
+                    const targetItem = e.target.closest('.upload-page-item');
+                    if (targetItem) {
+                        targetItem.classList.add('drag-over');
+                    }
+                }
+            },
+            
+            handleDragLeave: (e) => {
+                const targetItem = e.target.closest('.upload-page-item');
+                if (targetItem === e.currentTarget) {
+                    e.currentTarget.classList.remove('drag-over', 'drag-over-left', 'drag-over-right');
+                }
+            },
+            
+            handleDrop: (e, targetIndex) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // ล้าง highlight
+                document.querySelectorAll('.upload-page-item').forEach(item => {
+                    item.classList.remove('drag-over', 'drag-over-left', 'drag-over-right');
+                });
+                
+                // ทำการ reorder
+                if (ImageDragManager.draggedIndex !== null && ImageDragManager.draggedIndex !== targetIndex) {
+                    const draggedItem = UploadManager.pageFiles[ImageDragManager.draggedIndex];
+                    
+                    // ลบจากตำแหน่งเดิม
+                    UploadManager.pageFiles.splice(ImageDragManager.draggedIndex, 1);
+                    
+                    // คำนวณตำแหน่งใหม่ (ถ้า draggedIndex < targetIndex ให้หัก 1)
+                    const newIndex = ImageDragManager.draggedIndex < targetIndex ? targetIndex - 1 : targetIndex;
+                    
+                    // ใส่ลงในตำแหน่งใหม่
+                    UploadManager.pageFiles.splice(newIndex, 0, draggedItem);
+                    
+                    // Re-render
+                    UploadManager.renderPagesGrid();
+                }
             }
         };
 
@@ -3838,17 +4199,31 @@
 
                 itemsToShow.forEach((page, displayIndex) => {
                     const actualIndex = start + displayIndex;
-                    grid.innerHTML += `
-                        <div class="relative group rounded overflow-hidden aspect-a4 bg-gray-800 border border-gray-600">
-                            <span class="absolute top-1 left-1 bg-black/70 text-white text-xs px-1.5 rounded z-10">${actualIndex + 1}</span>
-                            <button onclick="UploadManager.removePage(${actualIndex})" class="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition z-10"><i class="fa-solid fa-xmark"></i></button>
-                            <img src="${page.url}" class="w-full h-full object-cover pointer-events-none">
-                            <div class="absolute bottom-0 left-0 right-0 bg-black/60 p-1 flex justify-between opacity-0 group-hover:opacity-100 transition">
-                                <button onclick="UploadManager.movePage(${actualIndex}, -1)" class="text-white hover:text-nRed text-sm p-1" ${actualIndex === 0 ? 'disabled class="opacity-30"' : ''}><i class="fa-solid fa-arrow-left"></i></button>
-                                <button onclick="UploadManager.movePage(${actualIndex}, 1)" class="text-white hover:text-nRed text-sm p-1" ${actualIndex === UploadManager.pageFiles.length - 1 ? 'disabled class="opacity-30"' : ''}><i class="fa-solid fa-arrow-right"></i></button>
-                            </div>
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'upload-page-item relative group rounded overflow-hidden aspect-a4 bg-gray-800 border border-gray-600';
+                    itemDiv.draggable = true;
+                    itemDiv.id = `upload-page-${actualIndex}`;
+                    itemDiv.dataset.index = actualIndex;
+                    
+                    itemDiv.innerHTML = `
+                        <span class="absolute top-1 left-1 bg-black/70 text-white text-xs px-1.5 rounded z-10">${actualIndex + 1}</span>
+                        <button onclick="UploadManager.removePage(${actualIndex})" class="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition z-10 pointer-events-auto"><i class="fa-solid fa-xmark"></i></button>
+                        <button onclick="UploadManager.replacePage(${actualIndex})" class="absolute top-7 right-1 bg-blue-600 hover:bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition z-10 pointer-events-auto" data-i18n-title="replace_image_title" title="${T('replace_image_title')}"><i class="fa-solid fa-image"></i></button>
+                        <img src="${page.url}" class="w-full h-full object-cover pointer-events-none">
+                        <div class="absolute bottom-0 left-0 right-0 bg-black/60 p-1 flex justify-between opacity-0 group-hover:opacity-100 transition">
+                            <button onclick="UploadManager.movePage(${actualIndex}, -1)" class="text-white hover:text-nRed text-sm p-1 pointer-events-auto" ${actualIndex === 0 ? 'disabled style="opacity:30%"' : ''}><i class="fa-solid fa-arrow-left"></i></button>
+                            <button onclick="UploadManager.movePage(${actualIndex}, 1)" class="text-white hover:text-nRed text-sm p-1 pointer-events-auto" ${actualIndex === UploadManager.pageFiles.length - 1 ? 'disabled style="opacity:30%"' : ''}><i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     `;
+                    
+                    // Add drag event listeners
+                    itemDiv.addEventListener('dragstart', (e) => ImageDragManager.handleDragStart(e, actualIndex));
+                    itemDiv.addEventListener('dragend', (e) => ImageDragManager.handleDragEnd(e));
+                    itemDiv.addEventListener('dragover', (e) => ImageDragManager.handleDragOver(e, actualIndex));
+                    itemDiv.addEventListener('dragleave', (e) => ImageDragManager.handleDragLeave(e));
+                    itemDiv.addEventListener('drop', (e) => ImageDragManager.handleDrop(e, actualIndex));
+                    
+                    grid.appendChild(itemDiv);
                 });
                 
                 if(UploadManager.pageFiles.length === 0){
@@ -3895,6 +4270,32 @@
             },
 
             removePage: (index) => { URL.revokeObjectURL(UploadManager.pageFiles[index].url); UploadManager.pageFiles.splice(index, 1); UploadManager.renderPagesGrid(); },
+            
+            replacePage: (index) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    try {
+                        // Revoke old URL
+                        URL.revokeObjectURL(UploadManager.pageFiles[index].url);
+                        
+                        // Create new URL and replace
+                        const newUrl = URL.createObjectURL(file);
+                        UploadManager.pageFiles[index] = { url: newUrl, file: file };
+                        
+                        UploadManager.renderPagesGrid();
+                        Toast.success(T('replace_image'));
+                    } catch (error) {
+                        Toast.error('เกิดข้อผิดพลาดในการแทนที่รูป');
+                    }
+                };
+                input.click();
+            },
+            
             movePage: (index, dir) => {
                 if (index + dir < 0 || index + dir >= UploadManager.pageFiles.length) return;
                 const temp = UploadManager.pageFiles[index];
