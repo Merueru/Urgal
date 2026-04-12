@@ -903,7 +903,8 @@
                     
                     <div class="flex items-center gap-4 text-gray-400 text-sm mb-6">
                         <span><i class="fa-solid fa-file-lines"></i> <span id="detPageCount">0</span> pages</span>
-                        <span><i class="fa-solid fa-clock"></i> <span id="detDate"></span></span>
+                        <span><i class="fa-solid fa-clock"></i> <span id="detDate" title=""></span></span>
+                        <span><i class="fa-solid fa-eye"></i> <span id="detViewCount">0</span></span>
                         <button id="btnWatchLater" onclick="Detail.toggleWatchLater()" class="text-gray-400 hover:text-cyan-400 transition flex items-center gap-1 border border-gray-500 hover:border-cyan-400 rounded-full px-3 py-2" data-i18n-title="add_to_watch_later" title="เพิ่มไปดูภายหลัง">
                             <i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i>
                         </button>
@@ -919,7 +920,7 @@
                         <button onclick="Detail.readRandom(App.currentGalleryId)" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-4 py-3 rounded-lg font-bold text-white transition shadow-lg" data-i18n-title="random_read_title" title="Random Page">
                             <i class="fa-solid fa-dice"></i>
                         </button>
-                        <button onclick="UI.navigate('edit', App.currentGalleryId)" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-3 rounded-lg font-bold text-white transition shadow-lg" data-i18n-title="edit_title" title="Edit">
+                        <button id="btnEdit" onclick="UI.navigate('edit', App.currentGalleryId)" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-3 rounded-lg font-bold text-white transition shadow-lg" data-i18n-title="edit_title" title="">
                             <i class="fa-solid fa-wrench"></i>
                         </button>
                         <button onclick="DataManager.exportGallery(App.currentGalleryId)" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-4 py-3 rounded-lg font-bold text-white transition shadow-lg flex items-center gap-2" data-i18n-title="export_this_title" title="Export">
@@ -1026,6 +1027,8 @@
                     
                     <div class="flex items-center gap-4 text-gray-400 text-sm mb-6 flex-wrap">
                         <span><i class="fa-solid fa-layer-group"></i> <span id="grpEpisodeCount">0</span> <span data-i18n="items_count">ตอน</span></span>
+                        <span><i class="fa-solid fa-arrow-down-to-line"></i> <span id="grpLastUpdated" title=""></span></span>
+                        <span><i class="fa-solid fa-eye"></i> <span id="grpTotalViews">0</span></span>
                         <button id="btnGrpWatchLater" onclick="GroupDetail.toggleWatchLater()" class="text-gray-400 hover:text-cyan-400 transition flex items-center gap-1 border border-gray-500 hover:border-cyan-400 rounded-full px-3 py-2" data-i18n-title="add_to_watch_later" title="">
                             <i class="fa-solid fa-plus"></i><i class="fa-solid fa-eye"></i>
                         </button>
@@ -1567,7 +1570,7 @@
                 group_view_toggle_title: "สลับดูแบบกลุ่ม", group_view_btn: "ดูแบบกลุ่ม", group_view_btn_single: "ดูแบบเดี่ยว",
                 pages_label: "หน้าทั้งหมด (Pages) - ลากวางได้หลายรูป", add_image_btn: "เพิ่มรูปภาพ",
                 pages_placeholder: "ลากรูปภาพมาวางที่นี่ หรือกดเพิ่มรูปภาพ", cancel_btn: "ยกเลิก", confirm_btn: "ยืนยัน", save_btn: "บันทึกและเผยแพร่",
-                no_tags: "ไม่มีแท็ก", no_artists: "ไม่ระบุ", pages_count: "หน้า", episode_count: "ตอน",
+                no_tags: "ไม่มีแท็ก", no_artists: "ไม่ระบุ", pages_count: "หน้า", episode_count: "ตอน", uploaded_date: "อัปโหลด", updated_date: "อัปเดต", views: "ดู",
                 read_now: "อ่านเลย", read_continue: "อ่านต่อ (หน้า {page})", random_read_title: "สุ่มหน้าอ่าน",
                 read_continue_group: "อ่านต่อ ตอน {episode} หน้า {page}", clear_bookmark_group_title: "เคลียร์ประวัติอ่านต่อ", clear_bookmark_group: "ลบประวัติอ่านต่อ",
                 clear_bookmark_title: "เคลียร์บุ๊กมาร์ก", delete_bookmark: "ลบที่คั่น", delete_trans_sets_desc: "เลือกชุดแปลที่ต้องการลบ :",
@@ -1630,7 +1633,7 @@
                 group_view_toggle_title: "Toggle group view", group_view_btn: "Group View", group_view_btn_single: "Single View",
                 pages_label: "Pages - Drag & Drop multiple", add_image_btn: "Add Images",
                 pages_placeholder: "Drag images here or click Add Images", cancel_btn: "Cancel", confirm_btn: "Confirm", save_btn: "Save & Publish",
-                no_tags: "No Tags", no_artists: "Unknown", pages_count: "pages", episode_count: "episode",
+                no_tags: "No Tags", no_artists: "Unknown", pages_count: "pages", episode_count: "episode", uploaded_date: "Uploaded", updated_date: "Updated", views: "Views",
                 read_now: "Read Now", read_continue: "Continue (Page {page})", random_read_title: "Random Page",
                 read_continue_group: "Continue Episode {episode} Page {page}", clear_bookmark_group_title: "Clear Reading History", clear_bookmark_group: "Remove Reading History",
                 clear_bookmark_title: "Clear Bookmark", delete_bookmark: "Remove Bookmark", delete_trans_sets_desc: "Select translation sets to delete:",
@@ -1693,7 +1696,7 @@
                 group_view_toggle_title: "切换分组视图", group_view_btn: "分组视图", group_view_btn_single: "单个视图",
                 pages_label: "内容页 - 可多选拖拽", add_image_btn: "添加图片",
                 pages_placeholder: "将图片拖到这里或点击添加", cancel_btn: "取消", confirm_btn: "确认", save_btn: "保存并发布",
-                no_tags: "暂无标签", no_artists: "未知作者", pages_count: "页", episode_count: "话",
+                no_tags: "暂无标签", no_artists: "未知作者", pages_count: "页", episode_count: "话", uploaded_date: "上传", updated_date: "最后更新", views: "查看次数",
                 read_now: "立即阅读", read_continue: "继续阅读 (第 {page} 页)", random_read_title: "随机阅读",
                 read_continue_group: "继续阅读 第 {episode} 话 第 {page} 页", clear_bookmark_group_title: "清除阅读历史", clear_bookmark_group: "删除阅读历史",
                 clear_bookmark_title: "清除书签", delete_bookmark: "删除书签", delete_trans_sets_desc: "选择要删除的翻译集:",
@@ -1756,7 +1759,7 @@
                 group_view_toggle_title: "グループビュー切り替え", group_view_btn: "グループビュー", group_view_btn_single: "単一ビュー",
                 pages_label: "ページ - 複数ドラッグ＆ドロップ可", add_image_btn: "画像を追加",
                 pages_placeholder: "画像をここにドラッグするかクリックして追加", cancel_btn: "キャンセル", confirm_btn: "確認", save_btn: "保存して公開",
-                no_tags: "タグなし", no_artists: "不明", pages_count: "枚", episode_count: "話",
+                no_tags: "タグなし", no_artists: "不明", pages_count: "枚", episode_count: "話", uploaded_date: "アップロード", updated_date: "最後に更新", views: "表示回数",
                 read_now: "今すぐ読む", read_continue: "続きから読む ({page} ページ)", random_read_title: "ランダム再生",
                 read_continue_group: "続きから読む {episode} 話目 {page} ページ", clear_bookmark_group_title: "読み取り履歴をクリア", clear_bookmark_group: "読み取り履歴を削除",
                 clear_bookmark_title: "ブックマーク解除", delete_bookmark: "削除", delete_trans_sets_desc: "削除するセットを選択してください:",
@@ -5529,7 +5532,7 @@
                     if (UploadManager.editingId) {
                         // Update existing
                         galleryId = UploadManager.editingId;
-                        await db.galleries.update(galleryId, { title, tags, artists, characters, series, groups, coverBlob, totalPages: UploadManager.pageFiles.length });
+                        await db.galleries.update(galleryId, { title, tags, artists, characters, series, groups, coverBlob, totalPages: UploadManager.pageFiles.length, updatedAt: new Date().toISOString() });
                         
                         // Replace pages (delete old, insert current state)
                         await db.pages.where('galleryId').equals(galleryId).delete();
@@ -5546,7 +5549,8 @@
                         await FileSystemManager.syncToLocal(galleryId);
                     } else {
                         // Create new
-                        galleryId = await db.galleries.add({ title, tags, artists, characters, series, groups, coverBlob, createdAt: new Date().toISOString(), isFavorite: false, isWatchLater: false, totalPages: UploadManager.pageFiles.length });
+                        const now = new Date().toISOString();
+                        galleryId = await db.galleries.add({ title, tags, artists, characters, series, groups, coverBlob, createdAt: now, updatedAt: now, isFavorite: false, isWatchLater: false, totalPages: UploadManager.pageFiles.length, viewCount: 0 });
                         const pagesToSave = UploadManager.pageFiles.map((p, index) => ({ galleryId, order: index, imageBlob: p.file, translations: [], translationSets: [] }));
                         if(pagesToSave.length > 0) await db.pages.bulkAdd(pagesToSave);
                         Toast.success(T('alert_save_success'));
@@ -6251,7 +6255,23 @@
                 const groups = gallery.groups && gallery.groups.length ? gallery.groups : [];
                 document.getElementById('detGroups').innerHTML = groups.length ? groups.map(g => UI.createTagBadge(g, 'group')).join('') : `<span class="text-gray-500 text-sm">${T('no_groups')}</span>`;
                 
-                document.getElementById('detDate').textContent = new Date(gallery.createdAt).toLocaleDateString('th-TH');
+                // Format dates
+                const createdDate = new Date(gallery.createdAt);
+                const updatedDate = new Date(gallery.updatedAt || gallery.lastModifiedAt || gallery.createdAt);
+                const createdDateStr = createdDate.toLocaleDateString('th-TH');
+                const createdDateLong = createdDate.toLocaleString('th-TH');
+                const updatedDateShort = updatedDate.toLocaleDateString('th-TH').split('/').reverse().slice(0, 3).reverse().join('-') + ' ' + updatedDate.toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
+                const updatedDateLong = updatedDate.toLocaleString('th-TH');
+                
+                // Set dates with title
+                document.getElementById('detDate').textContent = createdDateStr;
+                document.getElementById('detDate').title = T('uploaded_date') + ': ' + createdDateLong;
+                
+                // Set edit button title with last updated info
+                document.getElementById('btnEdit').title = T('updated_date') + ': ' + updatedDateLong;
+                
+                // Set view count
+                document.getElementById('detViewCount').textContent = gallery.viewCount || 0;
                 
                 Detail.updateFavoriteBtn();
                 Detail.updateWatchLaterBtn();
@@ -6740,6 +6760,28 @@
                 }
                 document.getElementById('grpTitle').textContent = groupName;
                 document.getElementById('grpEpisodeCount').textContent = GroupDetail.currentGalleries.length;
+                
+                // Calculate latest updated date and total views
+                let latestUpdatedDate = null;
+                let totalViews = 0;
+                GroupDetail.currentGalleries.forEach(g => {
+                    if (g.updatedAt || g.lastModifiedAt || g.createdAt) {
+                        const date = new Date(g.updatedAt || g.lastModifiedAt || g.createdAt);
+                        if (!latestUpdatedDate || date > latestUpdatedDate) {
+                            latestUpdatedDate = date;
+                        }
+                    }
+                    totalViews += (g.viewCount || 0);
+                });
+                
+                // Format and display last updated
+                if (latestUpdatedDate) {
+                    const dateShort = latestUpdatedDate.toLocaleDateString('th-TH').split('/').reverse().slice(0, 3).reverse().join('-') + ' ' + latestUpdatedDate.toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
+                    const dateLong = latestUpdatedDate.toLocaleString('th-TH');
+                    document.getElementById('grpLastUpdated').textContent = dateShort;
+                    document.getElementById('grpLastUpdated').title = T('updated_date') + ': ' + dateLong;
+                }
+                document.getElementById('grpTotalViews').textContent = totalViews;
 
                 // Collect all unique tags, artists, characters, series from all galleries
                 const allTags = new Set();
@@ -7727,20 +7769,14 @@
                 Reader.setupAutoHideBar();
                 Reader.initEpisodeTracking();
                 
-                // Track view count (increment by 1 per session)
+                // Track view count (increment per visit)
                 (async () => {
                     const currentGallery = await db.galleries.get(App.currentGalleryId);
                     if (currentGallery) {
-                        const today = new Date().toISOString().split('T')[0];
-                        const lastViewedDate = currentGallery.lastViewedDate || '';
-                        
-                        // Only increment if not viewed today
-                        if (lastViewedDate !== today) {
-                            await db.galleries.update(App.currentGalleryId, {
-                                viewCount: (currentGallery.viewCount || 0) + 1,
-                                lastViewedDate: today
-                            });
-                        }
+                        await db.galleries.update(App.currentGalleryId, {
+                            viewCount: (currentGallery.viewCount || 0) + 1,
+                            updatedAt: new Date().toISOString()
+                        });
                     }
                 })();
                 
